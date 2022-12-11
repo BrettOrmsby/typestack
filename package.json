@@ -1,0 +1,16 @@
+{
+  "scripts": {
+    "js": "node dist/index.js",
+    "dev": "npx tsc --watch",
+    "lint": "eslint . --ext .js,.ts --fix --ignore-path .gitignore"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.46.0",
+    "@typescript-eslint/parser": "^5.46.0",
+    "eslint": "^8.29.0",
+    "eslint-config-prettier": "^8.5.0",
+    "prettier": "^2.8.1",
+    "typescript": "^4.9.4"
+  },
+  "type": "module"
+}
