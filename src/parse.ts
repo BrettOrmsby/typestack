@@ -310,23 +310,11 @@ export class Parser {
     }
 
     #isAtEnd(): boolean {
-        return this.pointer >= this.tokens.length;
+        return this.tokens[this.pointer].type === TokenType.EOF;
     }
     #peek(): Token {
         if(this.#isAtEnd()) {
-            const latestToken = this.tokens[this.pointer -1];
-            return {
-                type: TokenType.CloseBracket,
-                startPos: {
-                    line: latestToken.endPos.line,
-                    char: latestToken.endPos.char +1
-                },
-                endPos: {
-                    line: latestToken.endPos.line,
-                    char: latestToken.endPos.char +1
-                },
-                value: ""
-            };
+            return this.tokens[this.tokens.length -1];
         }
         return this.tokens[this.pointer];
     }

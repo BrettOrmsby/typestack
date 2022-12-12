@@ -10,6 +10,7 @@ export enum TokenType {
   CloseParen,
   OpenBracket,
   CloseBracket,
+  EOF
 }
 
 export type Pos = {
@@ -117,6 +118,8 @@ export class Scanner {
                 this.#identifier();
             }
         }
+        
+        this.#addToken(TokenType.EOF, false);
 
         return this.tokens;
     }
