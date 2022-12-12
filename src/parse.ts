@@ -28,7 +28,7 @@ export type Program = Array<Expression | Statement>
 export class Parser {
     tokens: Token[];
     pointer: number;
-    functions: Record<string,  StackFunction>;
+    functions: Record<string, StackFunction>;
     newFunctions: string[];
     program: Program;
 
@@ -235,7 +235,7 @@ export class Parser {
                     
                     while(!this.#isAtEnd() && !this.#expect(TokenType.CloseParen)) {
 
-                        this.pointer -= 1
+                        this.pointer -= 1;
                         if(!this.#expect(TokenType.Identifier)) {
                             return new Error(`${this.#peek().startPos.line}:${this.#peek().startPos.char} Expected an identifier or parenthesis (\`(\`) after a opening parenthesis (\`(\`) of a function`);
                         }
@@ -342,36 +342,94 @@ export class Parser {
     }
 
     #checkFunctions(): Error | void {
-        const validIdentifierNames = Object.keys(this.functions);
-        
-        const isValidCodeError = traverse(this.program, []);
+        const isValidCodeError = traverse.bind(this)(this.program, {}, StackType.Int);
 
         if(isValidCodeError instanceof Error) {
             return isValidCodeError;
         } 
 
         for(const fn of this.newFunctions) {
-            const posError = traverse(this.functions[fn].body, Object.keys(this.functions[fn].params));
+            const posError = traverse.bind(this)(this.functions[fn].body, this.functions[fn].params, this.functions[fn].stack);
             if(posError) {
                 return posError;
             }
         }
 
-        function traverse(program: Program, otherIdentifiers: string[]): Error | void {
+        function traverse(program: Program, otherIdentifiers: Record<string, StackType>, stack: StackType): Error | void {
             for(const item of program) {
+                // if it is an expression
                 if("value" in item) {
                     if(item.type === TokenType.Identifier) {
-                        if(!validIdentifierNames.includes(item.value as string) && !otherIdentifiers.includes(item.value as string)) {
-                            return new Error(`${item.startPos.line}:${item.startPos.char} Unknown identifier: \`${item.value}\``);
+                        const value = item.value as string;
+                        if(value in otherIdentifiers) {
+                            stack = otherIdentifiers[value];
+                        } else if(value in this.functions) {
+                            if(this.functions[value].stack !== stack && this.functions[value].stack !== StackType.Any) {
+                                return new Error(`${item.startPos.line}:${item.startPos.char} Attempt to call function not found at stack ${stack}: \`${item.value}\``);
+                            }
+                        } else {
+                            return new Error(`${item.startPos.line}:${item.startPos.char} Undeclared identifier: \`${item.value}\``);
                         }
+                    } else if(item.type === TokenType.Keyword) {
+                        switch(item.value as string) {
+                        case "int":
+                            stack = StackType.Int;
+                            break;
+                        case "float": 
+                            stack = StackType.Float;
+                            break;
+                        case "str":
+                            stack = StackType.Str;
+                            break;
+                        case "bool": 
+                            stack = StackType.Bool;
+                            break;
+                        case "any": 
+                            stack = StackType.Any;
+                        }
+                    } else if(item.type === TokenType.Int) {
+                        stack = StackType.Int;
+                    } else if(item.type === TokenType.Float) {
+                        stack = StackType.Float;
+                    } else if(item.type === TokenType.Str) {
+                        stack = StackType.Str;
+                    } else if(item.type === TokenType.Bool) {
+                        stack = StackType.Bool;
                     }
                 } else {
-                    const result = traverse(item.block, otherIdentifiers);
-                    if(item.else) {
-                        return traverse(item.else, otherIdentifiers) || result;
-                    }
-                    return result;
+                    if(item.type === StatementType.Loop) {
+                        const result = traverse.bind(this)(item.block, otherIdentifiers, stack);
+                        if(result) {
+                            return result;
+                        }
+                    } else if(item.type === StatementType.ForLoop) {
+                        const result = traverse.bind(this)(item.block, otherIdentifiers, StackType.Int);
+                        if(result) {
+                            return result;
+                        }
+                        stack = StackType.Int;
+                    } else if(item.type === StatementType.WhileLoop) {
+                        const result = traverse.bind(this)(item.block, otherIdentifiers, StackType.Bool);
+                        if(result) {
+                            return result;
+                        }
+                        stack = StackType.Bool;
+                    } else if(item.type === StatementType.If) {
+                        const firstBlock = traverse.bind(this)(item.block, otherIdentifiers, StackType.Bool);
+                        if(item.else) {
+                            const secondBlock = traverse.bind(this)(item.block, otherIdentifiers, StackType.Bool);
+                            if(secondBlock || firstBlock) {
+                                return secondBlock || firstBlock;
+                            }
+                        } else {
+                            if(firstBlock) {
+                                return firstBlock;
+                            }
+                        }
+                        stack = StackType.Bool;
+                    } 
                 }
+                console.log(item, stack);
             }
         }
     }

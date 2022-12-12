@@ -1,9 +1,9 @@
 export enum StackType {
-    Int,
-    Float,
-    Str,
-    Bool,
-    Any
+    Int = "int",
+    Float = "float",
+    Str = "str",
+    Bool = "bool",
+    Any = "any"
 }
 
 export class Stack<T> {

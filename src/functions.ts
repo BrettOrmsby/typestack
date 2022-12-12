@@ -2,6 +2,7 @@ import { StackType, Stacks } from "./stack.js";
 import { Program } from "./parse.js";
 
 export type StackFunction = {
+    // will not need this
     stack: StackType,
     body?: Program,
     params: Record<string, StackType>,
