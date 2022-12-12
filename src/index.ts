@@ -1,5 +1,7 @@
-import Scanner from "./scan.js";
-const s = new Scanner(`
+// Todo: running code, standard library, error function, comments
+
+import interpret from "./interpret.js";
+const input = `
 100 for loop {
     dup 15 % 0 ==
     if {
@@ -18,5 +20,6 @@ const s = new Scanner(`
       }
     }
   }
-`);
-console.log(s.scan());
+`;
+
+console.log(JSON.stringify(interpret(input), null, 2));

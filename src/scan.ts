@@ -1,4 +1,4 @@
-enum TokenType {
+export enum TokenType {
   Int,
   Float,
   Str,
@@ -12,19 +12,19 @@ enum TokenType {
   CloseBracket,
 }
 
-type Pos = {
+export type Pos = {
   line: number;
   char: number;
 };
 
-type Token = {
+export type Token = {
   type: TokenType;
   startPos: Pos;
   endPos: Pos;
   value: string | number | boolean;
 };
 
-export default class Scanner {
+export class Scanner {
     input: string;
     tokens: Token[];
     pointer: number;
@@ -128,7 +128,7 @@ export default class Scanner {
                 type,
                 value,
                 startPos,
-                endPos: endPos ? endPos : startPos,
+                endPos: endPos ? endPos : {line: this.line, char: this.char},
             }
         );
     }
@@ -185,7 +185,7 @@ export default class Scanner {
             this.#addToken(TokenType.Float, float, startPos);
             this.char += 1;
         } else {
-            
+
             const int = parseInt(strOfNumber);
             if(Number.isNaN(int)) {
                 return new Error(`"${startPos.line}:${startPos.char} Unable to parse int: \`${int}\``);
@@ -212,7 +212,7 @@ export default class Scanner {
         }
         
         const keywords = [
-            "fn", "loop", "for", "while", "if", "else", "int", "bool", "str", "float", "any",
+            "fn", "loop", "for", "while", "if", "else", "break", "continue", "int", "bool", "str", "float", "any",
             "@int", "@float", "@str", "@bool", "@any",
         ];
 
