@@ -417,7 +417,6 @@ export class Parser {
                         stack = StackType.Bool;
                     } 
                 }
-                console.log(item, stack);
             }
         }
     }

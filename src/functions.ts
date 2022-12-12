@@ -38,6 +38,13 @@ export const standardLibraryFunctions: Record<string, StackFunction> = {
             stacks[StackType.Int].push(params.t2 % params.t);
         }
     },
+    "-": {
+        stack: StackType.Int,
+        params: { t: StackType.Int, t2: StackType.Int },
+        rawCode: (stacks, params) => {
+            stacks[StackType.Int].push(params.t2 - params.t);
+        }
+    },
     "==": {
         stack: StackType.Int,
         params: { t: StackType.Int, t2: StackType.Int },
