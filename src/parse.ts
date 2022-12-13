@@ -1,5 +1,5 @@
 import { TokenType, Token, Pos } from "./scan.js";
-import { type  StackFunction } from "./functions.js";
+import { type StackFunctions } from "./functions.js";
 import { StackType } from "./stack.js";
 
 type ExpressionType = TokenType.Int | TokenType.Float | TokenType.Str | TokenType.Bool | TokenType.Identifier | TokenType.Keyword;
@@ -28,11 +28,11 @@ export type Program = Array<Expression | Statement>
 export class Parser {
     tokens: Token[];
     pointer: number;
-    functions: Record<string, StackFunction>;
-    newFunctions: string[];
+    functions: StackFunctions;
+    newFunctions: {name: string, type: StackType}[];
     program: Program;
 
-    constructor(tokens: Token[], functions: Record<string,  StackFunction>) {
+    constructor(tokens: Token[], functions: StackFunctions) {
         this.tokens = tokens;
         this.functions = functions;
         this.newFunctions = [];
@@ -290,9 +290,11 @@ export class Parser {
                         return innerBlock;
                     }
                     
-                    this.newFunctions.push(name);
-                    this.functions[name] = {
-                        stack: functionType,
+                    this.newFunctions.push({
+                        name,
+                        type: functionType,
+                    });
+                    this.functions[functionType][name] = {
                         params: params,
                         body: innerBlock
                     };
@@ -340,7 +342,7 @@ export class Parser {
         } 
 
         for(const fn of this.newFunctions) {
-            const posError = traverse.bind(this)(this.functions[fn].body, this.functions[fn].params, this.functions[fn].stack);
+            const posError = traverse.bind(this)(this.functions[fn.type][fn.name].body, this.functions[fn.type][fn.name].params, fn.type);
             if(posError) {
                 return posError;
             }
@@ -354,12 +356,8 @@ export class Parser {
                         const value = item.value as string;
                         if(value in otherIdentifiers) {
                             stack = otherIdentifiers[value];
-                        } else if(value in this.functions) {
-                            if(this.functions[value].stack !== stack && this.functions[value].stack !== StackType.Any) {
-                                return new Error(`${item.startPos.line}:${item.startPos.char} Attempt to call function not found at stack ${stack}: \`${item.value}\``);
-                            }
-                        } else {
-                            return new Error(`${item.startPos.line}:${item.startPos.char} Undeclared identifier: \`${item.value}\``);
+                        } else if(!(value in this.functions[stack] || value in this.functions[StackType.Any])) {
+                            return new Error(`${item.startPos.line}:${item.startPos.char} Attempt to call function not found at stack ${stack}: \`${item.value}\``);
                         }
                     } else if(item.type === TokenType.Keyword) {
                         switch(item.value as string) {

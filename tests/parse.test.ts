@@ -226,7 +226,6 @@ describe("Parser should understand when keywords and punctuation are valid", () 
     });
     test("Parsing correct continue expression", () => {
         const input = "loop {continue} for loop {continue} while loop {continue}";
-        console.log(parse(input));
         expect(parse(input)).not.toBeInstanceOf(Error);
     });
     test("Parsing correct break expression", () => {
