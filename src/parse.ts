@@ -3,21 +3,21 @@ import { type StackFunctions } from "./functions.js";
 import { StackType } from "./stack.js";
 
 type ExpressionType = TokenType.Int | TokenType.Float | TokenType.Str | TokenType.Bool | TokenType.Identifier | TokenType.Keyword;
-type Expression = {
+export type Expression = {
   type: ExpressionType;
   startPos: Pos;
   endPos: Pos;
   value: string | number | boolean;
 }
 
-enum StatementType {
+export enum StatementType {
     ForLoop,
     WhileLoop,
     Loop,
     If,
 }
 
-type Statement = {
+export type Statement = {
     type: StatementType;
     block: Program;
     else?: Program;
@@ -46,11 +46,6 @@ export class Parser {
             return block;
         }
         this.program = block;
-        
-        const posError = this.#checkFunctions();
-        if(posError instanceof Error) {
-            return posError;
-        }
     }
 
     #parseStatement(isInRoot: boolean, isInLoop = false, isInIf = false, isInFunction = false): Error | Program {
@@ -332,93 +327,5 @@ export class Parser {
             return false;
         }
         return this.#peek().type === type && (!value || (value && value === this.#peek().value));
-    }
-
-    #checkFunctions(): Error | void {
-        const isValidCodeError = traverse.bind(this)(this.program, {}, StackType.Int);
-
-        if(isValidCodeError instanceof Error) {
-            return isValidCodeError;
-        } 
-
-        for(const fn of this.newFunctions) {
-            const posError = traverse.bind(this)(this.functions[fn.type][fn.name].body, this.functions[fn.type][fn.name].params, fn.type);
-            if(posError) {
-                return posError;
-            }
-        }
-
-        function traverse(program: Program, otherIdentifiers: Record<string, StackType>, stack: StackType): Error | void {
-            for(const item of program) {
-                // if it is an expression
-                if("value" in item) {
-                    if(item.type === TokenType.Identifier) {
-                        const value = item.value as string;
-                        if(value in otherIdentifiers) {
-                            stack = otherIdentifiers[value];
-                        } else if(!(value in this.functions[stack] || value in this.functions[StackType.Any])) {
-                            return new Error(`${item.startPos.line}:${item.startPos.char} Attempt to call function not found at stack ${stack}: \`${item.value}\``);
-                        }
-                    } else if(item.type === TokenType.Keyword) {
-                        switch(item.value as string) {
-                        case "int":
-                            stack = StackType.Int;
-                            break;
-                        case "float": 
-                            stack = StackType.Float;
-                            break;
-                        case "str":
-                            stack = StackType.Str;
-                            break;
-                        case "bool": 
-                            stack = StackType.Bool;
-                            break;
-                        case "any": 
-                            stack = StackType.Any;
-                        }
-                    } else if(item.type === TokenType.Int) {
-                        stack = StackType.Int;
-                    } else if(item.type === TokenType.Float) {
-                        stack = StackType.Float;
-                    } else if(item.type === TokenType.Str) {
-                        stack = StackType.Str;
-                    } else if(item.type === TokenType.Bool) {
-                        stack = StackType.Bool;
-                    }
-                } else {
-                    if(item.type === StatementType.Loop) {
-                        const result = traverse.bind(this)(item.block, otherIdentifiers, stack);
-                        if(result) {
-                            return result;
-                        }
-                    } else if(item.type === StatementType.ForLoop) {
-                        const result = traverse.bind(this)(item.block, otherIdentifiers, StackType.Int);
-                        if(result) {
-                            return result;
-                        }
-                        stack = StackType.Int;
-                    } else if(item.type === StatementType.WhileLoop) {
-                        const result = traverse.bind(this)(item.block, otherIdentifiers, StackType.Bool);
-                        if(result) {
-                            return result;
-                        }
-                        stack = StackType.Bool;
-                    } else if(item.type === StatementType.If) {
-                        const firstBlock = traverse.bind(this)(item.block, otherIdentifiers, StackType.Bool);
-                        if(item.else) {
-                            const secondBlock = traverse.bind(this)(item.block, otherIdentifiers, StackType.Bool);
-                            if(secondBlock || firstBlock) {
-                                return secondBlock || firstBlock;
-                            }
-                        } else {
-                            if(firstBlock) {
-                                return firstBlock;
-                            }
-                        }
-                        stack = StackType.Bool;
-                    } 
-                }
-            }
-        }
     }
 }

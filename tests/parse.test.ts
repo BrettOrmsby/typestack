@@ -1,7 +1,7 @@
 import { Scanner } from "../src/scan";
 import { Parser } from "../src/parse";
 import { standardLibraryFunctions } from "../src/functions.js";
-//nestled functions
+
 function parse(input: string) {
     const scanner = new Scanner(input);
     const output = scanner.scan();
@@ -48,7 +48,7 @@ describe("Parser correctly parse functions", () => {
     test("error on function within loop statement", () => {
         const input = `
         loop {
-            n negate(t: int) @int {
+            fn negate(t: int) @int {
                 0 t -
             }
         }
@@ -58,7 +58,7 @@ describe("Parser correctly parse functions", () => {
     test("error on function within for loop statement", () => {
         const input = `
         for loop {
-            n negate(t: int) @int {
+            fn negate(t: int) @int {
                 0 t -
             }
         }
@@ -68,7 +68,7 @@ describe("Parser correctly parse functions", () => {
     test("error on function within while loop statement", () => {
         const input = `
         while loop {
-            n negate(t: int) @int {
+            fn negate(t: int) @int {
                 0 t -
             }
         }
@@ -78,7 +78,7 @@ describe("Parser correctly parse functions", () => {
     test("error on function within if statement", () => {
         const input = `
         if {
-            n negate(t: int) @int {
+            fn negate(t: int) @int {
                 0 t -
             }
         }
@@ -88,11 +88,15 @@ describe("Parser correctly parse functions", () => {
     test("error on function within else statement", () => {
         const input = `
         if {} else {
-            n negate(t: int) @int {
+            fn negate(t: int) @int {
                 0 t -
             }
         }
         `;
+        expect(parse(input)).toBeInstanceOf(Error);
+    });
+    test("Function with keyword not identifier", () => {
+        const input = "fn bool() {}";
         expect(parse(input)).toBeInstanceOf(Error);
     });
 });
