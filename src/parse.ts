@@ -74,6 +74,9 @@ export class Parser {
             }
 
             if(TokenType.CloseBracket === current.type) {
+                if(isInRoot) {
+                    return new Error(`${current.startPos.line}:${current.startPos.char} Unexpected character: \`${current.value}\``);
+                }
                 this.#increment();
                 return block;
             }
@@ -127,7 +130,7 @@ export class Parser {
                     if(!this.#expect(TokenType.OpenBracket)) {
                         return new Error(`${this.#peek().startPos.line}:${this.#peek().startPos.char} Expected an opening bracket (\`{\`) after a loop statement`);
                     }
-                    const innerBlock = this.#parseStatement(false, isInIf,isInFunction, true);
+                    const innerBlock = this.#parseStatement(false, true, isInIf,isInFunction);
 
                     if(innerBlock instanceof Error) {
                         return innerBlock;
@@ -147,7 +150,7 @@ export class Parser {
                     if(!this.#expect(TokenType.OpenBracket)) {
                         return new Error(`${this.#peek().startPos.line}:${this.#peek().startPos.char} Expected an opening bracket (\`{\`) after a for loop statement`);
                     }
-                    const innerBlock = this.#parseStatement(false, isInIf,isInFunction, true);
+                    const innerBlock = this.#parseStatement(false, true, isInIf,isInFunction);
 
                     if(innerBlock instanceof Error) {
                         return innerBlock;
@@ -167,7 +170,7 @@ export class Parser {
                     if(!this.#expect(TokenType.OpenBracket)) {
                         return new Error(`${this.#peek().startPos.line}:${this.#peek().startPos.char} Expected an opening bracket (\`{\`) after a while loop statement`);
                     }
-                    const innerBlock = this.#parseStatement(false,isInIf, isInFunction, true);
+                    const innerBlock = this.#parseStatement(false, true, isInIf, isInFunction);
 
                     if(innerBlock instanceof Error) {
                         return innerBlock;
@@ -184,7 +187,7 @@ export class Parser {
                     if(!this.#expect(TokenType.OpenBracket)) {
                         return new Error(`${this.#peek().startPos.line}:${this.#peek().startPos.char} Expected an opening bracket (\`{\`) after an if statement`);
                     }
-                    const innerBlock = this.#parseStatement(false, true, isInFunction, isInLoop);
+                    const innerBlock = this.#parseStatement(false, isInLoop, true, isInFunction);
 
                     if(innerBlock instanceof Error) {
                         return innerBlock;
@@ -196,7 +199,7 @@ export class Parser {
                             return new Error(`${this.#peek().startPos.line}:${this.#peek().startPos.char} Expected an opening bracket (\`{\`) after an else statement`);
                         }
                         
-                        const elseBlock = this.#parseStatement(false, true, isInFunction, isInLoop);
+                        const elseBlock = this.#parseStatement(false, isInLoop, true, isInFunction);
 
                         if(elseBlock instanceof Error) {
                             return elseBlock;
@@ -281,7 +284,7 @@ export class Parser {
                         return new Error(`${this.#peek().startPos.line}:${this.#peek().startPos.char} Expected an opening bracket (\`{\`) after a function declaration`);
                     }
 
-                    const innerBlock = this.#parseStatement(false, isInIf, true, isInLoop);
+                    const innerBlock = this.#parseStatement(false, isInLoop, isInIf, true);
 
                     if(innerBlock instanceof Error) {
                         return innerBlock;

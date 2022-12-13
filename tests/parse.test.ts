@@ -189,3 +189,55 @@ describe("Parser correctly parses statements", () => {
         expect(parse(input)).not.toBeInstanceOf(Error);
     });
 });
+
+describe("Parser should understand when keywords and punctuation are valid", () => {
+    test("Parsing invalid closing bracket in root", () => {
+        const input = "}";
+        expect(parse(input)).toBeInstanceOf(Error);
+    });
+    test("Parsing invalid opening bracket in root", () => {
+        const input = "{";
+        expect(parse(input)).toBeInstanceOf(Error);
+    });
+    test("Parsing invalid colon in root", () => {
+        const input = ":";
+        expect(parse(input)).toBeInstanceOf(Error);
+    });
+    test("Parsing invalid opening parenthesis in root", () => {
+        const input = "(";
+        expect(parse(input)).toBeInstanceOf(Error);
+    });
+    test("Parsing invalid closing parenthesis bracket in root", () => {
+        const input = ")";
+        expect(parse(input)).toBeInstanceOf(Error);
+    });
+
+    test("Parsing invalid break expression", () => {
+        const input = "break";
+        expect(parse(input)).toBeInstanceOf(Error);
+    });
+    test("Parsing invalid continue expression", () => {
+        const input = "break";
+        expect(parse(input)).toBeInstanceOf(Error);
+    });
+    test("Parsing invalid any expression", () => {
+        const input = "any";
+        expect(parse(input)).toBeInstanceOf(Error);
+    });
+    test("Parsing correct continue expression", () => {
+        const input = "loop {continue} for loop {continue} while loop {continue}";
+        console.log(parse(input));
+        expect(parse(input)).not.toBeInstanceOf(Error);
+    });
+    test("Parsing correct break expression", () => {
+        const input = "loop {break} for loop {break} while loop {break}";
+        expect(parse(input)).not.toBeInstanceOf(Error);
+    });
+    test("Parsing correct any expression", () => {
+        const input = `
+    fn identifier(t: any) @any {
+        0 3 any
+    }`;
+        expect(parse(input)).not.toBeInstanceOf(Error);
+    });
+});
