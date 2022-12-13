@@ -1,11 +1,8 @@
 export default  {
     transform: {
-        "\\.[jt]sx?$": "ts-jest"
-    },
-    globals: {
-        "ts-jest": {
+        "\\.[jt]sx?$": ["ts-jest", {
             useESM: true
-        }
+        }],
     },
     moduleNameMapper: {
         "(.+)\\.js": "$1"
