@@ -14,14 +14,17 @@ export class Stack<T> {
     }
 
     push(t: T) {
-        this.push(t);
+        this.stack.push(t);
     }
 
-    get(): T | Error {
-        if(this.stack.length === 0) {
-            return Error("Attempt to get a value off the stack failed");
-        }
+    get(): T {
         return this.stack.pop();
+    }
+    check(): boolean {
+        return this.stack.length !== 0;
+    }
+    peek(): T {
+        return this.stack[this.stack.length-1];
     }
 }
 

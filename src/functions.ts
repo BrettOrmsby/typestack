@@ -248,9 +248,10 @@ export const standardLibraryFunctions: StackFunctions = {
             }
         },
         "print": {
-            params: { t: StackType.Any },
-            rawCode: (_stacks, params) => {
-                console.log(params.t);
+            params: { item: StackType.Any },
+            rawCode: (stacks, params, stack) => {
+                console.log(params.item);
+                stacks[stack].push(params.item);
             }
         },
 
