@@ -1,8 +1,8 @@
 // TODO: error function, comments
+// TODO: features to add: escape characters in string, module loading
 // TODO: statments should also have positions so the interpret errors can be better
 // TODO: fix a bug in type checking where a function called on an `any` stack is invalid even if there
 //       is an individual function in each stack type instead of one function in the any type
-// TODO: instead of keep pasing up the errors in a new json each time, just pass it
 import { Scanner } from "./scan.js";
 import { Parser } from "./parse.js";
 import typeCheck from "./typeCheck.js";
