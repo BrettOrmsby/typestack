@@ -36,7 +36,7 @@ function runProgram(program: Program, params: Record<string, {value: string | bo
                         const stackOfParam = stackFunction.params[key] === StackType.Any ? stack : stackFunction.params[key];
                         if(!stacks[stackOfParam].check()) {
                             //TODO: change the error to the full function thing like identifier(param: int) @int
-                            return new Error(`Unable to call function ${value} without enough parameters`);
+                            return new Error(`${item.startPos.line}:${item.startPos.char} Unable to call function ${value} without enough parameters`);
                         }
                         functionParams[key] = {
                             value: stacks[stackOfParam].get(),
@@ -48,7 +48,8 @@ function runProgram(program: Program, params: Record<string, {value: string | bo
                     if(stackFunction.body) {
                         const functionResult = runProgram(stackFunction.body, functionParams, stack, functions);
                         if(functionResult instanceof Error) {
-                            return functionResult;
+                            const message = `${item.startPos.line}:${item.startPos.char} At function call:\n` + functionResult.message.replace(/^/gm, "\t");
+                            return new Error(message);
                         }
                     }
 
@@ -58,7 +59,11 @@ function runProgram(program: Program, params: Record<string, {value: string | bo
                         Object.keys(functionParams).forEach((key) => {
                             functionParams[key] = functionParams[key].value;
                         });
-                        stackFunction.rawCode(stacks, functionParams, stack);
+                        const functionResult = stackFunction.rawCode(stacks, functionParams, stack);
+                        if(functionResult instanceof Error) {
+                            const message = `${item.startPos.line}:${item.startPos.char} At function call:\n` + functionResult.message.replace(/^/gm, "\t");
+                            return new Error(message);
+                        }
                     }
                 }
 
@@ -113,7 +118,7 @@ function runProgram(program: Program, params: Record<string, {value: string | bo
             } else if(item.type === StatementType.ForLoop) {
 
                 if(!stacks[StackType.Int].check()) {
-                    return new Error("For loops must have a `int` on the stack to run");
+                    return new Error(`${item.startPos.line}:${item.startPos.char} For loops must have a \`int\` on the stack to run`);
                 }
 
                 let resultOfIteration: Error | true | void;
@@ -131,7 +136,7 @@ function runProgram(program: Program, params: Record<string, {value: string | bo
 
                     // increment or decrement the top of the int stack so it is closer to 0
                     if(!stacks[StackType.Int].check()) {
-                        return new Error("For loops must have a `int` on the stack to run");
+                        return new Error(`${item.startPos.line}:${item.startPos.char} For loops must have a \`int\` on the stack to run`);
                     } else {
                         const top = stacks[StackType.Int].get();
                         if(top > 0) {
@@ -148,7 +153,7 @@ function runProgram(program: Program, params: Record<string, {value: string | bo
             } else if(item.type === StatementType.WhileLoop) {
 
                 if(!stacks[StackType.Bool].check()) {
-                    return new Error("While loops must have a `bool` on the stack to run");
+                    return new Error(`${item.startPos.line}:${item.startPos.char} While loops must have a \`bool\` on the stack to run`);
                 }
 
                 let resultOfIteration: Error | true | void;
@@ -165,7 +170,7 @@ function runProgram(program: Program, params: Record<string, {value: string | bo
                     }
 
                     if(!stacks[StackType.Bool].check()) {
-                        return new Error("While loops must have a `bool` on the stack to run");
+                        return new Error(`${item.startPos.line}:${item.startPos.char} While loops must have a \`bool\` on the stack to run`);
                     }
                 }
 
@@ -175,7 +180,7 @@ function runProgram(program: Program, params: Record<string, {value: string | bo
             } else if(item.type === StatementType.If) {
 
                 if(!stacks[StackType.Bool].check()) {
-                    return new Error("If statements must have a `bool` on the stack to run");
+                    return new Error(`${item.startPos.line}:${item.startPos.char} If statements must have a \`bool\` on the stack to run`);
                 }
 
                 // run the if block if the top of the bool stack is true or else try to run the else block

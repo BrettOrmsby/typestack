@@ -5,7 +5,7 @@ import { Program } from "./parse.js";
 export type StackFunction = {
     body?: Program,
     params: Record<string, StackType>,
-    rawCode?: (s: Stacks, p: Record<string, any>, c: StackType) => void
+    rawCode?: (s: Stacks, p: Record<string, any>, c: StackType) => void | Error
 }
 
 export type StackFunctions = {
@@ -66,7 +66,8 @@ export const standardLibraryFunctions: StackFunctions = {
         "/": {
             params: { right: StackType.Int, left: StackType.Int },
             rawCode: (stacks, params) => {
-                if(params.left === 0) {
+                console.log(params.right === 0)
+                if(params.right === 0) {
                     return new Error("Divide by zero. `/(right: int, left: int)` must have `right` parameter not equal to `0`");
                 }
                 stacks[StackType.Float].push(params.left / params.right);
@@ -75,7 +76,7 @@ export const standardLibraryFunctions: StackFunctions = {
         "//": {
             params: { right: StackType.Int, left: StackType.Int },
             rawCode: (stacks, params) => {
-                if(params.left === 0) {
+                if(params.right === 0) {
                     return new Error("Divide by zero. `//(right: int, left: int)` must have `right` parameter not equal to `0`");
                 }
                 stacks[StackType.Int].push(Math.floor(params.left / params.right));
@@ -84,7 +85,7 @@ export const standardLibraryFunctions: StackFunctions = {
         "%": {
             params: { right: StackType.Int, left: StackType.Int },
             rawCode: (stacks, params) => {
-                if(params.left === 0) {
+                if(params.right === 0) {
                     return new Error("Divide by zero. `%(right: int, left: int)` must have `right` parameter not equal to `0`");
                 }
                 stacks[StackType.Int].push(params.left % params.right);
@@ -146,7 +147,7 @@ export const standardLibraryFunctions: StackFunctions = {
         "/": {
             params: { right: StackType.Float, left: StackType.Float },
             rawCode: (stacks, params) => {
-                if(params.left === 0) {
+                if(params.right === 0) {
                     return new Error("Divide by zero. `/(right: float, left: float)` must have `right` parameter not equal to `0.0`");
                 }
                 stacks[StackType.Float].push(params.left / params.right);
@@ -155,7 +156,7 @@ export const standardLibraryFunctions: StackFunctions = {
         "//": {
             params: { right: StackType.Float, left: StackType.Float },
             rawCode: (stacks, params) => {
-                if(params.left === 0) {
+                if(params.right === 0) {
                     return new Error("Divide by zero. `//(right: float, left: float)` must have `right` parameter not equal to `0.0`");
                 }
                 stacks[StackType.Float].push(Math.floor(params.left * params.right));
@@ -164,7 +165,7 @@ export const standardLibraryFunctions: StackFunctions = {
         "%": {
             params: { right: StackType.Float, left: StackType.Float },
             rawCode: (stacks, params) => {
-                if(params.left === 0) {
+                if(params.right === 0) {
                     return new Error("Divide by zero. `%(right: float, left: float)` must have `right` parameter not equal to `0.0`");
                 }
                 stacks[StackType.Int].push(params.left % params.right);
