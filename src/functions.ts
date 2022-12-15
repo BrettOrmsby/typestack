@@ -66,7 +66,6 @@ export const standardLibraryFunctions: StackFunctions = {
         "/": {
             params: { right: StackType.Int, left: StackType.Int },
             rawCode: (stacks, params) => {
-                console.log(params.right === 0)
                 if(params.right === 0) {
                     return new Error("Divide by zero. `/(right: int, left: int)` must have `right` parameter not equal to `0`");
                 }

@@ -1,7 +1,5 @@
-// TODO: error function, comments
+// TODO: error function
 // TODO: features to add: escape characters in string, module loading
-// TODO: fix a bug in type checking where a function called on an `any` stack is invalid even if there
-//       is an individual function in each stack type instead of one function in the any type
 import { Scanner } from "./scan.js";
 import { Parser } from "./parse.js";
 import typeCheck from "./typeCheck.js";
