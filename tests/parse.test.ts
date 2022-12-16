@@ -1,15 +1,16 @@
 import { Scanner } from "../src/scan";
 import { Parser } from "../src/parse";
 import { standardLibraryFunctions } from "../src/functions.js";
+import { TSError } from "../src/utils/error";
 
 function parse(input: string) {
     const scanner = new Scanner(input);
-    const output = scanner.scan();
-    expect(output).not.toBeInstanceOf(Error);
-    if(output instanceof Error) {
+    const scanError = scanner.scan();
+    expect(scanError).not.toBeInstanceOf(TSError);
+    if(scanError instanceof TSError) {
         return;
     }
-    const parser = new Parser(output, standardLibraryFunctions);
+    const parser = new Parser(scanner.tokens, standardLibraryFunctions);
     return parser.parse();
 }
 

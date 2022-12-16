@@ -1,3 +1,4 @@
+import { TSError, ErrorInputConfig} from "./utils/error.js";
 export enum TokenType {
   Int,
   Float,
@@ -33,6 +34,7 @@ export class Scanner {
     line: number;
 
     constructor(input: string) {
+        ErrorInputConfig.input = input;
         this.input = input;
         this.tokens = [];
         this.pointer = 0;
@@ -40,7 +42,7 @@ export class Scanner {
         this.line = 1;
     }
 
-    scan(): Token[] | Error {
+    scan(): TSError | void {
         while(!this.#isAtEnd()) {
             const current = this.#peek();
 
@@ -95,7 +97,13 @@ export class Scanner {
                 }
 
                 if(this.#isAtEnd()) {
-                    return new Error(`${this.line}:${this.char-1} Expected ending string literal (\`"\`)`);
+                    return new TSError(
+                        {
+                            startPos: startPos, 
+                            endPos: { line: this.line, char: this.char }, 
+                        }, 
+                        "expected an ending string literal `\"`", 
+                    );
                 }
 
                 this.#addToken(TokenType.Str, str, startPos);
@@ -120,8 +128,6 @@ export class Scanner {
         }
         
         this.#addToken(TokenType.EOF, false);
-
-        return this.tokens;
     }
 
     #addToken(type: TokenType, value: string | number | boolean, startPos?: Pos, endPos?: Pos) {
@@ -151,13 +157,19 @@ export class Scanner {
         this.line += 1;
         this.char = 1;
     }
-    #expectSeparator(): Error | null {
+    #expectSeparator(): TSError | void {
         if(!this.#isAtEnd() && !["\n", "\r", "\t", " ", "{", "}", "(", ")", ":", "#"].includes(this.#peek())) {
-            return new Error(`${this.line}:${this.char} Expected separator (\`\n\`, \`\r\`, \`\t\`, \` \`, \`{\`, \`}\`, \`(\`, \`)\`, \`:\`)`);
+            return new TSError(
+                {
+                    startPos: { line: this.line, char: this.char }, 
+                    endPos: { line: this.line, char: this.char }, 
+                }, 
+                "Expected separator (`n`, `r`, `t`, ` `, `{`, `}`, `(`, `)`, `:`)`", 
+            );
         }
     }
 
-    #number(): Error | null {
+    #number(): TSError | void {
         const startPos = {
             line: this.line,
             char: this.char
@@ -180,7 +192,13 @@ export class Scanner {
 
             const float = parseFloat(strOfNumber);
             if(Number.isNaN(float)) {
-                return new Error(`"${startPos.line}:${startPos.char} Unable to parse float: \`${float}\``);
+                return new TSError(
+                    {
+                        startPos: { line: startPos.line, char: startPos.char }, 
+                        endPos: { line: this.line, char: this.char }, 
+                    }, 
+                    "Unable to parse float", 
+                );
             }
 
             // need to set the current character back 1 before adding the token because we incremented into a char that is not part of the float
@@ -191,7 +209,13 @@ export class Scanner {
 
             const int = parseInt(strOfNumber);
             if(Number.isNaN(int)) {
-                return new Error(`"${startPos.line}:${startPos.char} Unable to parse int: \`${int}\``);
+                return new TSError(
+                    {
+                        startPos: { line: startPos.line, char: startPos.char }, 
+                        endPos: { line: this.line, char: this.char }, 
+                    }, 
+                    "Unable to parse int", 
+                );
             }
             // need to set the current character back 1 before adding the token because we incremented into a char that is not part of the int
             this.char -= 1;
