@@ -8,49 +8,31 @@ import interpret from "./interpret.js";
 import { isTSError } from "./utils/error.js";
 
 export default function typeStack(input: string) {
-    const scanner = new Scanner(input);
-    const scanError = scanner.scan();
-    if(isTSError(scanError)) {
-        scanError.fire();
-        return;
-    }
-   
-    const parser = new Parser(scanner.tokens, standardLibraryFunctions);
-    const parseError = parser.parse();
-    if(parseError) {
-        throw parseError;
-    }
-
-    const typeErrors = typeCheck(parser.program, standardLibraryFunctions, parser.newFunctions);
-    if(typeErrors.length > 0) {
-        typeErrors.forEach(e => e.fire());
-        return;
-    }
-    
-    const runError = interpret(parser.program, parser.functions);
-    if(runError instanceof Error) {
-        throw runError;
-    }
-}
-
-const input = `
-100 for loop {
-    dup 15 % 0 ==
-    if {
-      "FizzBuzz" print drop
-    } else {
-      int dup 5 % 0 ==
-      if {
-        "Buzz" print drop
-      } else {
-        int dup 3 % 0 ==
-        if {
-          "Fizz" print drop
-        } else {
-          int print
-        }
-      }
-    }
+  const scanner = new Scanner(input);
+  const scanError = scanner.scan();
+  if (isTSError(scanError)) {
+    scanError.fire();
+    return;
   }
-`;
-typeStack(input);
+
+  const parser = new Parser(scanner.tokens, standardLibraryFunctions);
+  const parseError = parser.parse();
+  if (parseError) {
+    throw parseError;
+  }
+
+  const typeErrors = typeCheck(
+    parser.program,
+    standardLibraryFunctions,
+    parser.newFunctions
+  );
+  if (typeErrors.length > 0) {
+    typeErrors.forEach((e) => e.fire());
+    return;
+  }
+
+  const runError = interpret(parser.program, parser.functions);
+  if (runError instanceof Error) {
+    throw runError;
+  }
+}

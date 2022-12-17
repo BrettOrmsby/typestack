@@ -1,4 +1,4 @@
-import { TSError, ErrorInputConfig} from "./utils/error.js";
+import { TSError, ErrorInputConfig } from "./utils/error.js";
 export enum TokenType {
   Int,
   Float,
@@ -11,7 +11,7 @@ export enum TokenType {
   CloseParen,
   OpenBracket,
   CloseBracket,
-  EOF
+  EOF,
 }
 
 export type Pos = {
@@ -27,230 +27,256 @@ export type Token = {
 };
 
 export class Scanner {
-    input: string;
-    tokens: Token[];
-    pointer: number;
-    char: number;
-    line: number;
+  input: string;
+  tokens: Token[];
+  pointer: number;
+  char: number;
+  line: number;
 
-    constructor(input: string) {
-        ErrorInputConfig.input = input;
-        this.input = input;
-        this.tokens = [];
-        this.pointer = 0;
-        this.char = 1;
-        this.line = 1;
-    }
+  constructor(input: string) {
+    ErrorInputConfig.input = input;
+    this.input = input;
+    this.tokens = [];
+    this.pointer = 0;
+    this.char = 1;
+    this.line = 1;
+  }
 
-    scan(): TSError | void {
-        while(!this.#isAtEnd()) {
-            const current = this.#peek();
+  scan(): TSError | void {
+    while (!this.#isAtEnd()) {
+      const current = this.#peek();
 
-            if(["(",")", "{", "}", ":"].includes(current)) {
-                switch(current) {
-                case "(" : 
-                    this.#addToken(TokenType.OpenParen, "(");
-                    break;
-                case ")" : 
-                    this.#addToken(TokenType.CloseParen, ")");
-                    break;
-                case "{" : 
-                    this.#addToken(TokenType.OpenBracket, "{");
-                    break;
-                case "}" : 
-                    this.#addToken(TokenType.CloseBracket, "}");
-                    break;
-                case ":" : 
-                    this.#addToken(TokenType.Colon, ":");
-                }
-                this.#increment();
-                continue;
-            }
-
-            if([" ", "\t", "\r"].includes(current)) {
-                this.#increment();
-                continue;
-            }
-
-            if("\n" === current) {
-                this.#newline();
-                continue;
-            }
-
-            if("\"" === current) {
-                const startPos = {
-                    line: this.line,
-                    char: this.char
-                };
-
-                this.#increment();
-                let str = "";
-
-                while(!this.#isAtEnd() && this.#peek() !== "\"") {
-                    str += this.#peek();
-
-                    if(this.#peek() === "\n") {
-                        this.#newline();
-                    } else {
-                        this.#increment();
-                    }
-                }
-
-                if(this.#isAtEnd()) {
-                    return new TSError(
-                        {
-                            startPos: startPos, 
-                            endPos: { line: this.line, char: this.char }, 
-                        }, 
-                        "expected an ending string literal `\"`", 
-                    );
-                }
-
-                this.#addToken(TokenType.Str, str, startPos);
-
-                this.#increment();
-
-                const posError = this.#expectSeparator();
-                if(posError) {
-                    return posError;
-                }
-                continue;
-            }
-
-            if(current >= "0" && current <= "9") {
-                const posError = this.#number();
-                if(posError) {
-                    return posError;
-                }
-            } else {
-                this.#identifier();
-            }
+      if (["(", ")", "{", "}", ":"].includes(current)) {
+        switch (current) {
+          case "(":
+            this.#addToken(TokenType.OpenParen, "(");
+            break;
+          case ")":
+            this.#addToken(TokenType.CloseParen, ")");
+            break;
+          case "{":
+            this.#addToken(TokenType.OpenBracket, "{");
+            break;
+          case "}":
+            this.#addToken(TokenType.CloseBracket, "}");
+            break;
+          case ":":
+            this.#addToken(TokenType.Colon, ":");
         }
-        
-        this.#addToken(TokenType.EOF, false);
-    }
+        this.#increment();
+        continue;
+      }
 
-    #addToken(type: TokenType, value: string | number | boolean, startPos?: Pos, endPos?: Pos) {
-        startPos = startPos ? startPos : {line: this.line, char: this.char};
-        this.tokens.push(
-            {
-                type,
-                value,
-                startPos,
-                endPos: endPos ? endPos : {line: this.line, char: this.char},
-            }
-        );
-    }
+      if ([" ", "\t", "\r"].includes(current)) {
+        this.#increment();
+        continue;
+      }
 
-    #isAtEnd(): boolean {
-        return this.pointer >= this.input.length;
-    }
-    #peek(): string {
-        return this.input[this.pointer];
-    }
-    #increment() {
-        this.pointer += 1;
-        this.char += 1;
-    }
-    #newline() {
-        this.pointer += 1;
-        this.line += 1;
-        this.char = 1;
-    }
-    #expectSeparator(): TSError | void {
-        if(!this.#isAtEnd() && !["\n", "\r", "\t", " ", "{", "}", "(", ")", ":", "#"].includes(this.#peek())) {
-            return new TSError(
-                {
-                    startPos: { line: this.line, char: this.char }, 
-                    endPos: { line: this.line, char: this.char }, 
-                }, 
-                "Expected separator (`n`, `r`, `t`, ` `, `{`, `}`, `(`, `)`, `:`)`", 
-            );
-        }
-    }
+      if ("\n" === current) {
+        this.#newline();
+        continue;
+      }
 
-    #number(): TSError | void {
+      if ('"' === current) {
         const startPos = {
-            line: this.line,
-            char: this.char
+          line: this.line,
+          char: this.char,
         };
-        let strOfNumber = "";
 
-        while(!this.#isAtEnd() && this.#peek() >= "0" && this.#peek() <= "9") {
-            strOfNumber += this.#peek();
-            this.#increment();
-        }
-
-        if(!this.#isAtEnd() && this.#peek() === ".") {
-            strOfNumber += ".";
-            this.#increment();
-
-            while(!this.#isAtEnd() && this.#peek() >= "0" && this.#peek() <= "9") {
-                strOfNumber += this.#peek();
-                this.#increment();
-            }
-
-            const float = parseFloat(strOfNumber);
-            if(Number.isNaN(float)) {
-                return new TSError(
-                    {
-                        startPos: { line: startPos.line, char: startPos.char }, 
-                        endPos: { line: this.line, char: this.char }, 
-                    }, 
-                    "Unable to parse float", 
-                );
-            }
-
-            // need to set the current character back 1 before adding the token because we incremented into a char that is not part of the float
-            this.char -= 1;
-            this.#addToken(TokenType.Float, float, startPos);
-            this.char += 1;
-        } else {
-
-            const int = parseInt(strOfNumber);
-            if(Number.isNaN(int)) {
-                return new TSError(
-                    {
-                        startPos: { line: startPos.line, char: startPos.char }, 
-                        endPos: { line: this.line, char: this.char }, 
-                    }, 
-                    "Unable to parse int", 
-                );
-            }
-            // need to set the current character back 1 before adding the token because we incremented into a char that is not part of the int
-            this.char -= 1;
-            this.#addToken(TokenType.Int, int, startPos);
-            this.char += 1;            
-        }
-
-        return this.#expectSeparator();
-    }
- 
-    #identifier() {
-        const startPos = {
-            line: this.line,
-            char: this.char
-        };
+        this.#increment();
         let str = "";
 
-        while(!this.#isAtEnd() && ![" ", "\n", "\t", "\r", ":", "{", "}", "(", ")"].includes(this.#peek())) {
-            str += this.#peek();
-            this.#increment();
-        }
-        
-        const keywords = [
-            "fn", "loop", "for", "while", "if", "else", "break", "continue", "int", "bool", "str", "float", "any",
-            "@int", "@float", "@str", "@bool", "@any",
-        ];
+        while (!this.#isAtEnd() && this.#peek() !== '"') {
+          str += this.#peek();
 
-        if(str === "false") {
-            this.#addToken(TokenType.Bool, false, startPos);
-        } else if(str === "true") {
-            this.#addToken(TokenType.Bool, true, startPos);
-        } else if (keywords.includes(str)) {
-            this.#addToken(TokenType.Keyword, str, startPos);
-        } else {
-            this.#addToken(TokenType.Identifier, str, startPos);
+          if (this.#peek() === "\n") {
+            this.#newline();
+          } else {
+            this.#increment();
+          }
         }
+
+        if (this.#isAtEnd()) {
+          return new TSError(
+            {
+              startPos: startPos,
+              endPos: { line: this.line, char: this.char },
+            },
+            'expected an ending string literal `"`'
+          );
+        }
+
+        this.#addToken(TokenType.Str, str, startPos);
+
+        this.#increment();
+
+        const posError = this.#expectSeparator();
+        if (posError) {
+          return posError;
+        }
+        continue;
+      }
+
+      if (current >= "0" && current <= "9") {
+        const posError = this.#number();
+        if (posError) {
+          return posError;
+        }
+      } else {
+        this.#identifier();
+      }
     }
+
+    this.#addToken(TokenType.EOF, false);
+  }
+
+  #addToken(
+    type: TokenType,
+    value: string | number | boolean,
+    startPos?: Pos,
+    endPos?: Pos
+  ) {
+    startPos = startPos ? startPos : { line: this.line, char: this.char };
+    this.tokens.push({
+      type,
+      value,
+      startPos,
+      endPos: endPos ? endPos : { line: this.line, char: this.char },
+    });
+  }
+
+  #isAtEnd(): boolean {
+    return this.pointer >= this.input.length;
+  }
+  #peek(): string {
+    return this.input[this.pointer];
+  }
+  #increment() {
+    this.pointer += 1;
+    this.char += 1;
+  }
+  #newline() {
+    this.pointer += 1;
+    this.line += 1;
+    this.char = 1;
+  }
+  #expectSeparator(): TSError | void {
+    if (
+      !this.#isAtEnd() &&
+      !["\n", "\r", "\t", " ", "{", "}", "(", ")", ":", "#"].includes(
+        this.#peek()
+      )
+    ) {
+      return new TSError(
+        {
+          startPos: { line: this.line, char: this.char },
+          endPos: { line: this.line, char: this.char },
+        },
+        "Expected separator (`n`, `r`, `t`, ` `, `{`, `}`, `(`, `)`, `:`)`"
+      );
+    }
+  }
+
+  #number(): TSError | void {
+    const startPos = {
+      line: this.line,
+      char: this.char,
+    };
+    let strOfNumber = "";
+
+    while (!this.#isAtEnd() && this.#peek() >= "0" && this.#peek() <= "9") {
+      strOfNumber += this.#peek();
+      this.#increment();
+    }
+
+    if (!this.#isAtEnd() && this.#peek() === ".") {
+      strOfNumber += ".";
+      this.#increment();
+
+      while (!this.#isAtEnd() && this.#peek() >= "0" && this.#peek() <= "9") {
+        strOfNumber += this.#peek();
+        this.#increment();
+      }
+
+      const float = parseFloat(strOfNumber);
+      if (Number.isNaN(float)) {
+        return new TSError(
+          {
+            startPos: { line: startPos.line, char: startPos.char },
+            endPos: { line: this.line, char: this.char },
+          },
+          "Unable to parse float"
+        );
+      }
+
+      // need to set the current character back 1 before adding the token because we incremented into a char that is not part of the float
+      this.char -= 1;
+      this.#addToken(TokenType.Float, float, startPos);
+      this.char += 1;
+    } else {
+      const int = parseInt(strOfNumber);
+      if (Number.isNaN(int)) {
+        return new TSError(
+          {
+            startPos: { line: startPos.line, char: startPos.char },
+            endPos: { line: this.line, char: this.char },
+          },
+          "Unable to parse int"
+        );
+      }
+      // need to set the current character back 1 before adding the token because we incremented into a char that is not part of the int
+      this.char -= 1;
+      this.#addToken(TokenType.Int, int, startPos);
+      this.char += 1;
+    }
+
+    return this.#expectSeparator();
+  }
+
+  #identifier() {
+    const startPos = {
+      line: this.line,
+      char: this.char,
+    };
+    let str = "";
+
+    while (
+      !this.#isAtEnd() &&
+      ![" ", "\n", "\t", "\r", ":", "{", "}", "(", ")"].includes(this.#peek())
+    ) {
+      str += this.#peek();
+      this.#increment();
+    }
+
+    const keywords = [
+      "fn",
+      "loop",
+      "for",
+      "while",
+      "if",
+      "else",
+      "break",
+      "continue",
+      "int",
+      "bool",
+      "str",
+      "float",
+      "any",
+      "@int",
+      "@float",
+      "@str",
+      "@bool",
+      "@any",
+    ];
+
+    if (str === "false") {
+      this.#addToken(TokenType.Bool, false, startPos);
+    } else if (str === "true") {
+      this.#addToken(TokenType.Bool, true, startPos);
+    } else if (keywords.includes(str)) {
+      this.#addToken(TokenType.Keyword, str, startPos);
+    } else {
+      this.#addToken(TokenType.Identifier, str, startPos);
+    }
+  }
 }
