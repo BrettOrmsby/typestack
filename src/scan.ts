@@ -243,8 +243,6 @@ export class Scanner {
             "@int", "@float", "@str", "@bool", "@any",
         ];
 
-        // need to set the current character back 1 before adding the token because we incremented into a char that is not part of the identifier
-        this.char -= 1;
         if(str === "false") {
             this.#addToken(TokenType.Bool, false, startPos);
         } else if(str === "true") {
@@ -254,6 +252,5 @@ export class Scanner {
         } else {
             this.#addToken(TokenType.Identifier, str, startPos);
         }
-        this.char += 1;
     }
 }

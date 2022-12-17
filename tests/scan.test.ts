@@ -40,4 +40,10 @@ describe("Scanner should parse a program", () => {
         const scanner = new Scanner(input);
         expect(scanner.scan()).not.toBeInstanceOf(TSError);
     });
+
+    test("Mixed parsing", () => {
+        const input = "fn( loop{ while::: \"str\") 44.44:break true";
+        const scanner = new Scanner(input);
+        expect(scanner.scan()).not.toBeInstanceOf(TSError);
+    });
 });

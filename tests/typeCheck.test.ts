@@ -18,13 +18,13 @@ function check(input: string) {
         return;
     }
 
-    return typeCheck(parser.program, standardLibraryFunctions, parser.newFunctions);
+    return typeCheck(parser.program, standardLibraryFunctions, parser.newFunctions)[0];
 }
 
 describe("Type check should check types before standard library functions", () => {
     test("Invalid function call on str type", () => {
         const input = "\"1\" \"2\" /";
-        expect(check(input)).toBeInstanceOf(Error);
+        expect(check(input)).toBeInstanceOf(TSError);
     });
     test("Invalid custom function call on float type", () => {
         const input = `
@@ -32,7 +32,7 @@ describe("Type check should check types before standard library functions", () =
     fn negate(t: int) @int {
         0 t -
     }`;
-        expect(check(input)).toBeInstanceOf(Error);
+        expect(check(input)).toBeInstanceOf(TSError);
     });
     test("Valid custom function call on float type", () => {
         const input = `
@@ -40,13 +40,13 @@ describe("Type check should check types before standard library functions", () =
     fn negate(t: float) @float {
         0 t -
     }`;
-        expect(check(input)).not.toBeInstanceOf(Error);
+        expect(check(input)).not.toBeInstanceOf(TSError);
     });
     test("Invalid custom function with any type", () => {
         const input = `
     fn whatever(t: any) @any {
         0 t -
     }`;
-        expect(check(input)).toBeInstanceOf(Error);
+        expect(check(input)).toBeInstanceOf(TSError);
     });
 });

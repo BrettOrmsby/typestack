@@ -1,4 +1,5 @@
 // TODO: features to add: escape characters in string, module loading
+// TODO: Printing floats should be padded with a decimal 0
 import { Scanner } from "./scan.js";
 import { Parser } from "./parse.js";
 import typeCheck from "./typeCheck.js";
@@ -20,9 +21,10 @@ export default function typeStack(input: string) {
         throw parseError;
     }
 
-    const typeError = typeCheck(parser.program, standardLibraryFunctions, parser.newFunctions);
-    if(typeError) {
-        throw typeError;
+    const typeErrors = typeCheck(parser.program, standardLibraryFunctions, parser.newFunctions);
+    if(typeErrors.length > 0) {
+        typeErrors.forEach(e => e.fire());
+        return;
     }
     
     const runError = interpret(parser.program, parser.functions);
@@ -31,7 +33,7 @@ export default function typeStack(input: string) {
     }
 }
 
-let input = `
+const input = `
 100 for loop {
     dup 15 % 0 ==
     if {
@@ -51,5 +53,4 @@ let input = `
     }
   }
 `;
-
 typeStack(input);

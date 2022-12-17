@@ -12,6 +12,7 @@ function run(input: string) {
     if(scanError instanceof TSError) {
         return;
     }
+
     const parser = new Parser(scanner.tokens, standardLibraryFunctions);
     const parseError = parser.parse();
     expect(parseError).not.toBeInstanceOf(Error);
@@ -19,7 +20,11 @@ function run(input: string) {
         return;
     }
 
-    expect(typeCheck(parser.program, standardLibraryFunctions, parser.newFunctions)).not.toBeInstanceOf(Error);
+    const typeErrors = typeCheck(parser.program, standardLibraryFunctions, parser.newFunctions);
+    expect(typeErrors.length).toBe(0);
+    if(typeErrors.length > 0) {
+        return;
+    }
 
     return interpret(parser.program, parser.functions);
 }
