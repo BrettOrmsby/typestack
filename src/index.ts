@@ -1,5 +1,4 @@
 // TODO: features to add: escape characters in string, module loading
-// TODO: Printing floats should be padded with a decimal 0
 import { Scanner } from "./scan.js";
 import { Parser } from "./parse.js";
 import typeCheck from "./typeCheck.js";

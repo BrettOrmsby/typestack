@@ -266,7 +266,13 @@ export const standardLibraryFunctions: StackFunctions = {
     print: {
       params: { item: StackType.Any },
       rawCode: (stacks, params, stack) => {
-        console.log(params.item);
+        if (
+          stack === StackType.Float &&
+          !params.item.toString().includes(".")
+        ) {
+          params.item = params.item.toFixed(1);
+        }
+        console.log(params.item.toString());
         stacks[stack].push(params.item);
       },
     },
