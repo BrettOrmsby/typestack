@@ -26,6 +26,7 @@ export enum StatementType {
 export type Statement = {
   type: StatementType;
   startPos: Pos;
+  endPos: Pos;
   block: Program;
   else?: Program;
 };
@@ -183,6 +184,7 @@ export class Parser {
 
         if ("loop" === current.value) {
           const startPos = current.startPos;
+          const endPos = current.endPos;
 
           // opening bracket should follow a loop keyword
           if (!this.#expect(TokenType.OpenBracket)) {
@@ -205,7 +207,8 @@ export class Parser {
           }
 
           block.push({
-            startPos: startPos,
+            startPos,
+            endPos,
             type: StatementType.Loop,
             block: innerBlock,
           });
@@ -223,6 +226,9 @@ export class Parser {
               } Expected a \`loop\` keyword after a \`for\` keyword`
             );
           }
+
+          const endPos = this.#peek().endPos;
+
           if (!this.#expect(TokenType.OpenBracket)) {
             return new Error(
               `${this.#peek().startPos.line}:${
@@ -243,7 +249,8 @@ export class Parser {
           }
 
           block.push({
-            startPos: startPos,
+            startPos,
+            endPos,
             type: StatementType.ForLoop,
             block: innerBlock,
           });
@@ -261,6 +268,9 @@ export class Parser {
               } Expected a \`loop\` keyword after a \`while\` keyword`
             );
           }
+
+          const endPos = this.#peek().endPos;
+
           if (!this.#expect(TokenType.OpenBracket)) {
             return new Error(
               `${this.#peek().startPos.line}:${
@@ -281,7 +291,8 @@ export class Parser {
           }
 
           block.push({
-            startPos: startPos,
+            startPos,
+            endPos,
             type: StatementType.WhileLoop,
             block: innerBlock,
           });
@@ -290,6 +301,7 @@ export class Parser {
 
         if ("if" === current.value) {
           const startPos = current.startPos;
+          const endPos = current.endPos;
 
           // an opening bracket should follow an if
           if (!this.#expect(TokenType.OpenBracket)) {
@@ -334,7 +346,8 @@ export class Parser {
             }
 
             block.push({
-              startPos: startPos,
+              startPos,
+              endPos,
               type: StatementType.If,
               block: innerBlock,
               else: elseBlock,
@@ -342,7 +355,8 @@ export class Parser {
             continue;
           }
           block.push({
-            startPos: startPos,
+            startPos,
+            endPos,
             type: StatementType.If,
             block: innerBlock,
           });

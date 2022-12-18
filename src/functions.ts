@@ -16,6 +16,17 @@ export type StackFunctions = {
   [StackType.Any]: Record<string, StackFunction>;
 };
 
+export function functionToText(
+  name: string,
+  stack: StackType,
+  func: StackFunction
+): string {
+  const parameters = Object.keys(func.params).map(
+    (e) => `${e}: ${func.params[e]}`
+  );
+  return `${name}(${parameters.join(" ")}) @${stack}`;
+}
+
 export const standardLibraryFunctions: StackFunctions = {
   [StackType.Int]: {
     // comparison functions

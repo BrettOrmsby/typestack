@@ -97,7 +97,9 @@ ${space(lineNumberWidth + 1)}${bluePipe} ${space(errorStartsAt)}${underline}`;
   }
 }
 
-export function isTSError(error: TSError | void): error is TSError {
+export function isTSError(
+  error: TSError | void | boolean | string | number
+): error is TSError {
   return error instanceof TSError;
 }
 
