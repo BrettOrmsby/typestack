@@ -51,7 +51,6 @@ function runProgram(
                 ? stack
                 : stackFunction.params[key];
             if (!stacks[stackOfParam].check()) {
-              //TODO: change the error to the full function thing like identifier(param: int) @int
               return new TSError(
                 {
                   startPos: item.startPos,

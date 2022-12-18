@@ -1,4 +1,3 @@
-//TODO: Type conversion functions
 import { StackType, Stacks } from "./stack.js";
 import { Program } from "./parse.js";
 
@@ -299,6 +298,82 @@ export const standardLibraryFunctions: StackFunctions = {
       params: { right: StackType.Any, left: StackType.Any },
       rawCode: (stacks, params) => {
         stacks[StackType.Bool].push(params.left !== params.right);
+      },
+    },
+    
+    // conversion functions
+    toStr: {
+      params: { item: StackType.Any },
+      rawCode: (stacks, params, stack) => {
+        if (
+          stack === StackType.Float &&
+          !params.item.toString().includes(".")
+        ) {
+          params.item = params.item.toFixed(1);
+        }
+
+        stacks[StackType.Str].push(params.item.toString());
+      },
+    },
+    toBool: {
+      params: { item: StackType.Any },
+      rawCode: (stacks, params) => {
+        stacks[StackType.Bool].push(!!params.item);
+      },
+    },
+    toInt: {
+      params: { item: StackType.Any },
+      rawCode: (stacks, params, stack) => {
+        let int: number;
+        if (stack === StackType.Int) {
+          int = params.item;
+        } else if (stack === StackType.Float) {
+          int = Math.trunc(params.item);
+        } else if (stack === StackType.Bool) {
+          int = params.item ? 1 : 0;
+        } else {
+          for (const char of params.item.split("")) {
+            if (!(char >= "0" && char <= "9")) {
+              return new Error(
+                `unable to convert \`str\` to \`int\`: \`${params.item}\``
+              );
+            }
+          }
+          int = parseInt(params.item);
+        }
+        stacks[StackType.Int].push(int);
+      },
+    },
+    toFloat: {
+      params: { item: StackType.Any },
+      rawCode: (stacks, params, stack) => {
+        let float: number;
+        if (stack === StackType.Float || stack === StackType.Int) {
+          float = params.item;
+        } else if (stack === StackType.Bool) {
+          float = params.item ? 1 : 0;
+        } else {
+          let isInDecimal = false;
+          for (const char of params.item.split("")) {
+            if (char === ".") {
+              if (isInDecimal) {
+                return new Error(
+                  `unable to convert \`str\` to \`float\`: \`${params.item}\``
+                );
+              } else {
+                isInDecimal = true;
+                continue;
+              }
+            }
+            if (!(char >= "0" && char <= "9")) {
+              return new Error(
+                `unable to convert \`str\` to \`float\`: \`${params.item}\``
+              );
+            }
+          }
+          float = parseFloat(params.item);
+        }
+        stacks[StackType.Float].push(float);
       },
     },
   },

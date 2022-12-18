@@ -67,6 +67,13 @@ export class Scanner {
         continue;
       }
 
+      if ("#" === current) {
+        while (this.#peek() !== "\n") {
+          this.#increment();
+        }
+        continue;
+      }
+
       if ([" ", "\t", "\r"].includes(current)) {
         this.#increment();
         continue;
