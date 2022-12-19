@@ -34,6 +34,7 @@ export class Scanner {
   line: number;
 
   constructor(input: string) {
+    input = input.trimEnd();
     ErrorInputConfig.input = input;
     this.input = input;
     this.tokens = [];
@@ -133,7 +134,7 @@ export class Scanner {
         this.#identifier();
       }
     }
-
+    this.#increment();
     this.#addToken(TokenType.EOF, false);
   }
 

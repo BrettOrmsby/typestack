@@ -300,7 +300,7 @@ export const standardLibraryFunctions: StackFunctions = {
         stacks[StackType.Bool].push(params.left !== params.right);
       },
     },
-    
+
     // conversion functions
     toStr: {
       params: { item: StackType.Any },

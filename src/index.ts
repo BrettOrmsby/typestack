@@ -5,7 +5,7 @@ import { Parser } from "./parse.js";
 import typeCheck from "./typeCheck.js";
 import { standardLibraryFunctions } from "./functions.js";
 import interpret from "./interpret.js";
-import { isTSError, TSError } from "./utils/error.js";
+import { isTSError } from "./utils/error.js";
 
 export default function typeStack(input: string) {
   const scanner = new Scanner(input);
@@ -18,7 +18,7 @@ export default function typeStack(input: string) {
   const parser = new Parser(scanner.tokens, standardLibraryFunctions);
   const parseError = parser.parse();
   if (parseError) {
-    throw parseError;
+    parseError.fire();
   }
 
   const typeErrors = typeCheck(
