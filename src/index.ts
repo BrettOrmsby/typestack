@@ -1,5 +1,4 @@
-// TODO: features to add: escape characters in string, module loading
-// TODO: Printing floats should be padded with a decimal 0
+// TODO: features to add: module loading
 import { Scanner } from "./scan.js";
 import { Parser } from "./parse.js";
 import typeCheck from "./typeCheck.js";
@@ -18,7 +17,7 @@ export default function typeStack(input: string) {
   const parser = new Parser(scanner.tokens, standardLibraryFunctions);
   const parseError = parser.parse();
   if (parseError) {
-    throw parseError;
+    parseError.fire();
   }
 
   const typeErrors = typeCheck(
@@ -32,7 +31,7 @@ export default function typeStack(input: string) {
   }
 
   const runError = interpret(parser.program, parser.functions);
-  if (runError instanceof Error) {
-    throw runError;
+  if (isTSError(runError)) {
+    runError.fire();
   }
 }

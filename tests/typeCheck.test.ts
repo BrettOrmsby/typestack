@@ -13,8 +13,8 @@ function check(input: string) {
     }
     const parser = new Parser(scanner.tokens, standardLibraryFunctions);
     const parseError = parser.parse();
-    expect(parseError).not.toBeInstanceOf(Error);
-    if(parseError instanceof Error) {
+    expect(parseError).not.toBeInstanceOf(TSError);
+    if(parseError instanceof TSError) {
         return;
     }
 

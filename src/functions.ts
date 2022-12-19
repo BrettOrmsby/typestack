@@ -1,4 +1,3 @@
-//TODO: Type conversion functions
 import { StackType, Stacks } from "./stack.js";
 import { Program } from "./parse.js";
 
@@ -15,6 +14,17 @@ export type StackFunctions = {
   [StackType.Bool]: Record<string, StackFunction>;
   [StackType.Any]: Record<string, StackFunction>;
 };
+
+export function functionToText(
+  name: string,
+  stack: StackType,
+  func: StackFunction
+): string {
+  const parameters = Object.keys(func.params).map(
+    (e) => `${e}: ${func.params[e]}`
+  );
+  return `${name}(${parameters.join(" ")}) @${stack}`;
+}
 
 export const standardLibraryFunctions: StackFunctions = {
   [StackType.Int]: {
@@ -68,7 +78,7 @@ export const standardLibraryFunctions: StackFunctions = {
       rawCode: (stacks, params) => {
         if (params.right === 0) {
           return new Error(
-            "Divide by zero. `/(right: int, left: int)` must have `right` parameter not equal to `0`"
+            "divide by zero. `/(right: int, left: int)` must have `right` parameter not equal to `0`"
           );
         }
         stacks[StackType.Float].push(params.left / params.right);
@@ -79,7 +89,7 @@ export const standardLibraryFunctions: StackFunctions = {
       rawCode: (stacks, params) => {
         if (params.right === 0) {
           return new Error(
-            "Divide by zero. `//(right: int, left: int)` must have `right` parameter not equal to `0`"
+            "divide by zero. `//(right: int, left: int)` must have `right` parameter not equal to `0`"
           );
         }
         stacks[StackType.Int].push(Math.floor(params.left / params.right));
@@ -90,7 +100,7 @@ export const standardLibraryFunctions: StackFunctions = {
       rawCode: (stacks, params) => {
         if (params.right === 0) {
           return new Error(
-            "Divide by zero. `%(right: int, left: int)` must have `right` parameter not equal to `0`"
+            "divide by zero. `%(right: int, left: int)` must have `right` parameter not equal to `0`"
           );
         }
         stacks[StackType.Int].push(params.left % params.right);
@@ -154,7 +164,7 @@ export const standardLibraryFunctions: StackFunctions = {
       rawCode: (stacks, params) => {
         if (params.right === 0) {
           return new Error(
-            "Divide by zero. `/(right: float, left: float)` must have `right` parameter not equal to `0.0`"
+            "divide by zero. `/(right: float, left: float)` must have `right` parameter not equal to `0.0`"
           );
         }
         stacks[StackType.Float].push(params.left / params.right);
@@ -165,7 +175,7 @@ export const standardLibraryFunctions: StackFunctions = {
       rawCode: (stacks, params) => {
         if (params.right === 0) {
           return new Error(
-            "Divide by zero. `//(right: float, left: float)` must have `right` parameter not equal to `0.0`"
+            "divide by zero. `//(right: float, left: float)` must have `right` parameter not equal to `0.0`"
           );
         }
         stacks[StackType.Float].push(Math.floor(params.left * params.right));
@@ -176,7 +186,7 @@ export const standardLibraryFunctions: StackFunctions = {
       rawCode: (stacks, params) => {
         if (params.right === 0) {
           return new Error(
-            "Divide by zero. `%(right: float, left: float)` must have `right` parameter not equal to `0.0`"
+            "divide by zero. `%(right: float, left: float)` must have `right` parameter not equal to `0.0`"
           );
         }
         stacks[StackType.Int].push(params.left % params.right);
@@ -266,7 +276,13 @@ export const standardLibraryFunctions: StackFunctions = {
     print: {
       params: { item: StackType.Any },
       rawCode: (stacks, params, stack) => {
-        console.log(params.item);
+        if (
+          stack === StackType.Float &&
+          !params.item.toString().includes(".")
+        ) {
+          params.item = params.item.toFixed(1);
+        }
+        console.log(params.item.toString());
         stacks[stack].push(params.item);
       },
     },
@@ -282,6 +298,82 @@ export const standardLibraryFunctions: StackFunctions = {
       params: { right: StackType.Any, left: StackType.Any },
       rawCode: (stacks, params) => {
         stacks[StackType.Bool].push(params.left !== params.right);
+      },
+    },
+
+    // conversion functions
+    toStr: {
+      params: { item: StackType.Any },
+      rawCode: (stacks, params, stack) => {
+        if (
+          stack === StackType.Float &&
+          !params.item.toString().includes(".")
+        ) {
+          params.item = params.item.toFixed(1);
+        }
+
+        stacks[StackType.Str].push(params.item.toString());
+      },
+    },
+    toBool: {
+      params: { item: StackType.Any },
+      rawCode: (stacks, params) => {
+        stacks[StackType.Bool].push(!!params.item);
+      },
+    },
+    toInt: {
+      params: { item: StackType.Any },
+      rawCode: (stacks, params, stack) => {
+        let int: number;
+        if (stack === StackType.Int) {
+          int = params.item;
+        } else if (stack === StackType.Float) {
+          int = Math.trunc(params.item);
+        } else if (stack === StackType.Bool) {
+          int = params.item ? 1 : 0;
+        } else {
+          for (const char of params.item.split("")) {
+            if (!(char >= "0" && char <= "9")) {
+              return new Error(
+                `unable to convert \`str\` to \`int\`: \`${params.item}\``
+              );
+            }
+          }
+          int = parseInt(params.item);
+        }
+        stacks[StackType.Int].push(int);
+      },
+    },
+    toFloat: {
+      params: { item: StackType.Any },
+      rawCode: (stacks, params, stack) => {
+        let float: number;
+        if (stack === StackType.Float || stack === StackType.Int) {
+          float = params.item;
+        } else if (stack === StackType.Bool) {
+          float = params.item ? 1 : 0;
+        } else {
+          let isInDecimal = false;
+          for (const char of params.item.split("")) {
+            if (char === ".") {
+              if (isInDecimal) {
+                return new Error(
+                  `unable to convert \`str\` to \`float\`: \`${params.item}\``
+                );
+              } else {
+                isInDecimal = true;
+                continue;
+              }
+            }
+            if (!(char >= "0" && char <= "9")) {
+              return new Error(
+                `unable to convert \`str\` to \`float\`: \`${params.item}\``
+              );
+            }
+          }
+          float = parseFloat(params.item);
+        }
+        stacks[StackType.Float].push(float);
       },
     },
   },

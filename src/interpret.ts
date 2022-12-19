@@ -1,14 +1,15 @@
 import { TokenType } from "./scan.js";
 import { Program, StatementType } from "./parse.js";
-import { StackFunctions } from "./functions.js";
+import { StackFunctions, functionToText } from "./functions.js";
 import { stacks, StackType } from "./stack.js";
+import { TSError, isTSError } from "./utils/error.js";
 
 export default function interpret(
   program: Program,
   functions: StackFunctions
-): Error | void {
+): TSError | void {
   const runError = runProgram(program, {}, StackType.Int, functions);
-  if (runError instanceof Error) {
+  if (isTSError(runError)) {
     return runError;
   }
 }
@@ -18,7 +19,7 @@ function runProgram(
   params: Record<string, { value: string | boolean | number; type: StackType }>,
   stack: StackType,
   functions: StackFunctions
-): Error | true | void {
+): TSError | true | void {
   const startStack = stack;
   for (const item of program) {
     // if it is an expression
@@ -34,8 +35,13 @@ function runProgram(
           stacks[param.type].push(param.value);
         } else {
           // get the function from the `functions` first looking for the specific type and then in the `any` type
-          const stackFunction =
-            functions[stack][value] || functions[StackType.Any][value];
+          let stackFunction = functions[stack][value];
+          let errorStackType = stack;
+
+          if (!stackFunction) {
+            stackFunction = functions[StackType.Any][value];
+            errorStackType = StackType.Any;
+          }
           const functionParams = {};
 
           // get the parameters for the function and change the `any` type to the current stack
@@ -45,9 +51,13 @@ function runProgram(
                 ? stack
                 : stackFunction.params[key];
             if (!stacks[stackOfParam].check()) {
-              //TODO: change the error to the full function thing like identifier(param: int) @int
-              return new Error(
-                `${item.startPos.line}:${item.startPos.char} Unable to call function ${value} without enough parameters`
+              return new TSError(
+                {
+                  startPos: item.startPos,
+                  endPos: item.endPos,
+                },
+                "unable to call function `{}`. Expected more parameters",
+                functionToText(value, errorStackType, stackFunction)
               );
             }
             functionParams[key] = {
@@ -64,11 +74,16 @@ function runProgram(
               stack,
               functions
             );
-            if (functionResult instanceof Error) {
-              const message =
-                `${item.startPos.line}:${item.startPos.char} At function call:\n` +
-                functionResult.message.replace(/^/gm, "\t");
-              return new Error(message);
+            if (isTSError(functionResult)) {
+              return new TSError(
+                {
+                  startPos: item.startPos,
+                  endPos: item.endPos,
+                },
+                "error at function `{}`\n{}",
+                functionToText(value, errorStackType, stackFunction),
+                functionResult.error.trim().replace(/^/gm, "  ")
+              );
             }
           }
 
@@ -84,10 +99,15 @@ function runProgram(
               stack
             );
             if (functionResult instanceof Error) {
-              const message =
-                `${item.startPos.line}:${item.startPos.char} At function call:\n` +
-                functionResult.message.replace(/^/gm, "\t");
-              return new Error(message);
+              return new TSError(
+                {
+                  startPos: item.startPos,
+                  endPos: item.endPos,
+                },
+                "error at function `{}`\n{}",
+                functionToText(value, errorStackType, stackFunction),
+                functionResult.message.trim().replace(/^/gm, "  ")
+              );
             }
           }
         }
@@ -140,17 +160,21 @@ function runProgram(
         while (!resultOfIteration) {
           resultOfIteration = runProgram(item.block, params, stack, functions);
         }
-        if (resultOfIteration instanceof Error) {
+        if (isTSError(resultOfIteration)) {
           return resultOfIteration;
         }
       } else if (item.type === StatementType.ForLoop) {
         if (!stacks[StackType.Int].check()) {
-          return new Error(
-            `${item.startPos.line}:${item.startPos.char} For loops must have a \`int\` on the stack to run`
+          return new TSError(
+            {
+              startPos: item.startPos,
+              endPos: item.endPos,
+            },
+            "expected an `int` on the stack"
           );
         }
 
-        let resultOfIteration: Error | true | void;
+        let resultOfIteration: TSError | true | void;
 
         // repeat while there is no error or break and the top of the int stack is not 0
         while (!resultOfIteration && stacks[StackType.Int].peek() !== 0) {
@@ -161,7 +185,7 @@ function runProgram(
             functions
           );
 
-          if (resultOfIteration instanceof Error) {
+          if (isTSError(resultOfIteration)) {
             return resultOfIteration;
           }
           if (resultOfIteration) {
@@ -170,8 +194,12 @@ function runProgram(
 
           // increment or decrement the top of the int stack so it is closer to 0
           if (!stacks[StackType.Int].check()) {
-            return new Error(
-              `${item.startPos.line}:${item.startPos.char} For loops must have a \`int\` on the stack to run`
+            return new TSError(
+              {
+                startPos: item.startPos,
+                endPos: item.endPos,
+              },
+              "expected an `int` on the stack"
             );
           } else {
             const top = stacks[StackType.Int].get();
@@ -187,12 +215,16 @@ function runProgram(
         stack = StackType.Int;
       } else if (item.type === StatementType.WhileLoop) {
         if (!stacks[StackType.Bool].check()) {
-          return new Error(
-            `${item.startPos.line}:${item.startPos.char} While loops must have a \`bool\` on the stack to run`
+          return new TSError(
+            {
+              startPos: item.startPos,
+              endPos: item.endPos,
+            },
+            "expected a `bool` on the stack"
           );
         }
 
-        let resultOfIteration: Error | true | void;
+        let resultOfIteration: TSError | true | void;
 
         // repeat while the top of the bool stack is true and there is no error or break
         while (!resultOfIteration && stacks[StackType.Bool].get()) {
@@ -203,7 +235,7 @@ function runProgram(
             functions
           );
 
-          if (resultOfIteration instanceof Error) {
+          if (isTSError(resultOfIteration)) {
             return resultOfIteration;
           }
           if (resultOfIteration) {
@@ -211,8 +243,12 @@ function runProgram(
           }
 
           if (!stacks[StackType.Bool].check()) {
-            return new Error(
-              `${item.startPos.line}:${item.startPos.char} While loops must have a \`bool\` on the stack to run`
+            return new TSError(
+              {
+                startPos: item.startPos,
+                endPos: item.endPos,
+              },
+              "expected a `bool` on the stack"
             );
           }
         }
@@ -221,8 +257,12 @@ function runProgram(
         stack = StackType.Bool;
       } else if (item.type === StatementType.If) {
         if (!stacks[StackType.Bool].check()) {
-          return new Error(
-            `${item.startPos.line}:${item.startPos.char} If statements must have a \`bool\` on the stack to run`
+          return new TSError(
+            {
+              startPos: item.startPos,
+              endPos: item.endPos,
+            },
+            "expected a `bool` on the stack"
           );
         }
 

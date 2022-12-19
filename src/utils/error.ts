@@ -46,6 +46,9 @@ export class TSError {
     }
 
     let errorLength = pos.endPos.char - pos.startPos.char;
+    if (errorLength === 0) {
+      errorLength = 1;
+    }
     if (pos.startPos.line !== pos.endPos.line) {
       errorLength = MAX_ERROR_WIDTH + 1;
     }
@@ -97,7 +100,7 @@ ${space(lineNumberWidth + 1)}${bluePipe} ${space(errorStartsAt)}${underline}`;
   }
 }
 
-export function isTSError(error: TSError | void): error is TSError {
+export function isTSError(error: TSError | any): error is TSError {
   return error instanceof TSError;
 }
 

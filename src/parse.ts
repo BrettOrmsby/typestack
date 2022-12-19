@@ -1,6 +1,7 @@
 import { TokenType, Token, Pos } from "./scan.js";
 import { type StackFunctions } from "./functions.js";
 import { StackType } from "./stack.js";
+import { TSError, isTSError } from "./utils/error.js";
 
 type ExpressionType =
   | TokenType.Int
@@ -26,6 +27,7 @@ export enum StatementType {
 export type Statement = {
   type: StatementType;
   startPos: Pos;
+  endPos: Pos;
   block: Program;
   else?: Program;
 };
@@ -46,10 +48,9 @@ export class Parser {
     this.pointer = 0;
     this.program = [];
   }
-
-  parse(): Error | void {
+  parse(): TSError | void {
     const block = this.#parseStatement(true);
-    if (block instanceof Error) {
+    if (isTSError(block)) {
       return block;
     }
     this.program = block;
@@ -60,10 +61,7 @@ export class Parser {
     isInLoop = false,
     isInIf = false,
     isInFunction = false
-  ): Error | Program {
-    // startPos is used for the bracket pair error
-    const startPos = this.#peek().startPos;
-
+  ): TSError | Program {
     // increment past the `{` character
     if (!isInRoot) {
       this.#increment();
@@ -83,8 +81,12 @@ export class Parser {
           TokenType.Colon,
         ].includes(current.type)
       ) {
-        return new Error(
-          `${current.startPos.line}:${current.startPos.char} Unexpected character: \`${current.value}\``
+        return new TSError(
+          {
+            startPos: current.startPos,
+            endPos: current.endPos,
+          },
+          "unexpected character"
         );
       }
 
@@ -106,8 +108,12 @@ export class Parser {
       // return the block when hitting a `}` unless in the root witch would be an error
       if (TokenType.CloseBracket === current.type) {
         if (isInRoot) {
-          return new Error(
-            `${current.startPos.line}:${current.startPos.char} Unexpected character: \`${current.value}\``
+          return new TSError(
+            {
+              startPos: current.startPos,
+              endPos: current.endPos,
+            },
+            "unexpected character"
           );
         }
         this.#increment();
@@ -128,15 +134,25 @@ export class Parser {
             current.value as string
           )
         ) {
-          return new Error(
-            `${current.startPos.line}:${current.startPos.char} Unexpected keyword \`${current.value}\`. Keyword \`${current.value}\` must only be found after function declarations`
+          return new TSError(
+            {
+              startPos: current.startPos,
+              endPos: current.endPos,
+            },
+            "unexpected keyword `{}`. Keyword `{}` must only be found after parameters in a function declaration",
+            current.value,
+            current.value
           );
         }
 
         // Else is invalid
         if ("else" === current.value) {
-          return new Error(
-            `${current.startPos.line}:${current.startPos.char} Unexpected keyword \`else\`. Keyword \`else\` must only be found after an if statement`
+          return new TSError(
+            {
+              startPos: current.startPos,
+              endPos: current.endPos,
+            },
+            "unexpected keyword `else`. Keyword `else` must only be found after if statements"
           );
         }
 
@@ -147,8 +163,12 @@ export class Parser {
             this.#increment();
             continue;
           } else {
-            return new Error(
-              `${current.startPos.line}:${current.startPos.char} Unexpected keyword \`any\`. Keyword \`any\` must only be found in \`any\` functions`
+            return new TSError(
+              {
+                startPos: current.startPos,
+                endPos: current.endPos,
+              },
+              "unexpected keyword `any`. Keyword `any` must only be found in `@any` functions"
             );
           }
         }
@@ -160,8 +180,12 @@ export class Parser {
             this.#increment();
             continue;
           } else {
-            return new Error(
-              `${current.startPos.line}:${current.startPos.char} Unexpected keyword \`break\`. Keyword \`break\` must only be found in loops`
+            return new TSError(
+              {
+                startPos: current.startPos,
+                endPos: current.endPos,
+              },
+              "unexpected keyword `break`. Keyword `break` must only be found in loops"
             );
           }
         }
@@ -173,8 +197,12 @@ export class Parser {
             this.#increment();
             continue;
           } else {
-            return new Error(
-              `${current.startPos.line}:${current.startPos.char} Unexpected keyword \`continue\`. Keyword \`continue\` must only be found in loops`
+            return new TSError(
+              {
+                startPos: current.startPos,
+                endPos: current.endPos,
+              },
+              "unexpected keyword `continue`. Keyword `continue` must only be found in loops"
             );
           }
         }
@@ -183,13 +211,16 @@ export class Parser {
 
         if ("loop" === current.value) {
           const startPos = current.startPos;
+          const endPos = current.endPos;
 
           // opening bracket should follow a loop keyword
           if (!this.#expect(TokenType.OpenBracket)) {
-            return new Error(
-              `${this.#peek().startPos.line}:${
-                this.#peek().startPos.char
-              } Expected an opening bracket (\`{\`) after a loop statement`
+            return new TSError(
+              {
+                startPos: this.#peek().startPos,
+                endPos: this.#peek().endPos,
+              },
+              "expected an opening bracket `{` after a `loop` keyword"
             );
           }
 
@@ -200,12 +231,13 @@ export class Parser {
             isInFunction
           );
 
-          if (innerBlock instanceof Error) {
+          if (isTSError(innerBlock)) {
             return innerBlock;
           }
 
           block.push({
-            startPos: startPos,
+            startPos,
+            endPos,
             type: StatementType.Loop,
             block: innerBlock,
           });
@@ -217,17 +249,24 @@ export class Parser {
 
           // loop and an opening bracket should follow a for keyword
           if (!this.#expect(TokenType.Keyword, "loop")) {
-            return new Error(
-              `${this.#peek().startPos.line}:${
-                this.#peek().startPos.char
-              } Expected a \`loop\` keyword after a \`for\` keyword`
+            return new TSError(
+              {
+                startPos: this.#peek().startPos,
+                endPos: this.#peek().endPos,
+              },
+              "expected a `loop` keyword after a `for` keyword"
             );
           }
+
+          const endPos = this.#peek().endPos;
+
           if (!this.#expect(TokenType.OpenBracket)) {
-            return new Error(
-              `${this.#peek().startPos.line}:${
-                this.#peek().startPos.char
-              } Expected an opening bracket (\`{\`) after a for loop statement`
+            return new TSError(
+              {
+                startPos: this.#peek().startPos,
+                endPos: this.#peek().endPos,
+              },
+              "expected an opening bracket `{` after a `loop` keyword"
             );
           }
 
@@ -238,12 +277,13 @@ export class Parser {
             isInFunction
           );
 
-          if (innerBlock instanceof Error) {
+          if (isTSError(innerBlock)) {
             return innerBlock;
           }
 
           block.push({
-            startPos: startPos,
+            startPos,
+            endPos,
             type: StatementType.ForLoop,
             block: innerBlock,
           });
@@ -255,17 +295,24 @@ export class Parser {
 
           // loop and an opening bracket should follow a while keyword
           if (!this.#expect(TokenType.Keyword, "loop")) {
-            return new Error(
-              `${this.#peek().startPos.line}:${
-                this.#peek().startPos.char
-              } Expected a \`loop\` keyword after a \`while\` keyword`
+            return new TSError(
+              {
+                startPos: this.#peek().startPos,
+                endPos: this.#peek().endPos,
+              },
+              "expected a `loop` keyword after a `while` keyword"
             );
           }
+
+          const endPos = this.#peek().endPos;
+
           if (!this.#expect(TokenType.OpenBracket)) {
-            return new Error(
-              `${this.#peek().startPos.line}:${
-                this.#peek().startPos.char
-              } Expected an opening bracket (\`{\`) after a while loop statement`
+            return new TSError(
+              {
+                startPos: this.#peek().startPos,
+                endPos: this.#peek().endPos,
+              },
+              "expected an opening bracket `{` after a `loop` keyword"
             );
           }
 
@@ -276,12 +323,13 @@ export class Parser {
             isInFunction
           );
 
-          if (innerBlock instanceof Error) {
+          if (isTSError(innerBlock)) {
             return innerBlock;
           }
 
           block.push({
-            startPos: startPos,
+            startPos,
+            endPos,
             type: StatementType.WhileLoop,
             block: innerBlock,
           });
@@ -290,13 +338,16 @@ export class Parser {
 
         if ("if" === current.value) {
           const startPos = current.startPos;
+          const endPos = current.endPos;
 
           // an opening bracket should follow an if
           if (!this.#expect(TokenType.OpenBracket)) {
-            return new Error(
-              `${this.#peek().startPos.line}:${
-                this.#peek().startPos.char
-              } Expected an opening bracket (\`{\`) after an if statement`
+            return new TSError(
+              {
+                startPos: this.#peek().startPos,
+                endPos: this.#peek().endPos,
+              },
+              "expected an opening bracket `{` after an `if` keyword"
             );
           }
 
@@ -307,7 +358,7 @@ export class Parser {
             isInFunction
           );
 
-          if (innerBlock instanceof Error) {
+          if (isTSError(innerBlock)) {
             return innerBlock;
           }
 
@@ -315,10 +366,12 @@ export class Parser {
           this.pointer -= 1;
           if (this.#expect(TokenType.Keyword, "else")) {
             if (!this.#expect(TokenType.OpenBracket)) {
-              return new Error(
-                `${this.#peek().startPos.line}:${
-                  this.#peek().startPos.char
-                } Expected an opening bracket (\`{\`) after an else statement`
+              return new TSError(
+                {
+                  startPos: this.#peek().startPos,
+                  endPos: this.#peek().endPos,
+                },
+                "expected an opening bracket `{` after an `else` keyword"
               );
             }
 
@@ -329,12 +382,13 @@ export class Parser {
               isInFunction
             );
 
-            if (elseBlock instanceof Error) {
+            if (isTSError(elseBlock)) {
               return elseBlock;
             }
 
             block.push({
-              startPos: startPos,
+              startPos,
+              endPos,
               type: StatementType.If,
               block: innerBlock,
               else: elseBlock,
@@ -342,7 +396,8 @@ export class Parser {
             continue;
           }
           block.push({
-            startPos: startPos,
+            startPos,
+            endPos,
             type: StatementType.If,
             block: innerBlock,
           });
@@ -352,31 +407,37 @@ export class Parser {
         if ("fn" === current.value) {
           // functions must not be nestled
           if (!isInRoot) {
-            return new Error(
-              `${current.startPos.line}:${current.startPos.char} Function declarations must not be nestles in other statements`
+            return new TSError(
+              {
+                startPos: current.startPos,
+                endPos: current.endPos,
+              },
+              "unexpected `fn` keyword. Function declarations must not be nestled in other statements"
             );
           }
 
           // the name of the function (identifier) should follow
           if (!this.#expect(TokenType.Identifier)) {
-            return new Error(
-              `${this.#peek().startPos.line}:${
-                this.#peek().startPos.char
-              } Expected a identifier after a \`fn\` keyword`
+            return new TSError(
+              {
+                startPos: this.#peek().startPos,
+                endPos: this.#peek().endPos,
+              },
+              "expected an identifier after a `fn` keyword"
             );
           }
           const name = this.#peek().value as string;
 
           // an opening parenthesis should follow
           if (!this.#expect(TokenType.OpenParen)) {
-            return new Error(
-              `${this.#peek().startPos.line}:${
-                this.#peek().startPos.char
-              } Expected an opening parenthesis (\`(\`) after a function identifier`
+            return new TSError(
+              {
+                startPos: this.#peek().startPos,
+                endPos: this.#peek().endPos,
+              },
+              "expected an opening parenthesis `(` after a function identifier"
             );
           }
-
-          const parenStartPos = this.#peek().startPos;
 
           const params: Record<string, StackType> = {};
 
@@ -384,10 +445,12 @@ export class Parser {
           while (!this.#isAtEnd() && !this.#expect(TokenType.CloseParen)) {
             this.pointer -= 1;
             if (!this.#expect(TokenType.Identifier)) {
-              return new Error(
-                `${this.#peek().startPos.line}:${
-                  this.#peek().startPos.char
-                } Expected an identifier or parenthesis (\`(\`) after a opening parenthesis (\`(\`) of a function`
+              return new TSError(
+                {
+                  startPos: this.#peek().startPos,
+                  endPos: this.#peek().endPos,
+                },
+                "expected an identifier or closing bracket `)` after a function's opening bracket `(`"
               );
             }
             const name = this.#peek().value as string;
@@ -408,6 +471,14 @@ export class Parser {
                   bool: StackType.Bool,
                   any: StackType.Any,
                 }[this.#peek().value as string];
+              } else {
+                return new TSError(
+                  {
+                    startPos: this.#peek().startPos,
+                    endPos: this.#peek().endPos,
+                  },
+                  "expected a type `int`, `float`, `str`, `bool` or `any` after a colon for a function parameter"
+                );
               }
             } else {
               this.pointer -= 1;
@@ -416,8 +487,12 @@ export class Parser {
           }
 
           if (this.#isAtEnd()) {
-            return new Error(
-              `${parenStartPos.line}:${parenStartPos.char} Expected ending parenthesis pair`
+            return new TSError(
+              {
+                startPos: this.#peek().startPos,
+                endPos: this.#peek().endPos,
+              },
+              "expected a closing parenthesis `)`"
             );
           }
 
@@ -441,19 +516,23 @@ export class Parser {
               "@any": StackType.Any,
             }[this.#peek().value as string];
           } else {
-            return new Error(
-              `${this.#peek().startPos.line}:${
-                this.#peek().startPos.char
-              } Expected a function type (\`@int\`, \`@str\`, \`@float\`, \`@bool\`, \`@any\`) after a function declaration`
+            return new TSError(
+              {
+                startPos: this.#peek().startPos,
+                endPos: this.#peek().endPos,
+              },
+              "expected a `@int`, `@float`, `@str`, `@bool` or `@any` after function parameters"
             );
           }
 
           // finally, a opening bracket is needed
           if (!this.#expect(TokenType.OpenBracket)) {
-            return new Error(
-              `${this.#peek().startPos.line}:${
-                this.#peek().startPos.char
-              } Expected an opening bracket (\`{\`) after a function declaration`
+            return new TSError(
+              {
+                startPos: this.#peek().startPos,
+                endPos: this.#peek().endPos,
+              },
+              "expected an opening bracket `{` after a `function` declaration"
             );
           }
 
@@ -464,7 +543,7 @@ export class Parser {
             true
           );
 
-          if (innerBlock instanceof Error) {
+          if (isTSError(innerBlock)) {
             return innerBlock;
           }
 
@@ -479,19 +558,33 @@ export class Parser {
           continue;
         }
 
-        return new Error(
-          `${current.startPos.line}:${current.startPos.char} Unknown keyword: \`${current.value}\``
+        return new TSError(
+          {
+            startPos: current.startPos,
+            endPos: current.endPos,
+          },
+          "unknown keyword `{}`",
+          current.value
         );
       }
 
-      return new Error(
-        `${current.startPos.line}:${current.startPos.char} Unknown token: \`${current.value}\``
+      return new TSError(
+        {
+          startPos: current.startPos,
+          endPos: current.endPos,
+        },
+        "unknown token `{}`",
+        current.value
       );
     }
 
     if (this.#isAtEnd() && !isInRoot) {
-      return new Error(
-        `${startPos.line}:${startPos.char} Expected ending bracket pair`
+      return new TSError(
+        {
+          startPos: this.#peek().startPos,
+          endPos: this.#peek().endPos,
+        },
+        "expected an ending bracket `}`"
       );
     }
 

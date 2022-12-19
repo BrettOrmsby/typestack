@@ -15,8 +15,8 @@ function run(input: string) {
 
     const parser = new Parser(scanner.tokens, standardLibraryFunctions);
     const parseError = parser.parse();
-    expect(parseError).not.toBeInstanceOf(Error);
-    if(parseError instanceof Error) {
+    expect(parseError).not.toBeInstanceOf(TSError);
+    if(parseError instanceof TSError) {
         return;
     }
 
@@ -34,7 +34,7 @@ describe("Interpreter runs basic programs", () => {
         const input = "1 2 + 5 - 4 * 2 % print";
         const consoleSpy = jest.spyOn(console, "log");
         run(input);
-        expect(consoleSpy).toHaveBeenCalledWith(-0);
+        expect(consoleSpy).toHaveBeenCalledWith("0");
     });
     test("It can print strings",() => {
         const input = "\"Hello, World!\" print";
@@ -76,7 +76,7 @@ describe("Interpreter runs basic programs", () => {
         `;
         const consoleSpy = jest.spyOn(console, "log");
         run(input);
-        expect(consoleSpy).toHaveBeenCalledWith(201);
+        expect(consoleSpy).toHaveBeenCalledWith("201");
     });
     test("It can run while loops",() => {
         const input = `
@@ -89,7 +89,7 @@ describe("Interpreter runs basic programs", () => {
         `;
         const consoleSpy = jest.spyOn(console, "log");
         run(input);
-        expect(consoleSpy).toHaveBeenCalledWith(201);
+        expect(consoleSpy).toHaveBeenCalledWith("201");
     });
     test("It can run for loops",() => {
         const input = `
@@ -101,7 +101,7 @@ describe("Interpreter runs basic programs", () => {
         `;
         const consoleSpy = jest.spyOn(console, "log");
         run(input);
-        expect(consoleSpy).toHaveBeenCalledWith(201);
+        expect(consoleSpy).toHaveBeenCalledWith("201");
     });
     test("It can run functions",() => {
         const input = `
@@ -112,6 +112,6 @@ describe("Interpreter runs basic programs", () => {
         `;
         const consoleSpy = jest.spyOn(console, "log");
         run(input);
-        expect(consoleSpy).toHaveBeenCalledWith(-99);
+        expect(consoleSpy).toHaveBeenCalledWith("-99");
     });
 }); 

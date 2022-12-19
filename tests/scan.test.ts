@@ -9,6 +9,13 @@ describe("Scanner should error on invalid input", () => {
         expect(scanner.scan()).toBeInstanceOf(TSError);
     });
 
+    test("Invalid string escape", () => {
+        const input = `44 identifier "string \\g"
+      `;
+        const scanner = new Scanner(input);
+        expect(scanner.scan()).toBeInstanceOf(TSError);
+    });
+
     test("Invalid number without separator", () => {
         const input = "44word";
         const scanner = new Scanner(input);
@@ -43,6 +50,12 @@ describe("Scanner should parse a program", () => {
 
     test("Mixed parsing", () => {
         const input = "fn( loop{ while::: \"str\") 44.44:break true";
+        const scanner = new Scanner(input);
+        expect(scanner.scan()).not.toBeInstanceOf(TSError);
+    });
+
+    test("String escape code parsing", () => {
+        const input = " \"\\\\ \\n \\t \\r \\\" \\\\\\n \"";
         const scanner = new Scanner(input);
         expect(scanner.scan()).not.toBeInstanceOf(TSError);
     });
