@@ -1,5 +1,4 @@
-// TODO: features to add: escape characters in string, module loading
-// TODO: check over standard library error messages
+// TODO: features to add: module loading
 import { Scanner } from "./scan.js";
 import { Parser } from "./parse.js";
 import typeCheck from "./typeCheck.js";

@@ -95,12 +95,36 @@ export class Scanner {
         let str = "";
 
         while (!this.#isAtEnd() && this.#peek() !== '"') {
-          str += this.#peek();
-
-          if (this.#peek() === "\n") {
-            this.#newline();
-          } else {
+          if (this.#peek() === "\\") {
             this.#increment();
+            if (this.#peek() === "\\") {
+              str += "\\";
+            } else if (this.#peek() === "n") {
+              str += "\n";
+            } else if (this.#peek() === "r") {
+              str += "\r";
+            } else if (this.#peek() === "t") {
+              str += "\t";
+            } else if (this.#peek() === '"') {
+              str += '"';
+            } else {
+              return new TSError(
+                {
+                  startPos: { line: this.line, char: this.char - 1 },
+                  endPos: { line: this.line, char: this.char + 1 },
+                },
+                "unknown escape code"
+              );
+            }
+            this.#increment();
+          } else {
+            str += this.#peek();
+
+            if (this.#peek() === "\n") {
+              this.#newline();
+            } else {
+              this.#increment();
+            }
           }
         }
 
@@ -180,7 +204,7 @@ export class Scanner {
           startPos: { line: this.line, char: this.char },
           endPos: { line: this.line, char: this.char },
         },
-        "Expected separator (`n`, `r`, `t`, ` `, `{`, `}`, `(`, `)`, `:`)`"
+        "Expected separator (`\\n`, `\\r`, `\\t`, ` `, `{`, `}`, `(`, `)`, `:`)`"
       );
     }
   }
