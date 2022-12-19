@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0",
+  "version": "0.0.1",
   "name": "typestack-lang",
   "description": "A stack-based, type-safe programing language",
   "homepage": "https://github.com/BrettOrmsby/type-stack#readme",
