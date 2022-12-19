@@ -201,7 +201,7 @@ export const standardLibraryFunctions: StackFunctions = {
   },
   [StackType.Str]: {
     length: {
-      params: { str: StackType.Str },
+      params: { string: StackType.Str },
       rawCode: (stacks, params) => {
         stacks[StackType.Int].push(params.str.length);
       },
@@ -228,23 +228,23 @@ export const standardLibraryFunctions: StackFunctions = {
       },
     },
     "!": {
-      params: { right: StackType.Bool },
+      params: { boolean: StackType.Bool },
       rawCode: (stacks, params) => {
-        stacks[StackType.Bool].push(!params.right);
+        stacks[StackType.Bool].push(!params.boolean);
       },
     },
   },
   [StackType.Any]: {
     // Word functions
     dup: {
-      params: { t: StackType.Any },
+      params: { first: StackType.Any },
       rawCode: (stacks, params, stack) => {
-        stacks[stack].push(params.t);
-        stacks[stack].push(params.t);
+        stacks[stack].push(params.first);
+        stacks[stack].push(params.first);
       },
     },
     drop: {
-      params: { t: StackType.Any },
+      params: { first: StackType.Any },
     },
     swap: {
       params: { first: StackType.Any, second: StackType.Any },
