@@ -1,4 +1,5 @@
-// TODO: features to add: module loading
+// TODO: number/str/float after expected errors in not fully underlined
+// TODO: error on negative square root number
 import { Scanner } from "./scan.js";
 import { Parser } from "./parse.js";
 import typeCheck from "./typeCheck.js";
@@ -6,7 +7,7 @@ import { standardLibraryFunctions } from "./functions.js";
 import interpret from "./interpret.js";
 import { isTSError } from "./utils/error.js";
 
-export default function typeStack(input: string) {
+export default async function typeStack(input: string) {
   const scanner = new Scanner(input);
   const scanError = scanner.scan();
   if (isTSError(scanError)) {
@@ -15,7 +16,7 @@ export default function typeStack(input: string) {
   }
 
   const parser = new Parser(scanner.tokens, standardLibraryFunctions);
-  const parseError = parser.parse();
+  const parseError = await parser.parse();
   if (parseError) {
     parseError.fire();
   }

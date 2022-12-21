@@ -281,6 +281,7 @@ export class Scanner {
     }
 
     const keywords = [
+      "import",
       "fn",
       "loop",
       "for",

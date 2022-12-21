@@ -3,50 +3,50 @@ import { Parser } from "../src/parse";
 import { standardLibraryFunctions } from "../src/functions.js";
 import { TSError } from "../src/utils/error";
 
-function parse(input: string) {
+async function parse(input: string) {
     const scanner = new Scanner(input);
     const scanError = scanner.scan();
     expect(scanError).not.toBeInstanceOf(TSError);
-    if(scanError instanceof TSError) {
+    if (scanError instanceof TSError) {
         return;
     }
     const parser = new Parser(scanner.tokens, standardLibraryFunctions);
-    return parser.parse();
+    return await parser.parse();
 }
 
 describe("Parser correctly parse functions", () => {
-    test("No identifier following fn keyword", () => {
+    test("No identifier following fn keyword", async () => {
         const input = "fn";
-        expect(parse(input)).toBeInstanceOf(TSError);
+        expect(await parse(input)).toBeInstanceOf(TSError);
     });
-    test("No parenthesis following identifier", () => {
+    test("No parenthesis following identifier", async () => {
         const input = "fn identifier";
-        expect(parse(input)).toBeInstanceOf(TSError);
+        expect(await parse(input)).toBeInstanceOf(TSError);
     });
-    test("No closing bracket following opening bracket", () => {
+    test("No closing bracket following opening bracket", async () => {
         const input = "fn identifier(";
-        expect(parse(input)).toBeInstanceOf(TSError);
+        expect(await parse(input)).toBeInstanceOf(TSError);
     });
-    test("No function type", () => {
+    test("No function type", async () => {
         const input = "fn identifier()";
-        expect(parse(input)).toBeInstanceOf(TSError);
+        expect(await parse(input)).toBeInstanceOf(TSError);
     });
-    test("No bracket following params", () => {
+    test("No bracket following params", async () => {
         const input = "fn identifier() @int {";
-        expect(parse(input)).toBeInstanceOf(TSError);
+        expect(await parse(input)).toBeInstanceOf(TSError);
     });
-    test("No closing bracket", () => {
+    test("No closing bracket", async () => {
         const input = "fn identifier() @int {";
-        expect(parse(input)).toBeInstanceOf(TSError);
+        expect(await parse(input)).toBeInstanceOf(TSError);
     });
-    test("Correctly formatted function", () => {
+    test("Correctly formatted function", async () => {
         const input = `fn negate(t: int) @int {
             0 t -
         }`;
-        expect(parse(input)).not.toBeInstanceOf(TSError);
+        expect(await parse(input)).not.toBeInstanceOf(TSError);
     });
 
-    test("TSError on function within loop statement", () => {
+    test("TSError on function within loop statement", async () => {
         const input = `
         loop {
             fn negate(t: int) @int {
@@ -54,9 +54,9 @@ describe("Parser correctly parse functions", () => {
             }
         }
         `;
-        expect(parse(input)).toBeInstanceOf(TSError);
+        expect(await parse(input)).toBeInstanceOf(TSError);
     });
-    test("TSError on function within for loop statement", () => {
+    test("TSError on function within for loop statement", async () => {
         const input = `
         for loop {
             fn negate(t: int) @int {
@@ -64,9 +64,9 @@ describe("Parser correctly parse functions", () => {
             }
         }
         `;
-        expect(parse(input)).toBeInstanceOf(TSError);
+        expect(await parse(input)).toBeInstanceOf(TSError);
     });
-    test("TSError on function within while loop statement", () => {
+    test("TSError on function within while loop statement", async () => {
         const input = `
         while loop {
             fn negate(t: int) @int {
@@ -74,9 +74,9 @@ describe("Parser correctly parse functions", () => {
             }
         }
         `;
-        expect(parse(input)).toBeInstanceOf(TSError);
+        expect(await parse(input)).toBeInstanceOf(TSError);
     });
-    test("TSError on function within if statement", () => {
+    test("TSError on function within if statement", async () => {
         const input = `
         if {
             fn negate(t: int) @int {
@@ -84,9 +84,9 @@ describe("Parser correctly parse functions", () => {
             }
         }
         `;
-        expect(parse(input)).toBeInstanceOf(TSError);
+        expect(await parse(input)).toBeInstanceOf(TSError);
     });
-    test("TSError on function within else statement", () => {
+    test("TSError on function within else statement", async () => {
         const input = `
         if {} else {
             fn negate(t: int) @int {
@@ -94,88 +94,88 @@ describe("Parser correctly parse functions", () => {
             }
         }
         `;
-        expect(parse(input)).toBeInstanceOf(TSError);
+        expect(await parse(input)).toBeInstanceOf(TSError);
     });
-    test("Function with keyword not identifier", () => {
+    test("Function with keyword not identifier", async () => {
         const input = "fn bool() {}";
-        expect(parse(input)).toBeInstanceOf(TSError);
+        expect(await parse(input)).toBeInstanceOf(TSError);
     });
 });
 
 describe("Parser correctly parses statements", () => {
-    test("Parsing loop without brackets", () => {
+    test("Parsing loop without brackets", async () => {
         const input = "loop";
-        expect(parse(input)).toBeInstanceOf(TSError);
+        expect(await parse(input)).toBeInstanceOf(TSError);
     });
-    test("Parsing loop without closing bracket", () => {
+    test("Parsing loop without closing bracket", async () => {
         const input = "loop {";
-        expect(parse(input)).toBeInstanceOf(TSError);
+        expect(await parse(input)).toBeInstanceOf(TSError);
     });
-    test("Parsing correct loop", () => {
+    test("Parsing correct loop", async () => {
         const input = "loop{}";
-        expect(parse(input)).not.toBeInstanceOf(TSError);
+        expect(await parse(input)).not.toBeInstanceOf(TSError);
     });
-    test("Parsing while loop without loop keyword", () => {
+    test("Parsing while loop without loop keyword", async () => {
         const input = "while";
-        expect(parse(input)).toBeInstanceOf(TSError);
+        expect(await parse(input)).toBeInstanceOf(TSError);
     });
-    test("Parsing while loop without brackets", () => {
+    test("Parsing while loop without brackets", async () => {
         const input = "while loop";
-        expect(parse(input)).toBeInstanceOf(TSError);
+        expect(await parse(input)).toBeInstanceOf(TSError);
     });
-    test("Parsing loop without closing bracket", () => {
+    test("Parsing loop without closing bracket", async () => {
         const input = "while loop {";
-        expect(parse(input)).toBeInstanceOf(TSError);
+        expect(await parse(input)).toBeInstanceOf(TSError);
     });
-    test("Parsing correct while loop", () => {
+    test("Parsing correct while loop", async () => {
         const input = "while loop {}";
-        expect(parse(input)).not.toBeInstanceOf(TSError);
+        expect(await parse(input)).not.toBeInstanceOf(TSError);
     });
-    test("Parsing for loop without loop keyword", () => {
+    test("Parsing for loop without loop keyword", async () => {
         const input = "for";
-        expect(parse(input)).toBeInstanceOf(TSError);
+        expect(await parse(input)).toBeInstanceOf(TSError);
     });
-    test("Parsing for loop without brackets", () => {
+    test("Parsing for loop without brackets", async () => {
         const input = "for loop";
-        expect(parse(input)).toBeInstanceOf(TSError);
+        expect(await parse(input)).toBeInstanceOf(TSError);
     });
-    test("Parsing for without closing bracket", () => {
+    test("Parsing for without closing bracket", async () => {
         const input = "for loop {";
-        expect(parse(input)).toBeInstanceOf(TSError);
+        expect(await parse(input)).toBeInstanceOf(TSError);
     });
-    test("Parsing correct for loop", () => {
+    test("Parsing correct for loop", async () => {
         const input = "for loop {}";
-        expect(parse(input)).not.toBeInstanceOf(TSError);
+        expect(await parse(input)).not.toBeInstanceOf(TSError);
     });
-    test("Parsing while loop without loop keyword", () => {
+    test("Parsing while loop without loop keyword", async () => {
         const input = "while";
-        expect(parse(input)).toBeInstanceOf(TSError);
+        expect(await parse(input)).toBeInstanceOf(TSError);
     });
-    test("Parsing while loop without brackets", () => {
+    test("Parsing while loop without brackets", async () => {
         const input = "while loop";
-        expect(parse(input)).toBeInstanceOf(TSError);
+        expect(await parse(input)).toBeInstanceOf(TSError);
     });
-    test("Parsing loop without closing bracket", () => {
+    test("Parsing loop without closing bracket", async () => {
         const input = "while loop {";
-        expect(parse(input)).toBeInstanceOf(TSError);
+        expect(await parse(input)).toBeInstanceOf(TSError);
     });
-    test("Parsing if without brackets", () => {
+    test("Parsing if without brackets", async () => {
         const input = "if";
-        expect(parse(input)).toBeInstanceOf(TSError);
+        expect(await parse(input)).toBeInstanceOf(TSError);
     });
-    test("Parsing correct if", () => {
+    test("Parsing correct if", async () => {
         const input = "if{}";
-        expect(parse(input)).not.toBeInstanceOf(TSError);
+        expect(await parse(input)).not.toBeInstanceOf(TSError);
     });
-    test("Parsing if with else without brackets", () => {
+    test("Parsing if with else without brackets", async () => {
         const input = "if{}else";
-        expect(parse(input)).toBeInstanceOf(TSError);
+        expect(await parse(input)).toBeInstanceOf(TSError);
     });
-    test("Parsing correct if with else", () => {
+    test("Parsing correct if with else", async () => {
         const input = "if{}else{}";
-        expect(parse(input)).not.toBeInstanceOf(TSError);
+        expect(await parse(input)).not.toBeInstanceOf(TSError);
     });
-    test("Parsing correct nestled statements", () => {
+    test("Parsing correct nestled statements", async () => {
         const input = `if {
             while loop {
                 for loop {
@@ -191,57 +191,57 @@ describe("Parser correctly parses statements", () => {
                 }
             }
         }`;
-        expect(parse(input)).not.toBeInstanceOf(TSError);
+        expect(await parse(input)).not.toBeInstanceOf(TSError);
     });
 });
 
 describe("Parser should understand when keywords and punctuation are valid", () => {
-    test("Parsing invalid closing bracket in root", () => {
+    test("Parsing invalid closing bracket in root", async () => {
         const input = "}";
-        expect(parse(input)).toBeInstanceOf(TSError);
+        expect(await parse(input)).toBeInstanceOf(TSError);
     });
-    test("Parsing invalid opening bracket in root", () => {
+    test("Parsing invalid opening bracket in root", async () => {
         const input = "{";
-        expect(parse(input)).toBeInstanceOf(TSError);
+        expect(await parse(input)).toBeInstanceOf(TSError);
     });
-    test("Parsing invalid colon in root", () => {
+    test("Parsing invalid colon in root", async () => {
         const input = ":";
-        expect(parse(input)).toBeInstanceOf(TSError);
+        expect(await parse(input)).toBeInstanceOf(TSError);
     });
-    test("Parsing invalid opening parenthesis in root", () => {
+    test("Parsing invalid opening parenthesis in root", async () => {
         const input = "(";
-        expect(parse(input)).toBeInstanceOf(TSError);
+        expect(await parse(input)).toBeInstanceOf(TSError);
     });
-    test("Parsing invalid closing parenthesis bracket in root", () => {
+    test("Parsing invalid closing parenthesis bracket in root", async () => {
         const input = ")";
-        expect(parse(input)).toBeInstanceOf(TSError);
+        expect(await parse(input)).toBeInstanceOf(TSError);
     });
 
-    test("Parsing invalid break expression", () => {
+    test("Parsing invalid break expression", async () => {
         const input = "break";
-        expect(parse(input)).toBeInstanceOf(TSError);
+        expect(await parse(input)).toBeInstanceOf(TSError);
     });
-    test("Parsing invalid continue expression", () => {
+    test("Parsing invalid continue expression", async () => {
         const input = "break";
-        expect(parse(input)).toBeInstanceOf(TSError);
+        expect(await parse(input)).toBeInstanceOf(TSError);
     });
-    test("Parsing invalid any expression", () => {
+    test("Parsing invalid any expression", async () => {
         const input = "any";
-        expect(parse(input)).toBeInstanceOf(TSError);
+        expect(await parse(input)).toBeInstanceOf(TSError);
     });
-    test("Parsing correct continue expression", () => {
+    test("Parsing correct continue expression", async () => {
         const input = "loop {continue} for loop {continue} while loop {continue}";
-        expect(parse(input)).not.toBeInstanceOf(TSError);
+        expect(await parse(input)).not.toBeInstanceOf(TSError);
     });
-    test("Parsing correct break expression", () => {
+    test("Parsing correct break expression", async () => {
         const input = "loop {break} for loop {break} while loop {break}";
-        expect(parse(input)).not.toBeInstanceOf(TSError);
+        expect(await parse(input)).not.toBeInstanceOf(TSError);
     });
-    test("Parsing correct any expression", () => {
+    test("Parsing correct any expression", async () => {
         const input = `
     fn identifier(t: any) @any {
         0 3 any
     }`;
-        expect(parse(input)).not.toBeInstanceOf(TSError);
+        expect(await parse(input)).not.toBeInstanceOf(TSError);
     });
 });

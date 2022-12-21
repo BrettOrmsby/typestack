@@ -41,7 +41,7 @@ describe("Scanner should parse a program", () => {
         const scanner = new Scanner(input);
         expect(scanner.scan()).not.toBeInstanceOf(TSError);
     });
-    
+
     test("Keyword parsing", () => {
         const input = "fn loop while true";
         const scanner = new Scanner(input);

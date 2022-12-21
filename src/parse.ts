@@ -48,14 +48,56 @@ export class Parser {
     this.pointer = 0;
     this.program = [];
   }
-  parse(): TSError | void {
+  async parse(): Promise<TSError | void> {
+    const importError = await this.#parseImports();
+    if (isTSError(importError)) {
+      return importError;
+    }
     const block = this.#parseStatement(true);
     if (isTSError(block)) {
       return block;
     }
     this.program = block;
   }
+  async #parseImports() {
+    this.pointer -= 1;
+    while (this.pointer < 0 || !this.#isAtEnd()) {
+      if (this.#expect(TokenType.Keyword, "import")) {
+        if (this.#expect(TokenType.Identifier)) {
+          // dynamically import the file and add the module functions to the functions
+          try {
+            const module = (await import(`./modules/${this.#peek().value}.js`))
+              .default as unknown as StackFunctions;
 
+            for (const stack of Object.values(StackType)) {
+              for (const key in module[stack]) {
+                this.functions[stack][this.#peek().value + "." + key] =
+                  module[stack][key];
+              }
+            }
+          } catch (_) {
+            return new TSError(
+              {
+                startPos: this.#peek().startPos,
+                endPos: this.#peek().endPos,
+              },
+              "unable to import module"
+            );
+          }
+        } else {
+          return new TSError(
+            {
+              startPos: this.#peek().startPos,
+              endPos: this.#peek().endPos,
+            },
+            "expected an identifier after an `import` keyword"
+          );
+        }
+      } else {
+        return;
+      }
+    }
+  }
   #parseStatement(
     isInRoot: boolean,
     isInLoop = false,
@@ -145,7 +187,7 @@ export class Parser {
           );
         }
 
-        // Else is invalid
+        // else is invalid
         if ("else" === current.value) {
           return new TSError(
             {
@@ -205,6 +247,17 @@ export class Parser {
               "unexpected keyword `continue`. Keyword `continue` must only be found in loops"
             );
           }
+        }
+
+        // import is invalid unless at th top of the program
+        if ("import" === current.value) {
+          return new TSError(
+            {
+              startPos: current.startPos,
+              endPos: current.endPos,
+            },
+            "unexpected keyword `import`. Keyword `import` must only be found at the top of programs"
+          );
         }
 
         // parsing statements

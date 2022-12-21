@@ -28,7 +28,7 @@ npm install typestack-lang
 ```js
 import typestack from "typestack-lang";
 
-typestack(`
+await typestack(`
 100 for loop {
     dup 15 % 0 ==
     if {
