@@ -26,7 +26,7 @@ npm install typestack-lang
 ## Running TypeStack
 
 ```js
-import typestack from "typestack-lang";
+import typestack from "typestack-lang/dist/index.js";
 
 await typestack(`
 100 for loop {
