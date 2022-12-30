@@ -138,9 +138,9 @@ export class Scanner {
           );
         }
 
-        this.#addToken(TokenType.Str, str, startPos);
-
         this.#increment();
+
+        this.#addToken(TokenType.Str, str, startPos);
 
         const posError = this.#expectSeparator();
         if (posError) {
@@ -241,10 +241,7 @@ export class Scanner {
         );
       }
 
-      // need to set the current character back 1 before adding the token because we incremented into a char that is not part of the float
-      this.char -= 1;
       this.#addToken(TokenType.Float, float, startPos);
-      this.char += 1;
     } else {
       const int = parseInt(strOfNumber);
       if (Number.isNaN(int)) {
@@ -256,10 +253,8 @@ export class Scanner {
           "Unable to parse int"
         );
       }
-      // need to set the current character back 1 before adding the token because we incremented into a char that is not part of the int
-      this.char -= 1;
+
       this.#addToken(TokenType.Int, int, startPos);
-      this.char += 1;
     }
 
     return this.#expectSeparator();

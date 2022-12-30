@@ -1,5 +1,4 @@
-// TODO: number/str/float after expected errors in not fully underlined
-// TODO: error on negative square root number
+// TODO: add support for async functions so it can get user input
 import { Scanner } from "./scan.js";
 import { Parser } from "./parse.js";
 import typeCheck from "./typeCheck.js";
