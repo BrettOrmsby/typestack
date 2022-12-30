@@ -269,6 +269,7 @@ fn combineStr(top second) @str {
 * `//(right: int left: int)`: adds the floored quotient of `left` and `right` to the `int` stack (removes the decimal of the float)
 * `%(right: int left: int)`: adds the remainder of the division of `left` and `right` to the `int` stack
 * `^(right: int left: int)`: adds the power of `left` and `right` to the `int` stack 
+* `rand(max: int min: int)`: adds a random number inclusively between `min` and `max` to the `int` stack 
 
 #### `@float`
 

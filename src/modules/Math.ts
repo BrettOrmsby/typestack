@@ -3,28 +3,48 @@ import { StackType } from "../stack.js";
 
 const math: StackFunctions = {
   [StackType.Int]: {
-    squareRoot: {
+    abs: {
       params: { num: StackType.Int },
       rawCode: (stacks, params) => {
-        if (params.num < 0) {
-          return new Error(
-            "cannot square root a negative number `squareRoot(num: int)` must have `num` parameter greater or equal to `0`"
-          );
-        }
-        stacks[StackType.Float].push(Math.sqrt(params.num));
+        stacks[StackType.Int].push(Math.abs(params.num));
+      },
+    },
+    neg: {
+      params: { num: StackType.Int },
+      rawCode: (stacks, params) => {
+        stacks[StackType.Int].push(-params.num);
       },
     },
   },
   [StackType.Float]: {
-    squareRoot: {
-      params: { num: StackType.Int },
+    ceil: {
+      params: { num: StackType.Float },
       rawCode: (stacks, params) => {
-        if (params.num < 0) {
-          return new Error(
-            "cannot square root a negative number `squareRoot(num: float)` must have `num` parameter greater or equal to `0.0`"
-          );
-        }
-        stacks[StackType.Float].push(Math.sqrt(params.num));
+        stacks[StackType.Int].push(Math.ceil(params.num));
+      },
+    },
+    floor: {
+      params: { num: StackType.Float },
+      rawCode: (stacks, params) => {
+        stacks[StackType.Int].push(Math.floor(params.num));
+      },
+    },
+    round: {
+      params: { num: StackType.Float },
+      rawCode: (stacks, params) => {
+        stacks[StackType.Int].push(Math.round(params.num));
+      },
+    },
+    abs: {
+      params: { num: StackType.Float },
+      rawCode: (stacks, params) => {
+        stacks[StackType.Float].push(Math.abs(params.num));
+      },
+    },
+    neg: {
+      params: { num: StackType.Float },
+      rawCode: (stacks, params) => {
+        stacks[StackType.Float].push(-params.num);
       },
     },
   },

@@ -112,6 +112,14 @@ export const standardLibraryFunctions: StackFunctions = {
         stacks[StackType.Int].push(params.left ^ params.right);
       },
     },
+    rand: {
+      params: { max: StackType.Int, min: StackType.Int },
+      rawCode: (stacks, params) => {
+        stacks[StackType.Int].push(
+          Math.floor(Math.random() * (params.max - params.min + 1)) + params.min
+        );
+      },
+    },
   },
   [StackType.Float]: {
     // comparison functions
