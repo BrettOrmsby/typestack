@@ -87,6 +87,30 @@ The stack type is important as you can only call functions on certain types and 
 }
 ```
 
+### Example Number Guess Program
+
+```python
+# make the random number
+1 100 rand
+
+# repeat while the guess is wrong
+loop {
+  "Guess a number: " int read
+  over over # create a copy of the guess and random number
+  == if {
+    "You are correct!" print
+    break
+  } else {
+    int over # create a copy of the random number on the top
+    > if {
+      "Too high!" print drop
+    } else {
+      "Too low!" print drop
+    }
+  }
+}
+```
+
 ### Expressions
 
 * **Type keywords**: keywords that are a type: `int`, `float`, `str`, `bool` or `any` change the stack type.
@@ -254,6 +278,26 @@ fn combineStr(top second) @str {
 * Functions with the same name and same type as other defined functions overload the previous functions
 * Functions cannot be declared within any block (`if` statements, `loop` etc.)
 
+### Modules
+
+#### Importing Modules
+
+```python
+import Math
+```
+
+Importing modules must occur at the top of the program using the `import` keyword followed by the module name.
+
+#### Running Module Functions
+
+```python
+import Math
+
+55 Math.neg
+```
+
+Run module functions by prefixing the function with the module name followed by a period `.`. This syntax prevents the likelihood of overwriting other functions in the program.
+
 ### Standard Library Functions
 
 #### `@int`
@@ -300,12 +344,32 @@ fn combineStr(top second) @str {
 
 * `dup(first: any)`: duplicates the top of the stack
 * `drop(first: any)`: removes the top of the stack
+* `over(first: any second: any)`: duplicates `second` to the top of the stack
 * `swap(first: any second: any)`: swaps `first` and second `second` on the stack
 * `rot(first: any second: any third: any)`: rotate `third` to the top of the stack
 * `print(item: any)`: prints `item` to the console
+* `read(prompt: str)`: reads input from the console and adds it to the stack if it is valid in the type
 * `==(right: any left: any)`: compares if the `left` value is equal to the `right` value and adds `true` or `false` to the `bool`  stack
 * `!=(right: any left: any)`: compares if the `left` value is not equal to the `right` value and adds `true` or `false` to the `bool`  stack
 * `toInt(item: any)`: converts `item` to an `int`. If `item` is a `float`, `item` is truncated. If `item` is an `str`, `item` is converted to an `int` or an error occurs. If `item` is a `bool`, `item` is `1` if `true` or `0` if `false`
 * `toFloat(item: any)`: converts `item` to a `float`. If `item` is an `int`, `item` gains a `0` in the decimal place. If `item` is a `str`, `item` is converted to a `float` or an error occurs. If `item` is a `bool`, `item` is `1.0` if `true` or `0.0` if `false`
 * `toStr(item: any)`: converts `item` to a `str` in the way you would type `item`
 * `toBool(item: any)`: converts `item` to a `bool`. If `item` is an `int`, `item` is `true` if not `0`. If `item` is a `float`, `item` is `true` if not `0.0`. If `item` is a `str`, `item` is `true` if not empty (`""`)
+
+
+### Module Functions
+
+#### Math
+
+##### `@int`
+
+* `abs(num: int)`: adds the absolute (positive) value of `num` to the `int` stack 
+* `neg(num: int)`: adds the negative value of `num` to the `int` stack 
+
+##### `@float`
+
+* `abs(num: float)`: adds the absolute (positive) value of `num` to the `float` stack 
+* `neg(num: float)`: adds the negative value of `num` to the `float` stack 
+* `ceil(num: float)`: adds the value of `num` rounded up to the nearest integer to the `int` stack 
+* `floor(num: float)`: adds the value of `num` rounded down to the nearest integer to the `int` stack 
+* `round(num: float)`: adds the rounded value of `num` to the `int` stack
