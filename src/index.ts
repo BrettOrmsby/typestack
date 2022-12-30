@@ -1,4 +1,3 @@
-// TODO: add support for async functions so it can get user input
 import { Scanner } from "./scan.js";
 import { Parser } from "./parse.js";
 import typeCheck from "./typeCheck.js";
@@ -30,7 +29,7 @@ export default async function typeStack(input: string) {
     return;
   }
 
-  const runError = interpret(parser.program, parser.functions);
+  const runError = await interpret(parser.program, parser.functions);
   if (isTSError(runError)) {
     runError.fire();
   }

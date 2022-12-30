@@ -4,22 +4,22 @@ import { StackFunctions, functionToText } from "./functions.js";
 import { stacks, StackType } from "./stack.js";
 import { TSError, isTSError } from "./utils/error.js";
 
-export default function interpret(
+export default async function interpret(
   program: Program,
   functions: StackFunctions
-): TSError | void {
-  const runError = runProgram(program, {}, StackType.Int, functions);
+): Promise<TSError | void> {
+  const runError = await runProgram(program, {}, StackType.Int, functions);
   if (isTSError(runError)) {
     return runError;
   }
 }
 
-function runProgram(
+async function runProgram(
   program: Program,
   params: Record<string, { value: string | boolean | number; type: StackType }>,
   stack: StackType,
   functions: StackFunctions
-): TSError | true | void {
+): Promise<TSError | true | void> {
   const startStack = stack;
   for (const item of program) {
     // if it is an expression
@@ -68,7 +68,7 @@ function runProgram(
 
           // run the body as a program if it is made in TypeStack
           if (stackFunction.body) {
-            const functionResult = runProgram(
+            const functionResult = await runProgram(
               stackFunction.body,
               functionParams,
               stack,
@@ -93,11 +93,14 @@ function runProgram(
             Object.keys(functionParams).forEach((key) => {
               functionParams[key] = functionParams[key].value;
             });
-            const functionResult = stackFunction.rawCode(
+            let functionResult = stackFunction.rawCode(
               stacks,
               functionParams,
               stack
             );
+            if (functionResult instanceof Promise) {
+              functionResult = await functionResult;
+            }
             if (functionResult instanceof Error) {
               return new TSError(
                 {
@@ -151,14 +154,19 @@ function runProgram(
       // if it is a statement
       if (item.type === StatementType.Loop) {
         // run the result to start the condition for the while loop that repeats until there is an error or break returned
-        let resultOfIteration = runProgram(
+        let resultOfIteration = await runProgram(
           item.block,
           params,
           stack,
           functions
         );
         while (!resultOfIteration) {
-          resultOfIteration = runProgram(item.block, params, stack, functions);
+          resultOfIteration = await runProgram(
+            item.block,
+            params,
+            stack,
+            functions
+          );
         }
         if (isTSError(resultOfIteration)) {
           return resultOfIteration;
@@ -178,7 +186,7 @@ function runProgram(
 
         // repeat while there is no error or break and the top of the int stack is not 0
         while (!resultOfIteration && stacks[StackType.Int].peek() !== 0) {
-          resultOfIteration = runProgram(
+          resultOfIteration = await runProgram(
             item.block,
             params,
             StackType.Int,
@@ -228,7 +236,7 @@ function runProgram(
 
         // repeat while the top of the bool stack is true and there is no error or break
         while (!resultOfIteration && stacks[StackType.Bool].get()) {
-          resultOfIteration = runProgram(
+          resultOfIteration = await runProgram(
             item.block,
             params,
             StackType.Bool,
@@ -268,7 +276,7 @@ function runProgram(
 
         // run the if block if the top of the bool stack is true or else try to run the else block
         if (stacks[StackType.Bool].get()) {
-          const blockResult = runProgram(
+          const blockResult = await runProgram(
             item.block,
             params,
             StackType.Bool,
@@ -278,7 +286,7 @@ function runProgram(
             return blockResult;
           }
         } else if (item.else) {
-          const blockResult = runProgram(
+          const blockResult = await runProgram(
             item.else,
             params,
             StackType.Bool,

@@ -30,7 +30,7 @@ async function run(input: string) {
         return;
     }
 
-    return interpret(parser.program, parser.functions);
+    return await interpret(parser.program, parser.functions);
 }
 
 describe("Interpreter runs basic programs", () => {

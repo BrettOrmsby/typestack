@@ -1,10 +1,16 @@
 import { StackType, Stacks } from "./stack.js";
 import { Program } from "./parse.js";
+import * as readline from "readline";
+import { stdin as input, stdout as output } from "process";
 
 export type StackFunction = {
   body?: Program;
   params: Record<string, StackType>;
-  rawCode?: (s: Stacks, p: Record<string, any>, c: StackType) => void | Error;
+  rawCode?: (
+    s: Stacks,
+    p: Record<string, any>,
+    c: StackType
+  ) => void | Error | Promise<void | Error>;
 };
 
 export type StackFunctions = {
@@ -292,6 +298,56 @@ export const standardLibraryFunctions: StackFunctions = {
         }
         console.log(params.item.toString());
         stacks[stack].push(params.item);
+      },
+    },
+    read: {
+      params: { prompt: StackType.Str },
+      rawCode: async (stacks, params, stack) => {
+        const rl = readline.createInterface({ input, output });
+        const answer: string = await new Promise((resolve) => {
+          rl.question(params.prompt, resolve);
+        });
+        rl.close();
+
+        if (stack === StackType.Str) {
+          stacks[stack].push(answer);
+        } else if (stack === StackType.Bool) {
+          if (answer.trim() === "true") {
+            stacks[stack].push(true);
+          } else if (answer.trim() === "false") {
+            stacks[stack].push(false);
+          } else {
+            return new Error(
+              `invalid input for type \`${stack}\`: \`${answer}\``
+            );
+          }
+        } else {
+          // int or float
+          const isFloat = stack === StackType.Float;
+          let isInDecimal = false;
+          for (const char of answer.trim().split("")) {
+            if (char === ".") {
+              if (isInDecimal || !isFloat) {
+                return new Error(
+                  `invalid input for type \`${stack}\`: \`${answer}\``
+                );
+              } else {
+                isInDecimal = true;
+                continue;
+              }
+            }
+            if (!(char >= "0" && char <= "9")) {
+              return new Error(
+                `invalid input for type \`${stack}\`: \`${answer}\``
+              );
+            }
+          }
+          if (isFloat) {
+            stacks[stack].push(parseFloat(answer));
+          } else {
+            stacks[stack].push(parseInt(answer));
+          }
+        }
       },
     },
 
