@@ -373,3 +373,51 @@ Run module functions by prefixing the function with the module name followed by 
 * `ceil(num: float)`: adds the value of `num` rounded up to the nearest integer to the `int` stack 
 * `floor(num: float)`: adds the value of `num` rounded down to the nearest integer to the `int` stack 
 * `round(num: float)`: adds the rounded value of `num` to the `int` stack
+
+#### Date
+
+##### `@int`
+
+* `now()`: adds the current date in milliseconds to the `int` stack 
+* `getTimezoneOffset(date: int)`: adds the timezone offset of `date` to the `int` stack
+* `getMilliseconds(date: int)`: add the millisecond (`0`-`999`) of `date` in local time to the `int` stack
+* `getSeconds(date: int)`: add the second (`0`-`59`) of `date` in local time to the `int` stack
+* `getMinutes(date: int)`: add the minute (`0`-`59`) of `date` in local time to the `int` stack
+* `getHours(date: int)`: add the hour (`0`-`23`) of `date` in local time to the `int` stack
+* `getDay(date: int)`: add the day (`0`-`6`) of `date` in local time to the `int` stack
+* `getDate(date: int)`: add the date (`1`-`31`) of `date` in local time to the `int` stack
+* `getMonth(date: int)`: add the month (`0`-`11`) of `date` in local time to the `int` stack
+* `getYear(date: int)`: add the year (`2006`) of `date` in local time to the `int` stack
+* `getUTCMilliseconds(date: int)`: add the millisecond (`0`-`999`) of `date` in universal time to the `int` stack
+* `getUTCSeconds(date: int)`: add the second (`0`-`59`) of `date` in universal time to the `int` stack
+* `getUTCMinutes(date: int)`: add the minute (`0`-`59`) of `date` in universal time to the `int` stack
+* `getUTCHours(date: int)`: add the hour (`0`-`23`) of `date` in universal time to the `int` stack
+* `getUTCDay(date: int)`: add the day (`0`-`6`) of `date` in universal time to the `int` stack
+* `getUTCDate(date: int)`: add the date (`1`-`31`) of `date` in universal time to the `int` stack
+* `getUTCMonth(date: int)`: add the month (`0`-`11`) of `date` in universal time to the `int` stack
+* `getUTCYear(date: int)`: add the year (`2006`) of `date` in universal time to the `int` stack
+* `setMilliseconds(millisecond: int date: int)`: set the milliseconds of `date` in local time to `milliseconds` and add it to the `int` stack
+* `setSeconds(second: int date: int)`: set the seconds of `date` in local time to `second` and add it to the `int` stack
+* `setMinutes(minute: int date: int)`: set the minutes of `date` in local time to `minute` and add it to the `int` stack
+* `setHours(hour: int date: int)`: set the hours of `date` in local time to `hour` and add it to the `int` stack
+* `setDay(day: int date: int)`: set the day of `date` in local time to `day` and add it to the `int` stack
+* `setDate(day: int date: int)`: set the date of `date` in local time to `day` and add it to the `int` stack
+* `setMonth(month: int date: int)`: set the month of `date` in local time to `month` and add it to the `int` stack
+* `setYear(millisecond: int date: int)`: set the year of `date` in local time to `year` and add it to the `int` stack
+* `setUTCMilliseconds(millisecond: int date: int)`: set the milliseconds of `date` in universal time to `milliseconds` and add it to the `int` stack
+* `setUTCSeconds(second: int date: int)`: set the seconds of `date` in universal time to `second` and add it to the `int` stack
+* `setUTCMinutes(minute: int date: int)`: set the minutes of `date` in universal time to `minute` and add it to the `int` stack
+* `setUTCHours(hour: int date: int)`: set the hours of `date` in universal time to `hour` and add it to the `int` stack
+* `setUTCDay(day: int date: int)`: set the day of `date` in universal time to `day` and add it to the `int` stack
+* `setUTCDate(day: int date: int)`: set the date of `date` in universal time to `day` and add it to the `int` stack
+* `setUTCMonth(month: int date: int)`: set the month of `date` in universal time to `month` and add it to the `int` stack
+* `setUTCYear(millisecond: int date: int)`: set the year of `date` in universal time to `year` and add it to the `int` stack
+* `toStr(date: int)`: converts the date to a `str` (`"Tue Aug 19 1975 23:15:30 GMT+0200 (CEST)"`) and adds it to the `str` stack
+* `toDateStr(date: int)`: converts the date to a date`str` (`"Wed Jul 28 1993"`) and adds it to the `str` stack
+* `toISOStr(date: int)`: converts the date to a ISO `str` (`"2011-10-05T14:48:00.000Z"`) and adds it to the `str` stack
+* `toUTCStr(date: int)`: converts the date to a UTC `str` (`"Wed, 14 Jun 2017 07:00:00 GMT"`) and adds it to the `str` stack
+* `toTimeStr(date: int)`: converts the date to a time `str` (`"23:15:30 GMT+0200 (CEST)"`) and adds it to the `str` stack
+
+##### `@str`
+
+* `parse(date: str)`: adds the milliseconds of `date` (`"01 Jan 1970 00:00:00 GMT"`) to the `int` stack 
