@@ -69,7 +69,7 @@ export class Scanner {
       }
 
       if ("#" === current) {
-        while (this.#peek() !== "\n") {
+        while (!this.#isAtEnd() && this.#peek() !== "\n") {
           this.#increment();
         }
         continue;
