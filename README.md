@@ -302,10 +302,10 @@ Run module functions by prefixing the function with the module name followed by 
 
 #### `@int`
 
-* `<(right: int left: int)`: compares if the `left` value is less than the `right` value and adds `true` or `false` to the `bool`  stack
-* `>(right: int left: int)`: compares if the `left` value is greater than the `right` value and adds `true` or `false` to the `bool`  stack
-* `<=(right: int left: int)`: compares if the `left` value is less than or equal to the `right` value and adds `true` or `false` to the `bool`  stack
-* `>=(right: int left: int)`: compares if the `left` value is greater than or equal to the `right` value and adds `true` or `false` to the `bool`  stack
+* `<(right: int left: int)`: compares if `left` is less than `right` and adds `true` or `false` to the `bool`  stack
+* `>(right: int left: int)`: compares if `left` is greater than `right` and adds `true` or `false` to the `bool`  stack
+* `<=(right: int left: int)`: compares if `left` is less than or equal to `right` and adds `true` or `false` to the `bool`  stack
+* `>=(right: int left: int)`: compares if `left` is greater than or equal to `right` and adds `true` or `false` to the `bool`  stack
 * `+(right: int left: int)`: adds the sum of `left` and `right` to the `int` stack
 * `-(right: int left: int)`: adds the difference between `left` and `right` to the `int` stack
 * `*(right: int left: int)`: adds the product of `left` and `right` to the `int` stack
@@ -317,10 +317,10 @@ Run module functions by prefixing the function with the module name followed by 
 
 #### `@float`
 
-* `<(right: float left: float)`: compares if the `left` value is less than the `right` value and adds `true` or `false` to the `bool`  stack
-* `>(right: float left: float)`: compares if the `left` value is greater than the `right` value and adds `true` or `false` to the `bool`  stack
-* `<=(right: float left: float)`: compares if the `left` value is less than or equal to the `right` value and adds `true` or `false` to the `bool`  stack
-* `>=(right: float left: float)`: compares if the `left` value is greater than or equal to the `right` value and adds `true` or `false` to the `bool`  stack
+* `<(right: float left: float)`: compares if `left` is less than `right` and adds `true` or `false` to the `bool`  stack
+* `>(right: float left: float)`: compares if `left` is greater than `right` and adds `true` or `false` to the `bool`  stack
+* `<=(right: float left: float)`: compares if `left` is less than or equal to `right` value and adds `true` or `false` to the `bool`  stack
+* `>=(right: float left: float)`: compares if `left` is greater than or equal to `right` and adds `true` or `false` to the `bool`  stack
 * `+(right: float left: float)`: adds the sum of `left` and `right` to the `float` stack
 * `-(right: float left: float)`: adds the difference between `left` and `right` to the `float` stack
 * `*(right: float left: float)`: adds the product of `left` and `right` to the `float` stack
@@ -349,8 +349,8 @@ Run module functions by prefixing the function with the module name followed by 
 * `rot(first: any second: any third: any)`: rotate `third` to the top of the stack
 * `print(item: any)`: prints `item` to the console
 * `read(prompt: str)`: reads input from the console and adds it to the stack if it is valid in the type
-* `==(right: any left: any)`: compares if the `left` value is equal to the `right` value and adds `true` or `false` to the `bool`  stack
-* `!=(right: any left: any)`: compares if the `left` value is not equal to the `right` value and adds `true` or `false` to the `bool`  stack
+* `==(right: any left: any)`: compares if `left` is equal to `right` and adds `true` or `false` to the `bool`  stack
+* `!=(right: any left: any)`: compares if `left` is not equal to `right` and adds `true` or `false` to the `bool`  stack
 * `toInt(item: any)`: converts `item` to an `int`. If `item` is a `float`, `item` is truncated. If `item` is an `str`, `item` is converted to an `int` or an error occurs. If `item` is a `bool`, `item` is `1` if `true` or `0` if `false`
 * `toFloat(item: any)`: converts `item` to a `float`. If `item` is an `int`, `item` gains a `0` in the decimal place. If `item` is a `str`, `item` is converted to a `float` or an error occurs. If `item` is a `bool`, `item` is `1.0` if `true` or `0.0` if `false`
 * `toStr(item: any)`: converts `item` to a `str` in the way you would type `item`
@@ -381,37 +381,37 @@ Run module functions by prefixing the function with the module name followed by 
 * `now()`: adds the current date in milliseconds to the `int` stack 
 * `getTimezoneOffset(date: int)`: adds the timezone offset of `date` to the `int` stack
 * `getMilliseconds(date: int)`: add the millisecond (`0`-`999`) of `date` in local time to the `int` stack
-* `getSeconds(date: int)`: add the second (`0`-`59`) of `date` in local time to the `int` stack
-* `getMinutes(date: int)`: add the minute (`0`-`59`) of `date` in local time to the `int` stack
-* `getHours(date: int)`: add the hour (`0`-`23`) of `date` in local time to the `int` stack
-* `getDay(date: int)`: add the day (`0`-`6`) of `date` in local time to the `int` stack
-* `getDate(date: int)`: add the date (`1`-`31`) of `date` in local time to the `int` stack
-* `getMonth(date: int)`: add the month (`0`-`11`) of `date` in local time to the `int` stack
-* `getYear(date: int)`: add the year (`2006`) of `date` in local time to the `int` stack
-* `getUTCMilliseconds(date: int)`: add the millisecond (`0`-`999`) of `date` in universal time to the `int` stack
-* `getUTCSeconds(date: int)`: add the second (`0`-`59`) of `date` in universal time to the `int` stack
-* `getUTCMinutes(date: int)`: add the minute (`0`-`59`) of `date` in universal time to the `int` stack
-* `getUTCHours(date: int)`: add the hour (`0`-`23`) of `date` in universal time to the `int` stack
-* `getUTCDay(date: int)`: add the day (`0`-`6`) of `date` in universal time to the `int` stack
-* `getUTCDate(date: int)`: add the date (`1`-`31`) of `date` in universal time to the `int` stack
-* `getUTCMonth(date: int)`: add the month (`0`-`11`) of `date` in universal time to the `int` stack
-* `getUTCYear(date: int)`: add the year (`2006`) of `date` in universal time to the `int` stack
-* `setMilliseconds(millisecond: int date: int)`: set the milliseconds of `date` in local time to `milliseconds` and add it to the `int` stack
-* `setSeconds(second: int date: int)`: set the seconds of `date` in local time to `second` and add it to the `int` stack
-* `setMinutes(minute: int date: int)`: set the minutes of `date` in local time to `minute` and add it to the `int` stack
-* `setHours(hour: int date: int)`: set the hours of `date` in local time to `hour` and add it to the `int` stack
-* `setDay(day: int date: int)`: set the day of `date` in local time to `day` and add it to the `int` stack
-* `setDate(day: int date: int)`: set the date of `date` in local time to `day` and add it to the `int` stack
-* `setMonth(month: int date: int)`: set the month of `date` in local time to `month` and add it to the `int` stack
-* `setYear(millisecond: int date: int)`: set the year of `date` in local time to `year` and add it to the `int` stack
-* `setUTCMilliseconds(millisecond: int date: int)`: set the milliseconds of `date` in universal time to `milliseconds` and add it to the `int` stack
-* `setUTCSeconds(second: int date: int)`: set the seconds of `date` in universal time to `second` and add it to the `int` stack
-* `setUTCMinutes(minute: int date: int)`: set the minutes of `date` in universal time to `minute` and add it to the `int` stack
-* `setUTCHours(hour: int date: int)`: set the hours of `date` in universal time to `hour` and add it to the `int` stack
-* `setUTCDay(day: int date: int)`: set the day of `date` in universal time to `day` and add it to the `int` stack
-* `setUTCDate(day: int date: int)`: set the date of `date` in universal time to `day` and add it to the `int` stack
-* `setUTCMonth(month: int date: int)`: set the month of `date` in universal time to `month` and add it to the `int` stack
-* `setUTCYear(millisecond: int date: int)`: set the year of `date` in universal time to `year` and add it to the `int` stack
+* `getSeconds(date: int)`: adds the second (`0`-`59`) of `date` in local time to the `int` stack
+* `getMinutes(date: int)`: adds the minute (`0`-`59`) of `date` in local time to the `int` stack
+* `getHours(date: int)`: adds the hour (`0`-`23`) of `date` in local time to the `int` stack
+* `getDay(date: int)`: adds the day (`0`-`6`) of `date` in local time to the `int` stack
+* `getDate(date: int)`: adds the date (`1`-`31`) of `date` in local time to the `int` stack
+* `getMonth(date: int)`: adds the month (`0`-`11`) of `date` in local time to the `int` stack
+* `getYear(date: int)`: adds the year (`2006`) of `date` in local time to the `int` stack
+* `getUTCMilliseconds(date: int)`: adds the millisecond (`0`-`999`) of `date` in universal time to the `int` stack
+* `getUTCSeconds(date: int)`: adds the second (`0`-`59`) of `date` in universal time to the `int` stack
+* `getUTCMinutes(date: int)`: adds the minute (`0`-`59`) of `date` in universal time to the `int` stack
+* `getUTCHours(date: int)`: adds the hour (`0`-`23`) of `date` in universal time to the `int` stack
+* `getUTCDay(date: int)`: adds the day (`0`-`6`) of `date` in universal time to the `int` stack
+* `getUTCDate(date: int)`: adds the date (`1`-`31`) of `date` in universal time to the `int` stack
+* `getUTCMonth(date: int)`: adds the month (`0`-`11`) of `date` in universal time to the `int` stack
+* `getUTCYear(date: int)`: adds the year (`2006`) of `date` in universal time to the `int` stack
+* `setMilliseconds(millisecond: int date: int)`: sets the milliseconds of `date` in local time to `milliseconds` and adds it to the `int` stack
+* `setSeconds(second: int date: int)`: sets the seconds of `date` in local time to `second` and adds it to the `int` stack
+* `setMinutes(minute: int date: int)`: sets the minutes of `date` in local time to `minute` and adds it to the `int` stack
+* `setHours(hour: int date: int)`: sets the hours of `date` in local time to `hour` and adds it to the `int` stack
+* `setDay(day: int date: int)`: sets the day of `date` in local time to `day` and adds it to the `int` stack
+* `setDate(day: int date: int)`: sets the date of `date` in local time to `day` and adds it to the `int` stack
+* `setMonth(month: int date: int)`: sets the month of `date` in local time to `month` and adds it to the `int` stack
+* `setYear(millisecond: int date: int)`: sets the year of `date` in local time to `year` and adds it to the `int` stack
+* `setUTCMilliseconds(millisecond: int date: int)`: sets the milliseconds of `date` in universal time to `milliseconds` and adds it to the `int` stack
+* `setUTCSeconds(second: int date: int)`: sets the seconds of `date` in universal time to `second` and adds it to the `int` stack
+* `setUTCMinutes(minute: int date: int)`: sets the minutes of `date` in universal time to `minute` and adds it to the `int` stack
+* `setUTCHours(hour: int date: int)`: sets the hours of `date` in universal time to `hour` and adds it to the `int` stack
+* `setUTCDay(day: int date: int)`: sets the day of `date` in universal time to `day` and adds it to the `int` stack
+* `setUTCDate(day: int date: int)`: sets the date of `date` in universal time to `day` and adds it to the `int` stack
+* `setUTCMonth(month: int date: int)`: sets the month of `date` in universal time to `month` and adds it to the `int` stack
+* `setUTCYear(millisecond: int date: int)`: sets the year of `date` in universal time to `year` and adds it to the `int` stack
 * `toStr(date: int)`: converts the date to a `str` (`"Tue Aug 19 1975 23:15:30 GMT+0200 (CEST)"`) and adds it to the `str` stack
 * `toDateStr(date: int)`: converts the date to a date`str` (`"Wed Jul 28 1993"`) and adds it to the `str` stack
 * `toISOStr(date: int)`: converts the date to a ISO `str` (`"2011-10-05T14:48:00.000Z"`) and adds it to the `str` stack
@@ -421,3 +421,36 @@ Run module functions by prefixing the function with the module name followed by 
 ##### `@str`
 
 * `parse(date: str)`: adds the milliseconds of `date` (`"01 Jan 1970 00:00:00 GMT"`) to the `int` stack 
+
+#### Str
+
+##### `@int`
+
+* `fromCharCode(code: int)`: adds the character for the UTF-16 code of `code` to the `str` stack
+* `fromCodePoint(code: int)`: adds the character for the code point `code` to the `str` stack
+* `repeat(string: str amount: int)`: repeats `string` `amount` times and adds the it to the `str` stack. `amount` must be greater than or equal to `0`
+* `charAt(string: str index: int)`: adds the character at index (starting at 0) `index` of `string` to the `str` stack. If there is no character at the index, it adds `""` to the `str` stack
+* `charCodeAt(string: str index: int)`: adds the character code at index (starting at 0) `index` of `string` to the `int` stack. If there is no character at the index, an error occurs
+* `codePointAt(string: str index: int)`: adds the code point of the character at index (starting at 0) `index` of `string` to the `int` stack. If there is no character at the index, an error occurs
+* `slice(string: str endIndex: int startIndex: int)`: adds the the str made by extracting the characters from `startIndex` (starting at 0) up to but not including `endIndex` of `string` to the `str` stack. 
+
+##### `@str`
+
+* `startsWith(start: str string: str)`: checks if `string` starts with `start` and adds `true` or `false` to the `bool` stack
+* `endsWith(end: str string: str)`: checks if `string` ends with `end` and adds `true` or `false` to the `bool` stack
+* `includes(search: str string: str)`: checks if `string` contains `search` and adds `true` or `false` to the `bool` stack
+* `toUpper(string: str)`: converts `string` to all upper cases and adds it to the `str` stack 
+* `toLower(string: str)`: converts `string` to all lower cases and adds it to the `str` stack 
+* `trim(string: str)`: removes whitespace  from the start and end of `string` and adds it to the `str` stack
+* `reverse(string: str)`: reverses the characters of `string` and adds it to the `str` stack 
+* `occurrence(search: str string: str)`: adds the number of occurrences of `search` in `string` to the `int` stack 
+* `replace(replacement: str search: str string: str)`: replaces the first occurrence of `search` with `replacement` in `string` and adds it to the `str` stack
+* `replaceAll(replacement: str search: str string: str)`: replaces all occurrences of `search` with `replacement` in `string` and adds it to the `str` stack
+* `repeat(string: str amount: int)`: repeats `string` `amount` times and adds the it to the `str` stack. `amount` must be greater than or equal to `0`
+* `indexOf(search: str string: str)`: adds the index of the first occurrence of `search` in `string` to the `int` stack. If `search` is not in `string`, it adds `-1` to the `int`stack
+* `lastIndexOf(search: str string: str)`: adds the index of the last occurrence of `search` in `string` to the `int` stack. If `search` is not in `string`, it adds `-1` to the `int`stack
+* `charAt(string: str index: int)`: adds the character at index (starting at 0) `index` of `string` to the `str` stack. If there is no character at the index, it adds `""` to the `str` stack
+* `charCodeAt(string: str index: int)`: adds the character code at index (starting at 0) `index` of `string` to the `int` stack. If there is no character at the index, an error occurs
+* `codePointAt(string: str index: int)`: adds the code point of the character at index (starting at 0) `index` of `string` to the `int` stack. If there is no character at the index, an error occurs
+* `slice(string: str endIndex: int startIndex: int)`: adds the the str made by extracting the characters from `startIndex` (starting at 0) up to but not including `endIndex` of `string` to the `str` stack. 
+* `split(separator: str string: str)`: splits `string` by `separator` and adds each item to the `str` stack such that the last item is on the top of the stack
