@@ -1,7 +1,6 @@
 import { StackType, Stacks } from "./stack.js";
 import { Program } from "./parse.js";
 import * as readline from "readline";
-import { stdin as input, stdout as output } from "process";
 
 export type StackFunction = {
   body?: Program;
@@ -303,7 +302,14 @@ export const standardLibraryFunctions: StackFunctions = {
     read: {
       params: { prompt: StackType.Str },
       rawCode: async (stacks, params, stack) => {
-        const rl = readline.createInterface({ input, output });
+        // does not work on browser
+        if (window !== undefined) {
+          return;
+        }
+        const rl = readline.createInterface({
+          input: process.stdin,
+          output: process.stdout,
+        });
         const answer: string = await new Promise((resolve) => {
           rl.question(params.prompt, resolve);
         });
