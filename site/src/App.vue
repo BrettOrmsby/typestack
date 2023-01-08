@@ -1,7 +1,9 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import TypeStackEditor from "./components/TypeStackEditor.vue";
+</script>
 
 <template>
-  <div>Hello, World!</div>
+  <TypeStackEditor />
 </template>
 
 <style scoped></style>
