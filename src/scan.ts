@@ -269,7 +269,9 @@ export class Scanner {
 
     while (
       !this.#isAtEnd() &&
-      ![" ", "\n", "\t", "\r", ":", "{", "}", "(", ")"].includes(this.#peek())
+      ![" ", "\n", "\t", "\r", ":", "{", "}", "(", ")", "#"].includes(
+        this.#peek()
+      )
     ) {
       str += this.#peek();
       this.#increment();
