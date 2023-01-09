@@ -6,9 +6,10 @@ export type StackFunction = {
   body?: Program;
   params: Record<string, StackType>;
   rawCode?: (
-    s: Stacks,
-    p: Record<string, any>,
-    c: StackType
+    stacks: Stacks,
+    params: Record<string, any>,
+    currentStack: StackType,
+    consoleFunction: (string: string) => void
   ) => void | Error | Promise<void | Error>;
 };
 
@@ -288,14 +289,14 @@ export const standardLibraryFunctions: StackFunctions = {
     },
     print: {
       params: { item: StackType.Any },
-      rawCode: (stacks, params, stack) => {
+      rawCode: (stacks, params, stack, consoleFunc) => {
         if (
           stack === StackType.Float &&
           !params.item.toString().includes(".")
         ) {
           params.item = params.item.toFixed(1);
         }
-        console.log(params.item.toString());
+        consoleFunc(params.item.toString());
         stacks[stack].push(params.item);
       },
     },

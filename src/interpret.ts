@@ -109,7 +109,8 @@ export default class {
               let functionResult = stackFunction.rawCode(
                 stacks,
                 functionParams,
-                stack
+                stack,
+                this.consoleFunc
               );
               if (functionResult instanceof Promise) {
                 functionResult = await functionResult;
