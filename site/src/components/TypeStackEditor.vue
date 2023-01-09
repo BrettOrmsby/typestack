@@ -6,18 +6,28 @@ export default {
 
 <template>
   <PrismEditor class="my-editor" v-model="code" :highlight="highlight" />
-  <button @click="runCode(code)">Run</button>
+  <pre ref="consoleElement"></pre>
+  <button @click="runCode(code, consoleFunc)">Run</button>
 </template>
 
 <script lang="ts" setup>
 import { ref } from "vue";
 import { PrismEditor } from "vue-prism-editor";
+import { default as AnsiUp } from "ansi_up";
 import Highlight from "../utils/highlight";
 import runCode from "../utils/runCode";
 import "vue-prism-editor/dist/prismeditor.min.css";
 
+const consoleElement = ref<HTMLPreElement>();
 const code = ref("55 33 -");
 const highlight = (input: string) => new Highlight(input).run();
+
+const ansiUp = new AnsiUp();
+const consoleFunc = (string: string) => {
+  if (consoleElement.value) {
+    consoleElement.value.innerHTML += ansiUp.ansi_to_html(string);
+  }
+};
 </script>
 
 <style scoped>

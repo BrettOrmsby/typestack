@@ -16,8 +16,11 @@ addModule(math, "Math");
 addModule(date, "Date");
 addModule(str, "Str");
 
-export default async function run(code: string) {
-  typestack(code, functions);
+export default async function run(
+  code: string,
+  consoleFunc: (string: string) => void
+) {
+  typestack(code, functions, consoleFunc);
 }
 
 function addModule(module: StackFunctions, name: string) {
