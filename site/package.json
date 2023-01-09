@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "ansi_up": "^5.1.0",
+    "typestack-lang": "^1.4.1",
     "vue": "^3.2.45",
     "vue-prism-editor": "^2.0.0-alpha.2"
   },
