@@ -2,19 +2,20 @@ import { Scanner } from "./scan.js";
 import { Parser } from "./parse.js";
 import typeCheck from "./typeCheck.js";
 import { StackFunctions, standardLibraryFunctions } from "./functions.js";
-import interpret from "./interpret.js";
+import Interpreter from "./interpret.js";
 import { isTSError } from "./utils/error.js";
 
 export default async function typeStack(
   input: string,
-  functions?: StackFunctions
+  functions?: StackFunctions,
+  consoleFunc: (string: string) => void = console.log
 ) {
   let importedFunctions = standardLibraryFunctions;
   if (functions) {
     importedFunctions = combineStackFunctions(importedFunctions, functions);
   }
 
-  const scanner = new Scanner(input);
+  const scanner = new Scanner(input, consoleFunc);
   const scanError = scanner.scan();
   if (isTSError(scanError)) {
     scanError.fire();
@@ -37,7 +38,12 @@ export default async function typeStack(
     return;
   }
 
-  const runError = await interpret(parser.program, parser.functions);
+  const interpreter = new Interpreter(
+    parser.program,
+    parser.functions,
+    consoleFunc
+  );
+  const runError = await interpreter.run();
   if (isTSError(runError)) {
     runError.fire();
   }

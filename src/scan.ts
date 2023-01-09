@@ -33,9 +33,10 @@ export class Scanner {
   char: number;
   line: number;
 
-  constructor(input: string) {
+  constructor(input: string, consoleFunc: (string: string) => void) {
     input = input.trimEnd();
     ErrorInputConfig.input = input;
+    ErrorInputConfig.consoleFunc = consoleFunc;
     this.input = input;
     this.tokens = [];
     this.pointer = 0;

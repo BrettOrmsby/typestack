@@ -5,7 +5,7 @@ import { standardLibraryFunctions } from "../src/functions";
 import { TSError } from "../src/utils/error";
 
 async function check(input: string) {
-    const scanner = new Scanner(input);
+    const scanner = new Scanner(input, console.log);
     const scanError = scanner.scan();
     expect(scanError).not.toBeInstanceOf(TSError);
     if (scanError instanceof TSError) {

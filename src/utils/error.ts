@@ -1,7 +1,10 @@
 import { Pos } from "../scan.js";
 import { ConsoleEffects, consoleEffect } from "./consoleEffect.js";
 
-export const ErrorInputConfig: { input: string } = { input: "" };
+export const ErrorInputConfig: {
+  input: string;
+  consoleFunc: (string: string) => void;
+} = { input: "", consoleFunc: console.log };
 
 export class TSError {
   error: string;
@@ -96,7 +99,7 @@ ${space(lineNumberWidth + 1)}${bluePipe} ${space(errorStartsAt)}${underline}`;
     this.error = fullMessage;
   }
   fire() {
-    console.log(this.error);
+    ErrorInputConfig.consoleFunc(this.error);
   }
 }
 

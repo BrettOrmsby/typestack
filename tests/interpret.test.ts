@@ -1,12 +1,12 @@
 import { Scanner } from "../src/scan";
 import { Parser } from "../src/parse";
 import typeCheck from "../src/typeCheck";
-import interpret from "../src/interpret";
+import Interpreter from "../src/interpret";
 import { standardLibraryFunctions } from "../src/functions";
 import { TSError } from "../src/utils/error";
 
 async function run(input: string) {
-    const scanner = new Scanner(input);
+    const scanner = new Scanner(input, console.log);
     const scanError = scanner.scan();
     expect(scanError).not.toBeInstanceOf(TSError);
     if (scanError instanceof TSError) {
@@ -29,8 +29,9 @@ async function run(input: string) {
     if (typeErrors.length > 0) {
         return;
     }
-
-    return await interpret(parser.program, parser.functions);
+    
+    const interpreter = new Interpreter(parser.program, parser.functions, console.log);
+    return await interpreter.run();
 }
 
 describe("Interpreter runs basic programs", () => {

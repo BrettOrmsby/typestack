@@ -4,7 +4,7 @@ import { standardLibraryFunctions } from "../src/functions.js";
 import { TSError } from "../src/utils/error";
 
 async function parse(input: string) {
-    const scanner = new Scanner(input);
+    const scanner = new Scanner(input, console.log);
     const scanError = scanner.scan();
     expect(scanError).not.toBeInstanceOf(TSError);
     if (scanError instanceof TSError) {
