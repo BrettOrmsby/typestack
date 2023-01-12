@@ -1,3 +1,18 @@
+import {
+  standardLibraryFunctions,
+  type StackFunctions,
+} from "typestack-lang/dist/functions";
+
+let builtIns: string[] = [];
+Object.keys(standardLibraryFunctions).forEach(
+  (type) =>
+    (builtIns = [
+      ...builtIns,
+      ...Object.keys(standardLibraryFunctions[type as keyof StackFunctions]),
+    ])
+);
+builtIns = [...new Set(builtIns)];
+
 export default class Highlight {
   input: string;
   html: string;
@@ -162,6 +177,8 @@ export default class Highlight {
       this.#addSpan(str, "bool");
     } else if (keywords.includes(str)) {
       this.#addSpan(str, "keyword");
+    } else if (builtIns.includes(str)) {
+      this.#addSpan(str, "builtin");
     } else {
       this.#addSpan(str, "identifier");
     }

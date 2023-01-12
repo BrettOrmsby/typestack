@@ -20,7 +20,7 @@ export default async function run(
   code: string,
   consoleFunc: (string: string) => void
 ) {
-  typestack(code, functions, consoleFunc);
+  await typestack(code, functions, consoleFunc);
 }
 
 function addModule(module: StackFunctions, name: string) {
