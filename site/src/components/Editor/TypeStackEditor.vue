@@ -7,7 +7,7 @@ export default {
 <template>
   <div class="editor-wrapper">
     <div style="position: relative">
-      <button class="run-code" @click="runCode(code, consoleFunc)">
+      <button class="run-code" @click="runCode(text, consoleFunc)">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="20"
