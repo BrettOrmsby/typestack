@@ -80,6 +80,14 @@ const consoleFunc = (string: string) => {
   padding: 1em;
   border-top: 1px solid #44475a;
   height: 200px;
+  /* reset pico.css styling */
+  border-radius: 0;
+  background: #282a36;
+  color: #f8f8f2;
+  font-weight: unset;
+  line-height: initial;
+  font-size: 0.875em;
+  font-family: Fira code, Fira Mono, Consolas, Menlo, Courier, monospace;
 }
 
 :deep() :is(.prism-editor__textarea, .prism-editor__editor) {

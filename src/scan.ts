@@ -1,3 +1,8 @@
+/* TODO: fix this error with any type params that auto go to the type of function
+fn combineStr(top second) @str {
+    top + second
+}
+*/
 import { TSError, ErrorInputConfig } from "./utils/error.js";
 export enum TokenType {
   Int,

@@ -3,4 +3,16 @@
 }
 body {
     padding: 2em;
+    max-width: 70ch;
+    margin: 0 auto;
   }
+
+  pre,
+code {
+  background: #282a36;
+  color: #f8f8f2;
+}
+
+.editor-wrapper {
+    margin-bottom: var(--block-spacing-vertical);
+}

@@ -11,6 +11,7 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
   },
   "dependencies": {
+    "@picocss/pico": "^1.5.6",
     "ansi_up": "^5.1.0",
     "firacode": "^6.2.0",
     "typestack-lang": "^1.5.1",

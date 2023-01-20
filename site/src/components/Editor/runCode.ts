@@ -5,12 +5,33 @@ import math from "typestack-lang/dist/modules/Math";
 import date from "typestack-lang/dist/modules/Date";
 import str from "typestack-lang/dist/modules/Str";
 
+import {
+  consoleEffect,
+  ConsoleEffects,
+} from "typestack-lang/dist/utils/consoleEffect";
+
 const functions: StackFunctions = {
   int: {},
   float: {},
   str: {},
   bool: {},
-  any: {},
+  any: {
+    read: {
+      params: {},
+      rawCode: (_stacks, _params, _type, consoleFunc) => {
+        consoleFunc(
+          `${consoleEffect(
+            "Warning",
+            ConsoleEffects.FgYellow,
+            ConsoleEffects.Bright
+          )}:${consoleEffect(
+            "`read(prompt: str) @any` does not work in the browser",
+            ConsoleEffects.Bright
+          )}`
+        );
+      },
+    },
+  },
 };
 addModule(math, "Math");
 addModule(date, "Date");

@@ -1,7 +1,11 @@
 <script setup lang="ts">
-import TypeStackEditor from "./components/Editor/TypeStackEditor.vue";
+import TheHeader from "./components/TheHeader.vue";
+import TheGettingStarted from "./components/TheGettingStarted.vue";
+import TheBasics from "./components/TheBasics.vue";
 </script>
 
 <template>
-  <TypeStackEditor code='"Hello, World!" print drop' />
+  <TheHeader />
+  <TheGettingStarted />
+  <TheBasics />
 </template>
