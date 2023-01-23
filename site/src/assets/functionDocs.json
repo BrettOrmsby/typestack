@@ -1,0 +1,149 @@
+{
+    "standardLibrary": {
+      "@int": {
+        "<(right: int left: int)": "compares if <code>left</code> is less than <code>right</code> and adds <code>true</code> or <code>false</code> to the <code>bool</code> stack",
+        ">(right: int left: int)": "compares if <code>left</code> is greater than <code>right</code> and adds <code>true</code> or <code>false</code> to the <code>bool</code> stack",
+        "<=(right: int left: int)": "compares if <code>left</code> is less than or equal to <code>right</code> and adds <code>true</code> or <code>false</code> to the <code>bool</code> stack",
+        ">=(right: int left: int)": "compares if <code>left</code> is greater than or equal to <code>right</code> and adds <code>true</code> or <code>false</code> to the <code>bool</code> stack",
+        "+(right: int left: int)": "adds the sum of <code>left</code> and <code>right</code> to the <code>int</code> stack",
+        "-(right: int left: int)": "adds the difference between <code>left</code> and <code>right</code> to the <code>int</code> stack",
+        "*(right: int left: int)": "adds the product of <code>left</code> and <code>right</code> to the <code>int</code> stack",
+        "/(right: int left: int)": "adds the quotient of <code>left</code> and <code>right</code> to the <code>float</code> stack",
+        "//(right: int left: int)": "adds the floored quotient of <code>left</code> and <code>right</code> to the <code>int</code> stack (removes the decimal of the float)",
+        "%(right: int left: int)": "adds the remainder of the division of <code>left</code> and <code>right</code> to the <code>int</code> stack",
+        "^(right: int left: int)": "adds the power of <code>left</code> and <code>right</code> to the <code>int</code> stack",
+        "rand(max: int min: int)": "adds a random number inclusively between <code>min</code> and <code>max</code> to the <code>int</code> stack"
+      },
+      "@float": {
+        "<(right: float left: float)": "compares if <code>left</code> is less than <code>right</code> and adds <code>true</code> or <code>false</code> to the <code>bool</code> stack",
+        ">(right: float left: float)": "compares if <code>left</code> is greater than <code>right</code> and adds <code>true</code> or <code>false</code> to the <code>bool</code> stack",
+        "<=(right: float left: float)": "compares if <code>left</code> is less than or equal to <code>right</code> value and adds <code>true</code> or <code>false</code> to the <code>bool</code> stack",
+        ">=(right: float left: float)": "compares if <code>left</code> is greater than or equal to <code>right</code> and adds <code>true</code> or <code>false</code> to the <code>bool</code> stack",
+        "+(right: float left: float)": "adds the sum of <code>left</code> and <code>right</code> to the <code>float</code> stack",
+        "-(right: float left: float)": "adds the difference between <code>left</code> and <code>right</code> to the <code>float</code> stack",
+        "*(right: float left: float)": "adds the product of <code>left</code> and <code>right</code> to the <code>float</code> stack",
+        "/(right: float left: float)": "adds the quotient of <code>left</code> and <code>right</code> to the <code>float</code> stack",
+        "//(right: float left: float)": "adds the floored quotient of <code>left</code> and <code>right</code> to the <code>float</code> stack (removes the decimal of the float)",
+        "%(right: float left: float)": "adds the remainder of the division of <code>left</code> and <code>right</code> to the <code>float</code> stack",
+        "^(right: float left: float)": "adds the power of <code>left</code> and <code>right</code> to the <code>float</code> stack"
+      },
+      "@str": {
+        "+(right: str left: str)": "combines <code>left</code> and <code>right</code> and adds it to the <code>str</code> stack",
+        "length(string: str)": "adds the length of <code>string</code> to the <code>int</code> stack"
+      },
+      "@bool": {
+        "&(right: bool left: bool)": "adds <code>true</code> to the <code>bool</code> stack if both <code>right</code> and <code>left</code> are <code>true</code> or else, adds <code>false</code> to the <code>bool</code> stack",
+        "|(right: bool left: bool)": "adds <code>true</code> to the <code>bool</code> stack if one of <code>right</code> or <code>left</code> are <code>true</code> or else, adds <code>false</code> to the <code>bool</code> stack",
+        "!(boolean: bool)": "adds <code>true</code> to the <code>bool</code> if <code>boolean</code> if <code>false</code> or else, add <code>false</code> to the <code>bool</code> stack"
+      },
+      "@any": {
+        "dup(first: any)": "duplicates the top of the stack",
+        "drop(first: any)": "removes the top of the stack",
+        "over(first: any second: any)": "duplicates <code>second</code> to the top of the stack",
+        "swap(first: any second: any)": "swaps <code>first</code> and second <code>second</code> on the stack",
+        "rot(first: any second: any third: any)": "rotate <code>third</code> to the top of the stack",
+        "print(item: any)": "prints <code>item</code> to the console",
+        "read(prompt: str)": "reads input from the console and adds it to the stack if it is valid in the type",
+        "==(right: any left: any)": "compares if <code>left</code> is equal to <code>right</code> and adds <code>true</code> or <code>false</code> to the <code>bool</code> stack",
+        "!=(right: any left: any)": "compares if <code>left</code> is not equal to <code>right</code> and adds <code>true</code> or <code>false</code> to the <code>bool</code> stack",
+        "toInt(item: any)": "converts <code>item</code> to an <code>int</code>. If <code>item</code> is a <code>float</code>, <code>item</code> is truncated. If <code>item</code> is an <code>str</code>, <code>item</code> is converted to an <code>int</code> or an error occurs. If <code>item</code> is a <code>bool</code>, <code>item</code> is <code>1</code> if <code>true</code> or <code>0</code> if <code>false</code>",
+        "toFloat(item: any)": "converts <code>item</code> to a <code>float</code>. If <code>item</code> is an <code>int</code>, <code>item</code> gains a <code>0</code> in the decimal place. If <code>item</code> is a <code>str</code>, <code>item</code> is converted to a <code>float</code> or an error occurs. If <code>item</code> is a <code>bool</code>, <code>item</code> is <code>1.0</code> if <code>true</code> or <code>0.0</code> if <code>false</code>",
+        "toStr(item: any)": "converts <code>item</code> to a <code>str</code> in the way you would type <code>item</code>",
+        "toBool(item: any)": "converts <code>item</code> to a <code>bool</code>. If <code>item</code> is an <code>int</code>, <code>item</code> is <code>true</code> if not <code>0</code>. If <code>item</code> is a <code>float</code>, <code>item</code> is <code>true</code> if not <code>0.0</code>. If <code>item</code> is a <code>str</code>, <code>item</code> is <code>true</code> if not empty (<code>\"\"</code>)"
+      }
+    },
+  
+    "modules": {
+      "Math": {
+        "@int": {
+          "abs(num: int)": "adds the absolute (positive) value of <code>num</code> to the <code>int</code> stack",
+          "neg(num: int)": "adds the negative value of <code>num</code> to the <code>int</code> stack"
+        },
+        "@float": {
+          "abs(num: float)": "adds the absolute (positive) value of <code>num</code> to the <code>float</code> stack",
+          "neg(num: float)": "adds the negative value of <code>num</code> to the <code>float</code> stack",
+          "ceil(num: float)": "adds the value of <code>num</code> rounded up to the nearest integer to the <code>int</code> stack",
+          "floor(num: float)": "adds the value of <code>num</code> rounded down to the nearest integer to the <code>int</code> stack",
+          "round(num: float)": "adds the rounded value of <code>num</code> to the <code>int</code> stack"
+        }
+      },
+      "Date": {
+        "@int": {
+          "now()": "adds the current date in milliseconds to the <code>int</code> stack",
+          "getTimezoneOffset(date: int)": "adds the timezone offset of <code>date</code> to the <code>int</code> stack",
+          "getMilliseconds(date: int)": "add the millisecond (<code>0</code>-<code>999</code>) of <code>date</code> in local time to the <code>int</code> stack",
+          "getSeconds(date: int)": "adds the second (<code>0</code>-<code>59</code>) of <code>date</code> in local time to the <code>int</code> stack",
+          "getMinutes(date: int)": "adds the minute (<code>0</code>-<code>59</code>) of <code>date</code> in local time to the <code>int</code> stack",
+          "getHours(date: int)": "adds the hour (<code>0</code>-<code>23</code>) of <code>date</code> in local time to the <code>int</code> stack",
+          "getDay(date: int)": "adds the day (<code>0</code>-<code>6</code>) of <code>date</code> in local time to the <code>int</code> stack",
+          "getDate(date: int)": "adds the date (<code>1</code>-<code>31</code>) of <code>date</code> in local time to the <code>int</code> stack",
+          "getMonth(date: int)": "adds the month (<code>0</code>-<code>11</code>) of <code>date</code> in local time to the <code>int</code> stack",
+          "getYear(date: int)": "adds the year (<code>2006</code>) of <code>date</code> in local time to the <code>int</code> stack",
+          "getUTCMilliseconds(date: int)": "adds the millisecond (<code>0</code>-<code>999</code>) of <code>date</code> in universal time to the <code>int</code> stack",
+          "getUTCSeconds(date: int)": "adds the second (<code>0</code>-<code>59</code>) of <code>date</code> in universal time to the <code>int</code> stack",
+          "getUTCMinutes(date: int)": "adds the minute (<code>0</code>-<code>59</code>) of <code>date</code> in universal time to the <code>int</code> stack",
+          "getUTCHours(date: int)": "adds the hour (<code>0</code>-<code>23</code>) of <code>date</code> in universal time to the <code>int</code> stack",
+          "getUTCDay(date: int)": "adds the day (<code>0</code>-<code>6</code>) of <code>date</code> in universal time to the <code>int</code> stack",
+          "getUTCDate(date: int)": "adds the date (<code>1</code>-<code>31</code>) of <code>date</code> in universal time to the <code>int</code> stack",
+          "getUTCMonth(date: int)": "adds the month (<code>0</code>-<code>11</code>) of <code>date</code> in universal time to the <code>int</code> stack",
+          "getUTCYear(date: int)": "adds the year (<code>2006</code>) of <code>date</code> in universal time to the <code>int</code> stack",
+          "setMilliseconds(millisecond: int date: int)": "sets the milliseconds of <code>date</code> in local time to <code>milliseconds</code> and adds it to the <code>int</code> stack",
+          "setSeconds(second: int date: int)": "sets the seconds of <code>date</code> in local time to <code>second</code> and adds it to the <code>int</code> stack",
+          "setMinutes(minute: int date: int)": "sets the minutes of <code>date</code> in local time to <code>minute</code> and adds it to the <code>int</code> stack",
+          "setHours(hour: int date: int)": "sets the hours of <code>date</code> in local time to <code>hour</code> and adds it to the <code>int</code> stack",
+          "setDay(day: int date: int)": "sets the day of <code>date</code> in local time to <code>day</code> and adds it to the <code>int</code> stack",
+          "setDate(day: int date: int)": "sets the date of <code>date</code> in local time to <code>day</code> and adds it to the <code>int</code> stack",
+          "setMonth(month: int date: int)": "sets the month of <code>date</code> in local time to <code>month</code> and adds it to the <code>int</code> stack",
+          "setYear(millisecond: int date: int)": "sets the year of <code>date</code> in local time to <code>year</code> and adds it to the <code>int</code> stack",
+          "setUTCMilliseconds(millisecond: int date: int)": "sets the milliseconds of <code>date</code> in universal time to <code>milliseconds</code> and adds it to the <code>int</code> stack",
+          "setUTCSeconds(second: int date: int)": "sets the seconds of <code>date</code> in universal time to <code>second</code> and adds it to the <code>int</code> stack",
+          "setUTCMinutes(minute: int date: int)": "sets the minutes of <code>date</code> in universal time to <code>minute</code> and adds it to the <code>int</code> stack",
+          "setUTCHours(hour: int date: int)": "sets the hours of <code>date</code> in universal time to <code>hour</code> and adds it to the <code>int</code> stack",
+          "setUTCDay(day: int date: int)": "sets the day of <code>date</code> in universal time to <code>day</code> and adds it to the <code>int</code> stack",
+          "setUTCDate(day: int date: int)": "sets the date of <code>date</code> in universal time to <code>day</code> and adds it to the <code>int</code> stack",
+          "setUTCMonth(month: int date: int)": "sets the month of <code>date</code> in universal time to <code>month</code> and adds it to the <code>int</code> stack",
+          "setUTCYear(millisecond: int date: int)": "sets the year of <code>date</code> in universal time to <code>year</code> and adds it to the <code>int</code> stack",
+          "toStr(date: int)": "converts the date to a <code>str</code> (<code>\"Tue Aug 19 1975 23:15:30 GMT+0200 (CEST)\"</code >) and adds it to the <code>str</code> stack",
+          "toDateStr(date: int)": "converts the date to a date<code >str</code > (<code>\"Wed Jul 28 1993\"</code>) and adds it to the <code>str</code> stack",
+          "toISOStr(date: int)": "converts the date to a ISO <code>str</code> (<code>\"2011-10-05T14:48:00.000Z\"</code>) and adds it to the <code>str</code> stack",
+          "toUTCStr(date: int)": "converts the date to a UTC <code>str</code> (<code>\"Wed, 14 Jun 2017 07:00:00 GMT\"</code>) and adds it to the <code>str</code> stack",
+          "toTimeStr(date: int)": "converts the date to a time <code>str</code> (<code>\"23:15:30 GMT+0200 (CEST)\"</code>) and adds it to the <code>str</code> stack"
+        },
+        "@str": {
+          "parse(date: str)": "adds the milliseconds of <code>date</code> (<code>\"01 Jan 1970 00:00:00 GMT\"</code>) to the <code>int</code> stack"
+        }
+      },
+      "Str": {
+        "@int": {
+          "fromCharCode(code: int)": "adds the character for the UTF-16 code of <code>code</code> to the <code>str</code> stack",
+          "fromCodePoint(code: int)": "adds the character for the code point <code>code</code> to the <code>str</code> stack",
+          "repeat(string: str amount: int)": "repeats <code>string</code> <code>amount</code> times and adds the it to the <code>str</code> stack. <code>amount</code> must be greater than or equal to <code>0</code>",
+          "charAt(string: str index: int)": "adds the character at index (starting at 0) <code>index</code> of <code>string</code> to the <code>str</code> stack. If there is no character at the index, it adds <code>\"\"</code> to the <code>str</code> stack",
+          "charCodeAt(string: str index: int)": "adds the character code at index (starting at 0) <code>index</code> of <code>string</code> to the <code>int</code> stack. If there is no character at the index, an error occurs",
+          "codePointAt(string: str index: int)": "adds the code point of the character at index (starting at 0) <code>index</code> of <code>string</code> to the <code>int</code> stack. If there is no character at the index, an error occurs",
+          "slice(string: str endIndex: int startIndex: int)": "adds the the str made by extracting the characters from <code>startIndex</code> (starting at 0) up to but not including <code>endIndex</code> of <code>string</code> to the <code>str</code> stack."
+        },
+        "@str": {
+          "startsWith(start: str string: str)": "checks if <code>string</code> starts with <code>start</code> and adds <code>true</code> or <code>false</code> to the <code>bool</code> stack",
+          "endsWith(end: str string: str)": "checks if <code>string</code> ends with <code>end</code> and adds <code>true</code> or <code>false</code> to the <code>bool</code> stack",
+          "includes(search: str string: str)": "checks if <code>string</code> contains <code>search</code> and adds <code>true</code> or <code>false</code> to the <code>bool</code> stack",
+          "toUpper(string: str)": "converts <code>string</code> to all upper cases and adds it to the <code>str</code> stack",
+          "toLower(string: str)": "converts <code>string</code> to all lower cases and adds it to the <code>str</code> stack",
+          "trim(string: str)": "removes whitespace from the start and end of <code>string</code> and adds it to the <code>str</code> stack",
+          "reverse(string: str)": "reverses the characters of <code>string</code> and adds it to the <code>str</code> stack",
+          "occurrence(search: str string: str)": "adds the number of occurrences of <code>search</code> in <code>string</code> to the <code>int</code> stack",
+          "replace(replacement: str search: str string: str)": "replaces the first occurrence of <code>search</code> with <code>replacement</code> in <code>string</code> and adds it to the <code>str</code> stack",
+          "replaceAll(replacement: str search: str string: str)": "replaces all occurrences of <code>search</code> with <code>replacement</code> in <code>string</code> and adds it to the <code>str</code> stack",
+          "repeat(string: str amount: int)": "repeats <code>string</code> <code>amount</code> times and adds the it to the <code>str</code> stack. <code>amount</code> must be greater than or equal to <code>0</code>",
+          "indexOf(search: str string: str)": "adds the index of the first occurrence of <code>search</code> in <code>string</code> to the <code>int</code> stack. If <code>search</code> is not in <code>string</code>, it adds <code>-1</code> to the <code>int</code>stack",
+          "lastIndexOf(search: str string: str)": "adds the index of the last occurrence of <code>search</code> in <code>string</code> to the <code>int</code> stack. If <code>search</code> is not in <code>string</code>, it adds <code>-1</code> to the <code>int</code>stack",
+          "charAt(string: str index: int)": "adds the character at index (starting at 0) <code>index</code> of <code>string</code> to the <code>str</code> stack. If there is no character at the index, it adds <code>\"\"</code> to the <code>str</code> stack",
+          "charCodeAt(string: str index: int)": "adds the character code at index (starting at 0) <code>index</code> of <code>string</code> to the <code>int</code> stack. If there is no character at the index, an error occurs",
+          "codePointAt(string: str index: int)": "adds the code point of the character at index (starting at 0) <code>index</code> of <code>string</code> to the <code>int</code> stack. If there is no character at the index, an error occurs",
+          "slice(string: str endIndex: int startIndex: int)": "adds the the str made by extracting the characters from <code>startIndex</code> (starting at 0) up to but not including <code>endIndex</code> of <code>string</code> to the <code>str</code> stack.",
+          "split(separator: str string: str)": "splits <code>string</code> by <code>separator</code> and adds each item to the <code>str</code> stack such that the last item is on the top of the stack"
+        }
+      }
+    }
+  }
+  

@@ -9,7 +9,7 @@ export default {
     <section>
       <div class="headings">
         <h1>TypeStack</h1>
-        <p>A stack-based, type-safe programing language</p>
+        <p>A functional, stack-based, type-safe programing language</p>
       </div>
       <TypeStackEditor :code="code" class="editor" />
       <small
@@ -17,12 +17,12 @@ export default {
         come pre-imported</small
       >
       <div class="button-container">
-        <button class="secondary" @click="scrollToGetStarted()">
+        <a role="button" class="secondary" href="#gettingStarted">
           Get Started
-        </button>
-        <button class="contrast outline" @click="scrollToTheBasics()">
+        </a>
+        <a role="button" class="contrast outline" href="#theBasics">
           Documentation
-        </button>
+        </a>
       </div>
     </section>
   </header>
@@ -32,16 +32,6 @@ export default {
 import TypeStackEditor from "@/components/Editor/TypeStackEditor.vue";
 const code =
   '# Click the play button in the top right corner to run\n"Hello, World!" print';
-const scrollToGetStarted = () => {
-  document.querySelector("#gettingStarted")?.scrollIntoView({
-    behavior: "smooth",
-  });
-};
-const scrollToTheBasics = () => {
-  document.querySelector("#theBasics")?.scrollIntoView({
-    behavior: "smooth",
-  });
-};
 </script>
 
 <style scoped>
@@ -58,9 +48,7 @@ h1 {
   display: flex;
   justify-content: center;
 }
-button {
-  width: auto;
-  display: inline;
+a {
   margin-right: var(--block-spacing-horizontal);
 }
 .editor-wrapper {

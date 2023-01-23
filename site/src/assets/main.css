@@ -1,18 +1,24 @@
 * {
-    box-sizing: border-box;
+  box-sizing: border-box;
 }
-body {
-    padding: 2em;
-    max-width: 70ch;
-    margin: 0 auto;
-  }
 
-  pre,
-code {
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  padding: 2em;
+  max-width: 70ch;
+  margin: 0 auto;
+}
+pre, code {
   background: #282a36;
   color: #f8f8f2;
 }
+:not(pre) code {
+    padding: 0.2rem 0.4rem;
+}
 
 .editor-wrapper {
-    margin-bottom: var(--block-spacing-vertical);
+  margin-bottom: var(--block-spacing-vertical);
 }
