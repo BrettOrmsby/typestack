@@ -18,9 +18,19 @@ export default function typeCheck(
 
   let functionErrors = [];
   for (const fn of newFunctions) {
+    // overload all `any` type parameters to the function type
+    const params = { ...functions[fn.type][fn.name].params };
+    if (fn.type !== StackType.Any) {
+      for (const param in params) {
+        if (params[param] === StackType.Any) {
+          params[param] = fn.type;
+        }
+      }
+    }
+
     const functionError = traverseCheckProgram(
       functions[fn.type][fn.name].body,
-      functions[fn.type][fn.name].params,
+      params,
       fn.type,
       functions
     );

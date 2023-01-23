@@ -10,7 +10,7 @@
     "js": "node dist/index.js",
     "dev": "npx tsc --watch",
     "test": "jest",
-    "lint": "eslint . --ext .js,.ts --fix --ignore-path .gitignore && prettier --write \"src/**/*.ts\"",
+    "lint": "eslint . --ext .js,.ts --fix && prettier --write \"src/**/*.ts\"",
     "build": "tsc",
     "prepare": "npm run build",
     "prepublishOnly": "npm test && npm run lint",
