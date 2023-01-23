@@ -311,7 +311,7 @@ fn negate(num) @int {
 }
 
 fn combineStr(top second) @str {
-    top + second
+    top second +
 }`"
         />
 
