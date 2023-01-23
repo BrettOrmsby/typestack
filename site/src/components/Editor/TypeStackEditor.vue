@@ -50,6 +50,9 @@ ansiUp.use_classes = true;
 
 const consoleFunc = (string: string) => {
   if (consoleElement.value) {
+    if (consoleElement.value.style.display !== "block") {
+      consoleElement.value.style.display = "block";
+    }
     // if the text is the first text logged and it starts with a newline, replace it with nothing
     // do this because errors start with newlines and do not look good with the console like that
     if (consoleElement.value.innerText === "" && string.startsWith("\n")) {
@@ -88,6 +91,7 @@ const consoleFunc = (string: string) => {
   line-height: initial;
   font-size: 0.875em;
   font-family: Fira code, Fira Mono, Consolas, Menlo, Courier, monospace;
+  display: none;
 }
 
 :deep() :is(.prism-editor__textarea, .prism-editor__editor) {
