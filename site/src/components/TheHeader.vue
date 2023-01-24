@@ -47,6 +47,8 @@ h1 {
 .button-container {
   display: flex;
   justify-content: center;
+  flex-wrap: wrap;
+  row-gap: var(--block-spacing-horizontal);
 }
 a {
   margin-right: var(--block-spacing-horizontal);

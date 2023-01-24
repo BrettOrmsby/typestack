@@ -350,8 +350,8 @@ fn combineStr(top second) @str {
         <p>
           Importing modules must occur at the top of the program using the
           <code>import</code> keyword followed by the module name. Note:
-          importing modules modules on the browser will cause an error. Modules
-          come pre-imported.
+          importing modules on the browser will cause an error. Modules come
+          pre-imported.
         </p>
 
         <h3>Running Module Functions</h3>
