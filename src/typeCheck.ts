@@ -1,4 +1,3 @@
-import { TokenType } from "./scan.js";
 import { StackFunctions } from "./functions.js";
 import { Program, StatementType } from "./parse.js";
 import { StackType } from "./stack.js";

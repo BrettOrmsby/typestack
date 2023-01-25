@@ -12,14 +12,14 @@ export class TSError {
   constructor(
     pos: { startPos: Pos; endPos: Pos },
     msg: string,
-    ...params: any[]
+    ...params: Array<string | boolean | number>
   ) {
     const MAX_ERROR_WIDTH = 35; // characters on each side of the start of the error
 
     let replaceNum = -1;
     const formattedMessage = msg.replace(/{}/g, () => {
       replaceNum += 1;
-      return params[replaceNum];
+      return params[replaceNum].toString();
     });
 
     let errorLine = ErrorInputConfig.input.split("\n")[pos.startPos.line - 1];
