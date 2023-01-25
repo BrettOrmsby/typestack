@@ -1,33 +1,14 @@
-import { TokenType, Token, Pos, Keyword } from "./scan.js";
+import { TokenType, Token, Pos } from "./scan.js";
 import { type StackFunctions } from "./functions.js";
 import { StackType } from "./stack.js";
 import { TSError, isTSError } from "./utils/error.js";
+import { UnionSubset } from "./utils/types.js";
+import includes from "./utils/includes.js";
 
-// get a subset of a union
-type Extends<T, U extends T> = U;
-type ExpressionType = Extends<
+type ExpressionType = UnionSubset<
   TokenType,
   "int" | "float" | "str" | "bool" | "identifier" | "keyword"
 >;
-
-export type Expression = {
-  type: ExpressionType;
-  startPos: Pos;
-  endPos: Pos;
-  value: string | number | boolean;
-};
-
-/* 
-export type Expression<T extends ExpressionType> = {
-  type: T;
-  startPos: Pos;
-  endPos: Pos;
-  value: T extends TokenType.Int ? number :
-  T extends TokenType.Float ? number :
-  T extends TokenType.Bool ? boolean :
-  string;
-};
-*/
 
 export enum StatementType {
   ForLoop,
@@ -44,7 +25,7 @@ export type Statement = {
   else?: Program;
 };
 
-export type Program = Array<Expression | Statement>;
+export type Program = Array<Token<ExpressionType> | Statement>;
 
 export class Parser {
   tokens: Token<TokenType>[];
@@ -140,12 +121,17 @@ export class Parser {
           "unexpected character"
         );
       }
-
       // literals become expressions
-      if (
-        ["int", "float", "str", "bool", "identifier"].includes(current.type)
-      ) {
-        block.push(current as Expression);
+      const literalsTypes: Exclude<ExpressionType, "keyword">[] = [
+        "int",
+        "float",
+        "str",
+        "bool",
+        "identifier",
+      ];
+      if (includes(literalsTypes, current.type)) {
+        current.type;
+        block.push(current);
         this.#increment();
         continue;
       }
@@ -168,7 +154,7 @@ export class Parser {
       if ("keyword" === current.type) {
         // stack types become expressions
         if (["int", "bool", "str", "float"].includes(current.value as string)) {
-          block.push(current as Expression);
+          block.push(current);
           this.#increment();
           continue;
         }
@@ -204,7 +190,7 @@ export class Parser {
         // any can only be found in functions
         if ("any" === current.value) {
           if (isInFunction) {
-            block.push(current as Expression);
+            block.push(current);
             this.#increment();
             continue;
           } else {
@@ -221,7 +207,7 @@ export class Parser {
         // break can only be found in loops
         if ("break" === current.value) {
           if (isInLoop) {
-            block.push(current as Expression);
+            block.push(current);
             this.#increment();
             continue;
           } else {
@@ -238,7 +224,7 @@ export class Parser {
         // continue can only be found in loops
         if ("continue" === current.value) {
           if (isInLoop) {
-            block.push(current as Expression);
+            block.push(current);
             this.#increment();
             continue;
           } else {
