@@ -51,7 +51,7 @@ function traverseCheckProgram(
   for (const item of program) {
     // if it is an expression
     if ("value" in item) {
-      if (item.type === TokenType.Identifier) {
+      if (item.type === "identifier") {
         // The identifier must be in the parameters or a function at the current stack, in the any stack or in each individual stack
         const value = item.value as string;
         if (value in otherIdentifiers) {
@@ -77,7 +77,7 @@ function traverseCheckProgram(
             )
           );
         }
-      } else if (item.type === TokenType.Keyword) {
+      } else if (item.type === "keyword") {
         // certain keywords change the stack
         switch (item.value as string) {
           case "int":
@@ -96,13 +96,13 @@ function traverseCheckProgram(
             stack = StackType.Any;
         }
         // Type values change the stack
-      } else if (item.type === TokenType.Int) {
+      } else if (item.type === "int") {
         stack = StackType.Int;
-      } else if (item.type === TokenType.Float) {
+      } else if (item.type === "float") {
         stack = StackType.Float;
-      } else if (item.type === TokenType.Str) {
+      } else if (item.type === "str") {
         stack = StackType.Str;
-      } else if (item.type === TokenType.Bool) {
+      } else if (item.type === "bool") {
         stack = StackType.Bool;
       }
     } else {

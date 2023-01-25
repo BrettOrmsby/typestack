@@ -38,7 +38,7 @@ export default class {
     for (const item of program) {
       // if it is an expression
       if ("value" in item) {
-        if (item.type === TokenType.Identifier) {
+        if (item.type === "identifier") {
           const value = item.value as string;
 
           // if the identifier is a parameter variable or function
@@ -128,7 +128,7 @@ export default class {
               }
             }
           }
-        } else if (item.type === TokenType.Keyword) {
+        } else if (item.type === "keyword") {
           // switch stacks for the most part
           switch (item.value as string) {
             case "int":
@@ -155,12 +155,13 @@ export default class {
           }
         } else {
           // Expression is a bool, str, float or int so just add it and switch stacks
-          const stackType = {
-            [TokenType.Int]: StackType.Int,
-            [TokenType.Float]: StackType.Float,
-            [TokenType.Str]: StackType.Str,
-            [TokenType.Bool]: StackType.Bool,
-          }[item.type];
+          const tokenTypeToStackObj = {
+            int: StackType.Int,
+            float: StackType.Float,
+            str: StackType.Str,
+            bool: StackType.Bool,
+          };
+          const stackType = tokenTypeToStackObj[item.type];
           stack = stackType;
           stacks[stackType].push(item.value);
         }

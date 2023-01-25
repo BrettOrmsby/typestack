@@ -1,39 +1,66 @@
-/* TODO: fix this error with any type params that auto go to the type of function
-fn combineStr(top second) @str {
-    top + second
-}
-*/
 import { TSError, ErrorInputConfig } from "./utils/error.js";
-export enum TokenType {
-  Int,
-  Float,
-  Str,
-  Bool,
-  Keyword,
-  Identifier,
-  Colon,
-  OpenParen,
-  CloseParen,
-  OpenBracket,
-  CloseBracket,
-  EOF,
-}
+
+export type TokenType =
+  | "int"
+  | "float"
+  | "str"
+  | "bool"
+  | "keyword"
+  | "identifier"
+  | "colon"
+  | "openParen"
+  | "closeParen"
+  | "openBracket"
+  | "closeBracket"
+  | "EOF";
+
+const keywords = [
+  "import",
+  "fn",
+  "loop",
+  "for",
+  "while",
+  "if",
+  "else",
+  "break",
+  "continue",
+  "int",
+  "bool",
+  "str",
+  "float",
+  "any",
+  "@int",
+  "@float",
+  "@str",
+  "@bool",
+  "@any",
+] as const;
+
+export type Keyword = typeof keywords[number];
 
 export type Pos = {
   line: number;
   char: number;
 };
 
-export type Token = {
+export type Token<T extends TokenType> = {
   type: TokenType;
   startPos: Pos;
   endPos: Pos;
-  value: string | number | boolean;
+  value: T extends "int"
+    ? number
+    : T extends "float"
+    ? number
+    : T extends "bool"
+    ? boolean
+    : T extends "keyword"
+    ? Keyword
+    : string;
 };
 
 export class Scanner {
   input: string;
-  tokens: Token[];
+  tokens: Token<TokenType>[];
   pointer: number;
   char: number;
   line: number;
@@ -56,19 +83,19 @@ export class Scanner {
       if (["(", ")", "{", "}", ":"].includes(current)) {
         switch (current) {
           case "(":
-            this.#addToken(TokenType.OpenParen, "(");
+            this.#addToken("openParen", "(");
             break;
           case ")":
-            this.#addToken(TokenType.CloseParen, ")");
+            this.#addToken("closeParen", ")");
             break;
           case "{":
-            this.#addToken(TokenType.OpenBracket, "{");
+            this.#addToken("openBracket", "{");
             break;
           case "}":
-            this.#addToken(TokenType.CloseBracket, "}");
+            this.#addToken("closeBracket", "}");
             break;
           case ":":
-            this.#addToken(TokenType.Colon, ":");
+            this.#addToken("colon", ":");
         }
         this.#increment();
         continue;
@@ -146,7 +173,7 @@ export class Scanner {
 
         this.#increment();
 
-        this.#addToken(TokenType.Str, str, startPos);
+        this.#addToken("str", str, startPos);
 
         const posError = this.#expectSeparator();
         if (posError) {
@@ -165,21 +192,20 @@ export class Scanner {
       }
     }
     this.#increment();
-    this.#addToken(TokenType.EOF, false);
+    this.#addToken("EOF", "");
   }
 
-  #addToken(
-    type: TokenType,
-    value: string | number | boolean,
-    startPos?: Pos,
-    endPos?: Pos
+  #addToken<T extends TokenType>(
+    type: T,
+    value: Token<T>["value"],
+    startPos: Pos = { line: this.line, char: this.char },
+    endPos: Pos = { line: this.line, char: this.char }
   ) {
-    startPos = startPos ? startPos : { line: this.line, char: this.char };
     this.tokens.push({
       type,
       value,
       startPos,
-      endPos: endPos ? endPos : { line: this.line, char: this.char },
+      endPos,
     });
   }
 
@@ -247,7 +273,7 @@ export class Scanner {
         );
       }
 
-      this.#addToken(TokenType.Float, float, startPos);
+      this.#addToken("float", float, startPos);
     } else {
       const int = parseInt(strOfNumber);
       if (Number.isNaN(int)) {
@@ -260,7 +286,7 @@ export class Scanner {
         );
       }
 
-      this.#addToken(TokenType.Int, int, startPos);
+      this.#addToken("int", int, startPos);
     }
 
     return this.#expectSeparator();
@@ -283,36 +309,14 @@ export class Scanner {
       this.#increment();
     }
 
-    const keywords = [
-      "import",
-      "fn",
-      "loop",
-      "for",
-      "while",
-      "if",
-      "else",
-      "break",
-      "continue",
-      "int",
-      "bool",
-      "str",
-      "float",
-      "any",
-      "@int",
-      "@float",
-      "@str",
-      "@bool",
-      "@any",
-    ];
-
     if (str === "false") {
-      this.#addToken(TokenType.Bool, false, startPos);
+      this.#addToken("bool", false, startPos);
     } else if (str === "true") {
-      this.#addToken(TokenType.Bool, true, startPos);
-    } else if (keywords.includes(str)) {
-      this.#addToken(TokenType.Keyword, str, startPos);
+      this.#addToken("bool", true, startPos);
+    } else if (keywords.some((e) => e === str)) {
+      this.#addToken("keyword", str as Keyword, startPos);
     } else {
-      this.#addToken(TokenType.Identifier, str, startPos);
+      this.#addToken("identifier", str, startPos);
     }
   }
 }

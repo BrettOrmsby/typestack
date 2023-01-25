@@ -1,21 +1,33 @@
-import { TokenType, Token, Pos } from "./scan.js";
+import { TokenType, Token, Pos, Keyword } from "./scan.js";
 import { type StackFunctions } from "./functions.js";
 import { StackType } from "./stack.js";
 import { TSError, isTSError } from "./utils/error.js";
 
-type ExpressionType =
-  | TokenType.Int
-  | TokenType.Float
-  | TokenType.Str
-  | TokenType.Bool
-  | TokenType.Identifier
-  | TokenType.Keyword;
+// get a subset of a union
+type Extends<T, U extends T> = U;
+type ExpressionType = Extends<
+  TokenType,
+  "int" | "float" | "str" | "bool" | "identifier" | "keyword"
+>;
+
 export type Expression = {
   type: ExpressionType;
   startPos: Pos;
   endPos: Pos;
   value: string | number | boolean;
 };
+
+/* 
+export type Expression<T extends ExpressionType> = {
+  type: T;
+  startPos: Pos;
+  endPos: Pos;
+  value: T extends TokenType.Int ? number :
+  T extends TokenType.Float ? number :
+  T extends TokenType.Bool ? boolean :
+  string;
+};
+*/
 
 export enum StatementType {
   ForLoop,
@@ -35,13 +47,13 @@ export type Statement = {
 export type Program = Array<Expression | Statement>;
 
 export class Parser {
-  tokens: Token[];
+  tokens: Token<TokenType>[];
   pointer: number;
   functions: StackFunctions;
   newFunctions: { name: string; type: StackType }[];
   program: Program;
 
-  constructor(tokens: Token[], functions: StackFunctions) {
+  constructor(tokens: Token<TokenType>[], functions: StackFunctions) {
     this.tokens = tokens;
     this.functions = functions;
     this.newFunctions = [];
@@ -62,8 +74,8 @@ export class Parser {
   async #parseImports() {
     this.pointer -= 1;
     while (this.pointer < 0 || !this.#isAtEnd()) {
-      if (this.#expect(TokenType.Keyword, "import")) {
-        if (this.#expect(TokenType.Identifier)) {
+      if (this.#expect("keyword", "import")) {
+        if (this.#expect("identifier")) {
           // dynamically import the file and add the module functions to the functions
           try {
             const module = (await import(`./modules/${this.#peek().value}.js`))
@@ -116,12 +128,9 @@ export class Parser {
 
       // Punctuation should not be in the middle of nowhere
       if (
-        [
-          TokenType.OpenBracket,
-          TokenType.CloseParen,
-          TokenType.OpenParen,
-          TokenType.Colon,
-        ].includes(current.type)
+        ["openBracket", "closeParen", "openParen", "colon"].includes(
+          current.type
+        )
       ) {
         return new TSError(
           {
@@ -134,13 +143,7 @@ export class Parser {
 
       // literals become expressions
       if (
-        [
-          TokenType.Int,
-          TokenType.Float,
-          TokenType.Str,
-          TokenType.Bool,
-          TokenType.Identifier,
-        ].includes(current.type)
+        ["int", "float", "str", "bool", "identifier"].includes(current.type)
       ) {
         block.push(current as Expression);
         this.#increment();
@@ -148,7 +151,7 @@ export class Parser {
       }
 
       // return the block when hitting a `}` unless in the root witch would be an error
-      if (TokenType.CloseBracket === current.type) {
+      if ("closeBracket" === current.type) {
         if (isInRoot) {
           return new TSError(
             {
@@ -162,7 +165,7 @@ export class Parser {
         return block;
       }
 
-      if (TokenType.Keyword === current.type) {
+      if ("keyword" === current.type) {
         // stack types become expressions
         if (["int", "bool", "str", "float"].includes(current.value as string)) {
           block.push(current as Expression);
@@ -267,7 +270,7 @@ export class Parser {
           const endPos = current.endPos;
 
           // opening bracket should follow a loop keyword
-          if (!this.#expect(TokenType.OpenBracket)) {
+          if (!this.#expect("openBracket")) {
             return new TSError(
               {
                 startPos: this.#peek().startPos,
@@ -301,7 +304,7 @@ export class Parser {
           const startPos = current.startPos;
 
           // loop and an opening bracket should follow a for keyword
-          if (!this.#expect(TokenType.Keyword, "loop")) {
+          if (!this.#expect("keyword", "loop")) {
             return new TSError(
               {
                 startPos: this.#peek().startPos,
@@ -313,7 +316,7 @@ export class Parser {
 
           const endPos = this.#peek().endPos;
 
-          if (!this.#expect(TokenType.OpenBracket)) {
+          if (!this.#expect("openBracket")) {
             return new TSError(
               {
                 startPos: this.#peek().startPos,
@@ -347,7 +350,7 @@ export class Parser {
           const startPos = current.startPos;
 
           // loop and an opening bracket should follow a while keyword
-          if (!this.#expect(TokenType.Keyword, "loop")) {
+          if (!this.#expect("keyword", "loop")) {
             return new TSError(
               {
                 startPos: this.#peek().startPos,
@@ -359,7 +362,7 @@ export class Parser {
 
           const endPos = this.#peek().endPos;
 
-          if (!this.#expect(TokenType.OpenBracket)) {
+          if (!this.#expect("openBracket")) {
             return new TSError(
               {
                 startPos: this.#peek().startPos,
@@ -394,7 +397,7 @@ export class Parser {
           const endPos = current.endPos;
 
           // an opening bracket should follow an if
-          if (!this.#expect(TokenType.OpenBracket)) {
+          if (!this.#expect("openBracket")) {
             return new TSError(
               {
                 startPos: this.#peek().startPos,
@@ -417,8 +420,8 @@ export class Parser {
 
           // an optional else keyword can follow with an opening bracket
           this.pointer -= 1;
-          if (this.#expect(TokenType.Keyword, "else")) {
-            if (!this.#expect(TokenType.OpenBracket)) {
+          if (this.#expect("keyword", "else")) {
+            if (!this.#expect("openBracket")) {
               return new TSError(
                 {
                   startPos: this.#peek().startPos,
@@ -470,7 +473,7 @@ export class Parser {
           }
 
           // the name of the function (identifier) should follow
-          if (!this.#expect(TokenType.Identifier)) {
+          if (!this.#expect("identifier")) {
             return new TSError(
               {
                 startPos: this.#peek().startPos,
@@ -482,7 +485,7 @@ export class Parser {
           const name = this.#peek().value as string;
 
           // an opening parenthesis should follow
-          if (!this.#expect(TokenType.OpenParen)) {
+          if (!this.#expect("openParen")) {
             return new TSError(
               {
                 startPos: this.#peek().startPos,
@@ -495,9 +498,9 @@ export class Parser {
           const params: Record<string, StackType> = {};
 
           // get all the parameters from the function
-          while (!this.#isAtEnd() && !this.#expect(TokenType.CloseParen)) {
+          while (!this.#isAtEnd() && !this.#expect("closeParen")) {
             this.pointer -= 1;
-            if (!this.#expect(TokenType.Identifier)) {
+            if (!this.#expect("identifier")) {
               return new TSError(
                 {
                   startPos: this.#peek().startPos,
@@ -507,12 +510,11 @@ export class Parser {
               );
             }
             const name = this.#peek().value as string;
-
             // parameters can have a type associated with them separated by a colon
-            if (this.#expect(TokenType.Colon)) {
+            if (this.#expect("colon")) {
               this.#increment();
               if (
-                this.#peek().type === TokenType.Keyword &&
+                this.#peek().type === "keyword" &&
                 ["int", "str", "float", "bool", "any"].includes(
                   this.#peek().value as string
                 )
@@ -556,7 +558,7 @@ export class Parser {
           // a function type should follow
           if (
             !this.#isAtEnd() &&
-            this.#peek().type === TokenType.Keyword &&
+            this.#peek().type === "keyword" &&
             ["@int", "@str", "@float", "@bool", "@any"].includes(
               this.#peek().value as string
             )
@@ -579,7 +581,7 @@ export class Parser {
           }
 
           // finally, a opening bracket is needed
-          if (!this.#expect(TokenType.OpenBracket)) {
+          if (!this.#expect("openBracket")) {
             return new TSError(
               {
                 startPos: this.#peek().startPos,
@@ -645,9 +647,9 @@ export class Parser {
   }
 
   #isAtEnd(): boolean {
-    return this.tokens[this.pointer].type === TokenType.EOF;
+    return this.tokens[this.pointer].type === "EOF";
   }
-  #peek(): Token {
+  #peek(): Token<TokenType> {
     if (this.#isAtEnd()) {
       return this.tokens[this.tokens.length - 1];
     }

@@ -2,7 +2,7 @@
   "version": "1.5.2",
   "name": "typestack-lang",
   "description": "A stack-based, type-safe programing language",
-  "homepage": "https://github.com/BrettOrmsby/type-stack#readme",
+  "homepage": "https://brettormsby.github.io/typestack/",
   "license": "MIT",
   "author": "Brett Ormsby",
   "repository": "github:BrettOrmsby/type-stack",
