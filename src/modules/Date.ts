@@ -1,186 +1,185 @@
 import { type StackFunctions } from "../functions.js";
-import { StackType } from "../stack.js";
 
 const date: StackFunctions = {
-  [StackType.Int]: {
+  int: {
     now: {
       params: {},
       rawCode: (stacks) => {
-        stacks[StackType.Int].push(Date.now());
+        stacks.int.push(Date.now());
       },
     },
     getTimezoneOffset: {
-      params: { date: StackType.Int },
+      params: { date: "int" },
       rawCode: (stacks, params) => {
         const date = new Date(params.date);
         if (!isValidDate(date)) {
           return new Error(`unable to convert to a date: \`${params.date}\``);
         }
-        stacks[StackType.Int].push(date.getTimezoneOffset());
+        stacks.int.push(date.getTimezoneOffset());
       },
     },
     getDate: {
-      params: { date: StackType.Int },
+      params: { date: "int" },
       rawCode: (stacks, params) => {
         const date = new Date(params.date);
         if (!isValidDate(date)) {
           return new Error(`unable to convert to a date: \`${params.date}\``);
         }
-        stacks[StackType.Int].push(date.getDate());
+        stacks.int.push(date.getDate());
       },
     },
     getDay: {
-      params: { date: StackType.Int },
+      params: { date: "int" },
       rawCode: (stacks, params) => {
         const date = new Date(params.date);
         if (!isValidDate(date)) {
           return new Error(`unable to convert to a date: \`${params.date}\``);
         }
-        stacks[StackType.Int].push(date.getDay());
+        stacks.int.push(date.getDay());
       },
     },
     getYear: {
-      params: { date: StackType.Int },
+      params: { date: "int" },
       rawCode: (stacks, params) => {
         const date = new Date(params.date);
         if (!isValidDate(date)) {
           return new Error(`unable to convert to a date: \`${params.date}\``);
         }
-        stacks[StackType.Int].push(date.getFullYear());
+        stacks.int.push(date.getFullYear());
       },
     },
     getHours: {
-      params: { date: StackType.Int },
+      params: { date: "int" },
       rawCode: (stacks, params) => {
         const date = new Date(params.date);
         if (!isValidDate(date)) {
           return new Error(`unable to convert to a date: \`${params.date}\``);
         }
-        stacks[StackType.Int].push(date.getHours());
+        stacks.int.push(date.getHours());
       },
     },
     getMilliseconds: {
-      params: { date: StackType.Int },
+      params: { date: "int" },
       rawCode: (stacks, params) => {
         const date = new Date(params.date);
         if (!isValidDate(date)) {
           return new Error(`unable to convert to a date: \`${params.date}\``);
         }
-        stacks[StackType.Int].push(date.getMilliseconds());
+        stacks.int.push(date.getMilliseconds());
       },
     },
     getMinutes: {
-      params: { date: StackType.Int },
+      params: { date: "int" },
       rawCode: (stacks, params) => {
         const date = new Date(params.date);
         if (!isValidDate(date)) {
           return new Error(`unable to convert to a date: \`${params.date}\``);
         }
-        stacks[StackType.Int].push(date.getMinutes());
+        stacks.int.push(date.getMinutes());
       },
     },
     getMonth: {
-      params: { date: StackType.Int },
+      params: { date: "int" },
       rawCode: (stacks, params) => {
         const date = new Date(params.date);
         if (!isValidDate(date)) {
           return new Error(`unable to convert to a date: \`${params.date}\``);
         }
-        stacks[StackType.Int].push(date.getMonth());
+        stacks.int.push(date.getMonth());
       },
     },
     getSeconds: {
-      params: { date: StackType.Int },
+      params: { date: "int" },
       rawCode: (stacks, params) => {
         const date = new Date(params.date);
         if (!isValidDate(date)) {
           return new Error(`unable to convert to a date: \`${params.date}\``);
         }
-        stacks[StackType.Int].push(date.getSeconds());
+        stacks.int.push(date.getSeconds());
       },
     },
     getUTCDate: {
-      params: { date: StackType.Int },
+      params: { date: "int" },
       rawCode: (stacks, params) => {
         const date = new Date(params.date);
         if (!isValidDate(date)) {
           return new Error(`unable to convert to a date: \`${params.date}\``);
         }
-        stacks[StackType.Int].push(date.getUTCDate());
+        stacks.int.push(date.getUTCDate());
       },
     },
     getUTCDay: {
-      params: { date: StackType.Int },
+      params: { date: "int" },
       rawCode: (stacks, params) => {
         const date = new Date(params.date);
         if (!isValidDate(date)) {
           return new Error(`unable to convert to a date: \`${params.date}\``);
         }
-        stacks[StackType.Int].push(date.getUTCDay());
+        stacks.int.push(date.getUTCDay());
       },
     },
     getUTCYear: {
-      params: { date: StackType.Int },
+      params: { date: "int" },
       rawCode: (stacks, params) => {
         const date = new Date(params.date);
         if (!isValidDate(date)) {
           return new Error(`unable to convert to a date: \`${params.date}\``);
         }
-        stacks[StackType.Int].push(date.getUTCFullYear());
+        stacks.int.push(date.getUTCFullYear());
       },
     },
     getUTCHours: {
-      params: { date: StackType.Int },
+      params: { date: "int" },
       rawCode: (stacks, params) => {
         const date = new Date(params.date);
         if (!isValidDate(date)) {
           return new Error(`unable to convert to a date: \`${params.date}\``);
         }
-        stacks[StackType.Int].push(date.getUTCHours());
+        stacks.int.push(date.getUTCHours());
       },
     },
     getUTCMilliseconds: {
-      params: { date: StackType.Int },
+      params: { date: "int" },
       rawCode: (stacks, params) => {
         const date = new Date(params.date);
         if (!isValidDate(date)) {
           return new Error(`unable to convert to a date: \`${params.date}\``);
         }
-        stacks[StackType.Int].push(date.getUTCMilliseconds());
+        stacks.int.push(date.getUTCMilliseconds());
       },
     },
     getUTCMinutes: {
-      params: { date: StackType.Int },
+      params: { date: "int" },
       rawCode: (stacks, params) => {
         const date = new Date(params.date);
         if (!isValidDate(date)) {
           return new Error(`unable to convert to a date: \`${params.date}\``);
         }
-        stacks[StackType.Int].push(date.getUTCMinutes());
+        stacks.int.push(date.getUTCMinutes());
       },
     },
     getUTCMonth: {
-      params: { date: StackType.Int },
+      params: { date: "int" },
       rawCode: (stacks, params) => {
         const date = new Date(params.date);
         if (!isValidDate(date)) {
           return new Error(`unable to convert to a date: \`${params.date}\``);
         }
-        stacks[StackType.Int].push(date.getUTCMonth());
+        stacks.int.push(date.getUTCMonth());
       },
     },
     getUTCSeconds: {
-      params: { date: StackType.Int },
+      params: { date: "int" },
       rawCode: (stacks, params) => {
         const date = new Date(params.date);
         if (!isValidDate(date)) {
           return new Error(`unable to convert to a date: \`${params.date}\``);
         }
-        stacks[StackType.Int].push(date.getUTCSeconds());
+        stacks.int.push(date.getUTCSeconds());
       },
     },
     setDate: {
-      params: { day: StackType.Int, date: StackType.Int },
+      params: { day: "int", date: "int" },
       rawCode: (stacks, params) => {
         const date = new Date(params.date);
         if (!isValidDate(date)) {
@@ -190,11 +189,11 @@ const date: StackFunctions = {
         if (!isValidDate(newDate)) {
           return new Error("invalid date created");
         }
-        stacks[StackType.Int].push(newDate);
+        stacks.int.push(newDate);
       },
     },
     setFullYear: {
-      params: { year: StackType.Int, date: StackType.Int },
+      params: { year: "int", date: "int" },
       rawCode: (stacks, params) => {
         const date = new Date(params.date);
         if (!isValidDate(date)) {
@@ -204,11 +203,11 @@ const date: StackFunctions = {
         if (!isValidDate(newDate)) {
           return new Error("invalid date created");
         }
-        stacks[StackType.Int].push(newDate);
+        stacks.int.push(newDate);
       },
     },
     setHours: {
-      params: { hour: StackType.Int, date: StackType.Int },
+      params: { hour: "int", date: "int" },
       rawCode: (stacks, params) => {
         const date = new Date(params.date);
         if (!isValidDate(date)) {
@@ -218,11 +217,11 @@ const date: StackFunctions = {
         if (!isValidDate(newDate)) {
           return new Error("invalid date created");
         }
-        stacks[StackType.Int].push(newDate);
+        stacks.int.push(newDate);
       },
     },
     setMilliseconds: {
-      params: { millisecond: StackType.Int, date: StackType.Int },
+      params: { millisecond: "int", date: "int" },
       rawCode: (stacks, params) => {
         const date = new Date(params.date);
         if (!isValidDate(date)) {
@@ -232,11 +231,11 @@ const date: StackFunctions = {
         if (!isValidDate(newDate)) {
           return new Error("invalid date created");
         }
-        stacks[StackType.Int].push(newDate);
+        stacks.int.push(newDate);
       },
     },
     setMinutes: {
-      params: { minute: StackType.Int, date: StackType.Int },
+      params: { minute: "int", date: "int" },
       rawCode: (stacks, params) => {
         const date = new Date(params.date);
         if (!isValidDate(date)) {
@@ -246,11 +245,11 @@ const date: StackFunctions = {
         if (!isValidDate(newDate)) {
           return new Error("invalid date created");
         }
-        stacks[StackType.Int].push(newDate);
+        stacks.int.push(newDate);
       },
     },
     setMonth: {
-      params: { month: StackType.Int, date: StackType.Int },
+      params: { month: "int", date: "int" },
       rawCode: (stacks, params) => {
         const date = new Date(params.date);
         if (!isValidDate(date)) {
@@ -260,11 +259,11 @@ const date: StackFunctions = {
         if (!isValidDate(newDate)) {
           return new Error("invalid date created");
         }
-        stacks[StackType.Int].push(newDate);
+        stacks.int.push(newDate);
       },
     },
     setSeconds: {
-      params: { second: StackType.Int, date: StackType.Int },
+      params: { second: "int", date: "int" },
       rawCode: (stacks, params) => {
         const date = new Date(params.date);
         if (!isValidDate(date)) {
@@ -274,11 +273,11 @@ const date: StackFunctions = {
         if (!isValidDate(newDate)) {
           return new Error("invalid date created");
         }
-        stacks[StackType.Int].push(newDate);
+        stacks.int.push(newDate);
       },
     },
     setUTCDate: {
-      params: { day: StackType.Int, date: StackType.Int },
+      params: { day: "int", date: "int" },
       rawCode: (stacks, params) => {
         const date = new Date(params.date);
         if (!isValidDate(date)) {
@@ -288,11 +287,11 @@ const date: StackFunctions = {
         if (!isValidDate(newDate)) {
           return new Error("invalid date created");
         }
-        stacks[StackType.Int].push(newDate);
+        stacks.int.push(newDate);
       },
     },
     setUTCFullYear: {
-      params: { year: StackType.Int, date: StackType.Int },
+      params: { year: "int", date: "int" },
       rawCode: (stacks, params) => {
         const date = new Date(params.date);
         if (!isValidDate(date)) {
@@ -302,11 +301,11 @@ const date: StackFunctions = {
         if (!isValidDate(newDate)) {
           return new Error("invalid date created");
         }
-        stacks[StackType.Int].push(newDate);
+        stacks.int.push(newDate);
       },
     },
     setUTCHours: {
-      params: { hour: StackType.Int, date: StackType.Int },
+      params: { hour: "int", date: "int" },
       rawCode: (stacks, params) => {
         const date = new Date(params.date);
         if (!isValidDate(date)) {
@@ -316,11 +315,11 @@ const date: StackFunctions = {
         if (!isValidDate(newDate)) {
           return new Error("invalid date created");
         }
-        stacks[StackType.Int].push(newDate);
+        stacks.int.push(newDate);
       },
     },
     seUTCMilliseconds: {
-      params: { millisecond: StackType.Int, date: StackType.Int },
+      params: { millisecond: "int", date: "int" },
       rawCode: (stacks, params) => {
         const date = new Date(params.date);
         if (!isValidDate(date)) {
@@ -330,11 +329,11 @@ const date: StackFunctions = {
         if (!isValidDate(newDate)) {
           return new Error("invalid date created");
         }
-        stacks[StackType.Int].push(newDate);
+        stacks.int.push(newDate);
       },
     },
     setUTCMinutes: {
-      params: { minute: StackType.Int, date: StackType.Int },
+      params: { minute: "int", date: "int" },
       rawCode: (stacks, params) => {
         const date = new Date(params.date);
         if (!isValidDate(date)) {
@@ -344,11 +343,11 @@ const date: StackFunctions = {
         if (!isValidDate(newDate)) {
           return new Error("invalid date created");
         }
-        stacks[StackType.Int].push(newDate);
+        stacks.int.push(newDate);
       },
     },
     setUTCMonth: {
-      params: { month: StackType.Int, date: StackType.Int },
+      params: { month: "int", date: "int" },
       rawCode: (stacks, params) => {
         const date = new Date(params.date);
         if (!isValidDate(date)) {
@@ -358,11 +357,11 @@ const date: StackFunctions = {
         if (!isValidDate(newDate)) {
           return new Error("invalid date created");
         }
-        stacks[StackType.Int].push(newDate);
+        stacks.int.push(newDate);
       },
     },
     setUTCSeconds: {
-      params: { second: StackType.Int, date: StackType.Int },
+      params: { second: "int", date: "int" },
       rawCode: (stacks, params) => {
         const date = new Date(params.date);
         if (!isValidDate(date)) {
@@ -372,80 +371,80 @@ const date: StackFunctions = {
         if (!isValidDate(newDate)) {
           return new Error("invalid date created");
         }
-        stacks[StackType.Int].push(newDate);
+        stacks.int.push(newDate);
       },
     },
     toStr: {
-      params: { date: StackType.Int },
+      params: { date: "int" },
       rawCode: (stacks, params) => {
         const date = new Date(params.date);
 
         if (!isValidDate(date)) {
           return new Error(`unable to convert to a date: \`${params.date}\``);
         }
-        stacks[StackType.Str].push(date.toString());
+        stacks.str.push(date.toString());
       },
     },
     toDateStr: {
-      params: { date: StackType.Int },
+      params: { date: "int" },
       rawCode: (stacks, params) => {
         const date = new Date(params.date);
 
         if (!isValidDate(date)) {
           return new Error(`unable to convert to a date: \`${params.date}\``);
         }
-        stacks[StackType.Str].push(date.toDateString());
+        stacks.str.push(date.toDateString());
       },
     },
     toISOStr: {
-      params: { date: StackType.Int },
+      params: { date: "int" },
       rawCode: (stacks, params) => {
         const date = new Date(params.date);
 
         if (!isValidDate(date)) {
           return new Error(`unable to convert to a date: \`${params.date}\``);
         }
-        stacks[StackType.Str].push(date.toISOString());
+        stacks.str.push(date.toISOString());
       },
     },
     toUTCStr: {
-      params: { date: StackType.Int },
+      params: { date: "int" },
       rawCode: (stacks, params) => {
         const date = new Date(params.date);
 
         if (!isValidDate(date)) {
           return new Error(`unable to convert to a date: \`${params.date}\``);
         }
-        stacks[StackType.Str].push(date.toUTCString());
+        stacks.str.push(date.toUTCString());
       },
     },
     toTimeStr: {
-      params: { date: StackType.Int },
+      params: { date: "int" },
       rawCode: (stacks, params) => {
         const date = new Date(params.date);
 
         if (!isValidDate(date)) {
           return new Error(`unable to convert to a date: \`${params.date}\``);
         }
-        stacks[StackType.Str].push(date.toTimeString());
+        stacks.str.push(date.toTimeString());
       },
     },
   },
-  [StackType.Float]: {},
-  [StackType.Str]: {
+  float: {},
+  str: {
     parse: {
-      params: { date: StackType.Str },
+      params: { date: "str" },
       rawCode: (stacks, params) => {
         const date = Date.parse(params.date);
         if (!isValidDate(date)) {
           return new Error(`unable to convert to a date: \`${params.date}\``);
         }
-        stacks[StackType.Int].push(Date.parse(params.date));
+        stacks.int.push(Date.parse(params.date));
       },
     },
   },
-  [StackType.Bool]: {},
-  [StackType.Any]: {},
+  bool: {},
+  any: {},
 };
 
 function isValidDate(d: number | Date) {

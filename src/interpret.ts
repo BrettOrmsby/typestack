@@ -1,6 +1,6 @@
 import { Program } from "./parse.js";
 import { StackFunctions, functionToText } from "./functions.js";
-import { stacks, StackType } from "./stack.js";
+import { stacks, StackTypes } from "./stack.js";
 import { TSError, isTSError } from "./utils/error.js";
 
 export default class {
@@ -19,7 +19,7 @@ export default class {
   }
 
   async run(): Promise<TSError | void> {
-    const runError = await this.runProgram(this.program, {}, StackType.Int);
+    const runError = await this.runProgram(this.program, {}, "int");
     if (isTSError(runError)) {
       return runError;
     }
@@ -29,9 +29,9 @@ export default class {
     program: Program,
     params: Record<
       string,
-      { value: string | boolean | number; type: StackType }
+      { value: string | boolean | number; type: StackTypes }
     >,
-    stack: StackType
+    stack: StackTypes
   ): Promise<TSError | true | void> {
     const startStack = stack;
     for (const item of program) {
@@ -52,15 +52,15 @@ export default class {
             let errorStackType = stack;
 
             if (!stackFunction) {
-              stackFunction = this.functions[StackType.Any][value];
-              errorStackType = StackType.Any;
+              stackFunction = this.functions.any[value];
+              errorStackType = "any";
             }
             const functionParams = {};
 
             // get the parameters for the function and change the `any` type to the current stack
             for (const key in stackFunction.params) {
               const stackOfParam =
-                stackFunction.params[key] === StackType.Any
+                stackFunction.params[key] === "any"
                   ? stack
                   : stackFunction.params[key];
               if (!stacks[stackOfParam].check()) {
@@ -131,16 +131,16 @@ export default class {
           // switch stacks for the most part
           switch (item.value as string) {
             case "int":
-              stack = StackType.Int;
+              stack = "int";
               break;
             case "float":
-              stack = StackType.Float;
+              stack = "float";
               break;
             case "str":
-              stack = StackType.Str;
+              stack = "str";
               break;
             case "bool":
-              stack = StackType.Bool;
+              stack = "bool";
               break;
             case "any":
               stack = startStack;
@@ -154,13 +154,7 @@ export default class {
           }
         } else {
           // Expression is a bool, str, float or int so just add it and switch stacks
-          const tokenTypeToStackObj = {
-            int: StackType.Int,
-            float: StackType.Float,
-            str: StackType.Str,
-            bool: StackType.Bool,
-          };
-          const stackType = tokenTypeToStackObj[item.type];
+          const stackType = item.type as StackTypes;
           stack = stackType;
           stacks[stackType].push(item.value);
         }
@@ -184,7 +178,7 @@ export default class {
             return resultOfIteration;
           }
         } else if (item.type === "forLoop") {
-          if (!stacks[StackType.Int].check()) {
+          if (!stacks.int.check()) {
             return new TSError(
               {
                 startPos: item.startPos,
@@ -197,11 +191,11 @@ export default class {
           let resultOfIteration: TSError | true | void;
 
           // repeat while there is no error or break and the top of the int stack is not 0
-          while (!resultOfIteration && stacks[StackType.Int].peek() !== 0) {
+          while (!resultOfIteration && stacks.int.peek() !== 0) {
             resultOfIteration = await this.runProgram(
               item.block,
               params,
-              StackType.Int
+              "int"
             );
 
             if (isTSError(resultOfIteration)) {
@@ -212,7 +206,7 @@ export default class {
             }
 
             // increment or decrement the top of the int stack so it is closer to 0
-            if (!stacks[StackType.Int].check()) {
+            if (!stacks.int.check()) {
               return new TSError(
                 {
                   startPos: item.startPos,
@@ -221,19 +215,19 @@ export default class {
                 "expected an `int` on the stack"
               );
             } else {
-              const top = stacks[StackType.Int].get();
+              const top = stacks.int.get();
               if (top > 0) {
-                stacks[StackType.Int].push(top - 1);
+                stacks.int.push(top - 1);
               } else if (top < 0) {
-                stacks[StackType.Int].push(top + 1);
+                stacks.int.push(top + 1);
               }
             }
           }
 
           // move to the int stack on exit
-          stack = StackType.Int;
+          stack = "int";
         } else if (item.type === "wileLoop") {
-          if (!stacks[StackType.Bool].check()) {
+          if (!stacks.bool.check()) {
             return new TSError(
               {
                 startPos: item.startPos,
@@ -246,11 +240,11 @@ export default class {
           let resultOfIteration: TSError | true | void;
 
           // repeat while the top of the bool stack is true and there is no error or break
-          while (!resultOfIteration && stacks[StackType.Bool].get()) {
+          while (!resultOfIteration && stacks.bool.get()) {
             resultOfIteration = await this.runProgram(
               item.block,
               params,
-              StackType.Bool
+              "bool"
             );
 
             if (isTSError(resultOfIteration)) {
@@ -260,7 +254,7 @@ export default class {
               break;
             }
 
-            if (!stacks[StackType.Bool].check()) {
+            if (!stacks.bool.check()) {
               return new TSError(
                 {
                   startPos: item.startPos,
@@ -272,9 +266,9 @@ export default class {
           }
 
           // move to the bool stack on exit
-          stack = StackType.Bool;
+          stack = "bool";
         } else if (item.type === "if") {
-          if (!stacks[StackType.Bool].check()) {
+          if (!stacks.bool.check()) {
             return new TSError(
               {
                 startPos: item.startPos,
@@ -285,11 +279,11 @@ export default class {
           }
 
           // run the if block if the top of the bool stack is true or else try to run the else block
-          if (stacks[StackType.Bool].get()) {
+          if (stacks.bool.get()) {
             const blockResult = await this.runProgram(
               item.block,
               params,
-              StackType.Bool
+              "bool"
             );
             if (blockResult) {
               return blockResult;
@@ -298,7 +292,7 @@ export default class {
             const blockResult = await this.runProgram(
               item.else,
               params,
-              StackType.Bool
+              "bool"
             );
             if (blockResult) {
               return blockResult;
@@ -306,7 +300,7 @@ export default class {
           }
 
           // move to the bool stack on exit
-          stack = StackType.Bool;
+          stack = "bool";
         }
       }
     }

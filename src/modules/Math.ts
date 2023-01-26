@@ -1,56 +1,55 @@
 import { type StackFunctions } from "../functions.js";
-import { StackType } from "../stack.js";
 
 const math: StackFunctions = {
-  [StackType.Int]: {
+  int: {
     abs: {
-      params: { num: StackType.Int },
+      params: { num: "int" },
       rawCode: (stacks, params) => {
-        stacks[StackType.Int].push(Math.abs(params.num));
+        stacks.int.push(Math.abs(params.num));
       },
     },
     neg: {
-      params: { num: StackType.Int },
+      params: { num: "int" },
       rawCode: (stacks, params) => {
-        stacks[StackType.Int].push(-params.num);
+        stacks.int.push(-params.num);
       },
     },
   },
-  [StackType.Float]: {
+  float: {
     ceil: {
-      params: { num: StackType.Float },
+      params: { num: "float" },
       rawCode: (stacks, params) => {
-        stacks[StackType.Int].push(Math.ceil(params.num));
+        stacks.int.push(Math.ceil(params.num));
       },
     },
     floor: {
-      params: { num: StackType.Float },
+      params: { num: "float" },
       rawCode: (stacks, params) => {
-        stacks[StackType.Int].push(Math.floor(params.num));
+        stacks.int.push(Math.floor(params.num));
       },
     },
     round: {
-      params: { num: StackType.Float },
+      params: { num: "float" },
       rawCode: (stacks, params) => {
-        stacks[StackType.Int].push(Math.round(params.num));
+        stacks.int.push(Math.round(params.num));
       },
     },
     abs: {
-      params: { num: StackType.Float },
+      params: { num: "float" },
       rawCode: (stacks, params) => {
-        stacks[StackType.Float].push(Math.abs(params.num));
+        stacks.float.push(Math.abs(params.num));
       },
     },
     neg: {
-      params: { num: StackType.Float },
+      params: { num: "float" },
       rawCode: (stacks, params) => {
-        stacks[StackType.Float].push(-params.num);
+        stacks.float.push(-params.num);
       },
     },
   },
-  [StackType.Str]: {},
-  [StackType.Bool]: {},
-  [StackType.Any]: {},
+  str: {},
+  bool: {},
+  any: {},
 };
 
 export default math;

@@ -1,16 +1,15 @@
 import { type StackFunctions } from "../functions.js";
-import { StackType } from "../stack.js";
 
 const str: StackFunctions = {
-  [StackType.Int]: {
+  int: {
     fromCharCode: {
-      params: { code: StackType.Int },
+      params: { code: "int" },
       rawCode: (stacks, params) => {
-        stacks[StackType.Str].push(String.fromCharCode(params.code));
+        stacks.str.push(String.fromCharCode(params.code));
       },
     },
     fromCodePoint: {
-      params: { code: StackType.Int },
+      params: { code: "int" },
       rawCode: (stacks, params) => {
         let char: string;
         try {
@@ -20,28 +19,28 @@ const str: StackFunctions = {
             `\`code\` is an invalid code point: \`${params.code}\``
           );
         }
-        stacks[StackType.Str].push(char);
+        stacks.str.push(char);
       },
     },
     repeat: {
-      params: { string: StackType.Str, amount: StackType.Int },
+      params: { string: "str", amount: "int" },
       rawCode: (stacks, params) => {
         if (params.amount < 0) {
           return new Error(
             `unable to repeat a negative \`amount\`: \`${params.amount}\``
           );
         }
-        stacks[StackType.Str].push(params.string.repeat(params.amount));
+        stacks.str.push(params.string.repeat(params.amount));
       },
     },
     charAt: {
-      params: { string: StackType.Str, index: StackType.Int },
+      params: { string: "str", index: "int" },
       rawCode: (stacks, params) => {
-        stacks[StackType.Str].push(params.string.charAt(params.index));
+        stacks.str.push(params.string.charAt(params.index));
       },
     },
     charCodeAt: {
-      params: { string: StackType.Str, index: StackType.Int },
+      params: { string: "str", index: "int" },
       rawCode: (stacks, params) => {
         const code = params.string.charCodeAt(params.index);
         if (isNaN(code)) {
@@ -49,11 +48,11 @@ const str: StackFunctions = {
             `\`index\` out of range: \`"${params.string}"\`, \`${params.index}\``
           );
         }
-        stacks[StackType.Int].push(code);
+        stacks.int.push(code);
       },
     },
     codePointAt: {
-      params: { string: StackType.Str, index: StackType.Int },
+      params: { string: "str", index: "int" },
       rawCode: (stacks, params) => {
         const code = params.string.codePointAt(params.index);
         if (!code) {
@@ -61,129 +60,127 @@ const str: StackFunctions = {
             `\`index\` out of range: \`"${params.string}"\`, \`${params.index}\``
           );
         }
-        stacks[StackType.Int].push(code);
+        stacks.int.push(code);
       },
     },
     slice: {
       params: {
-        string: StackType.Str,
-        endIndex: StackType.Int,
-        startIndex: StackType.Int,
+        string: "str",
+        endIndex: "int",
+        startIndex: "int",
       },
       rawCode: (stacks, params) => {
-        stacks[StackType.Str].push(
+        stacks.str.push(
           params.string.slice(params.startIndex, params.endIndex)
         );
       },
     },
   },
-  [StackType.Float]: {},
-  [StackType.Str]: {
+  float: {},
+  str: {
     endsWith: {
-      params: { end: StackType.Str, string: StackType.Str },
+      params: { end: "str", string: "str" },
       rawCode: (stacks, params) => {
-        stacks[StackType.Bool].push(params.string.endsWith(params.end));
+        stacks.bool.push(params.string.endsWith(params.end));
       },
     },
     startsWith: {
-      params: { start: StackType.Str, string: StackType.Str },
+      params: { start: "str", string: "str" },
       rawCode: (stacks, params) => {
-        stacks[StackType.Bool].push(params.string.startsWith(params.start));
+        stacks.bool.push(params.string.startsWith(params.start));
       },
     },
     includes: {
-      params: { search: StackType.Str, string: StackType.Str },
+      params: { search: "str", string: "str" },
       rawCode: (stacks, params) => {
-        stacks[StackType.Bool].push(params.string.includes(params.search));
+        stacks.bool.push(params.string.includes(params.search));
       },
     },
     occurrence: {
-      params: { search: StackType.Str, string: StackType.Str },
+      params: { search: "str", string: "str" },
       rawCode: (stacks, params) => {
-        stacks[StackType.Int].push(
-          params.string.split(params.search).length - 1
-        );
+        stacks.int.push(params.string.split(params.search).length - 1);
       },
     },
     toUpper: {
-      params: { string: StackType.Str },
+      params: { string: "str" },
       rawCode: (stacks, params) => {
-        stacks[StackType.Str].push(params.string.toUpperCase());
+        stacks.str.push(params.string.toUpperCase());
       },
     },
     toLower: {
-      params: { string: StackType.Str },
+      params: { string: "str" },
       rawCode: (stacks, params) => {
-        stacks[StackType.Str].push(params.string.toLowerCase());
+        stacks.str.push(params.string.toLowerCase());
       },
     },
     trim: {
-      params: { string: StackType.Str },
+      params: { string: "str" },
       rawCode: (stacks, params) => {
-        stacks[StackType.Str].push(params.string.trim());
+        stacks.str.push(params.string.trim());
       },
     },
     reverse: {
-      params: { string: StackType.Str },
+      params: { string: "str" },
       rawCode: (stacks, params) => {
-        stacks[StackType.Str].push(params.string.split("").reverse().join(""));
+        stacks.str.push(params.string.split("").reverse().join(""));
       },
     },
     replace: {
       params: {
-        replacement: StackType.Str,
-        search: StackType.Str,
-        string: StackType.Str,
+        replacement: "str",
+        search: "str",
+        string: "str",
       },
       rawCode: (stacks, params) => {
-        stacks[StackType.Str].push(
+        stacks.str.push(
           params.string.replace(params.search, params.replacement)
         );
       },
     },
     replaceAll: {
       params: {
-        replacement: StackType.Str,
-        search: StackType.Str,
-        string: StackType.Str,
+        replacement: "str",
+        search: "str",
+        string: "str",
       },
       rawCode: (stacks, params) => {
-        stacks[StackType.Str].push(
+        stacks.str.push(
           params.string.replaceAll(params.search, params.replacement)
         );
       },
     },
     repeat: {
-      params: { string: StackType.Str, amount: StackType.Int },
+      params: { string: "str", amount: "int" },
       rawCode: (stacks, params) => {
         if (params.amount < 0) {
           return new Error(
             `unable to repeat a negative \`amount\`: \`${params.amount}\``
           );
         }
-        stacks[StackType.Str].push(params.string.repeat(params.amount));
+        stacks.str.push(params.string.repeat(params.amount));
       },
     },
     indexOf: {
-      params: { search: StackType.Str, string: StackType.Str },
+      params: { search: "str", string: "str" },
       rawCode: (stacks, params) => {
-        stacks[StackType.Int].push(params.string.indexOf(params.search));
+        stacks.int.push(params.string.indexOf(params.search));
       },
     },
     lastIndexOf: {
-      params: { search: StackType.Str, string: StackType.Str },
+      params: { search: "str", string: "str" },
       rawCode: (stacks, params) => {
-        stacks[StackType.Int].push(params.string.lastIndexOf(params.search));
+        stacks.int.push(params.string.lastIndexOf(params.search));
       },
     },
     charAt: {
-      params: { string: StackType.Str, index: StackType.Int },
+      params: { string: "str", index: "int" },
       rawCode: (stacks, params) => {
-        stacks[StackType.Str].push(params.string.charAt(params.index));
+        stacks.str.push(params.string.charAt(params.index));
       },
     },
     charCodeAt: {
-      params: { string: StackType.Str, index: StackType.Int },
+      params: { string: "str", index: "int" },
       rawCode: (stacks, params) => {
         const code = params.string.charCodeAt(params.index);
         if (isNaN(code)) {
@@ -191,11 +188,11 @@ const str: StackFunctions = {
             `\`index\` out of range: \`"${params.string}"\`, \`${params.index}\``
           );
         }
-        stacks[StackType.Int].push(code);
+        stacks.int.push(code);
       },
     },
     codePointAt: {
-      params: { string: StackType.Str, index: StackType.Int },
+      params: { string: "str", index: "int" },
       rawCode: (stacks, params) => {
         const code = params.string.codePointAt(params.index);
         if (!code) {
@@ -203,32 +200,32 @@ const str: StackFunctions = {
             `\`index\` out of range: \`"${params.string}"\`, \`${params.index}\``
           );
         }
-        stacks[StackType.Int].push(code);
+        stacks.int.push(code);
       },
     },
     slice: {
       params: {
-        string: StackType.Str,
-        endIndex: StackType.Int,
-        startIndex: StackType.Int,
+        string: "str",
+        endIndex: "int",
+        startIndex: "int",
       },
       rawCode: (stacks, params) => {
-        stacks[StackType.Str].push(
+        stacks.str.push(
           params.string.slice(params.startIndex, params.endIndex)
         );
       },
     },
     split: {
-      params: { separator: StackType.Str, string: StackType.Str },
+      params: { separator: "str", string: "str" },
       rawCode: (stacks, params) => {
         params.string
           .split(params.separator)
-          .forEach((e) => stacks[StackType.Str].push(e));
+          .forEach((e) => stacks.str.push(e));
       },
     },
   },
-  [StackType.Bool]: {},
-  [StackType.Any]: {},
+  bool: {},
+  any: {},
 };
 
 export default str;

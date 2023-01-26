@@ -1,6 +1,6 @@
 import { TokenType, Token, Pos, Keyword } from "./scan.js";
 import { type StackFunctions } from "./functions.js";
-import { StackType } from "./stack.js";
+import { type StackTypes, stackTypes } from "./stack.js";
 import { TSError, isTSError } from "./utils/error.js";
 import { UnionSubset } from "./utils/types.js";
 import includes from "./utils/includes.js";
@@ -26,7 +26,7 @@ export class Parser {
   tokens: Token<TokenType>[];
   pointer: number;
   functions: StackFunctions;
-  newFunctions: { name: string; type: StackType }[];
+  newFunctions: { name: string; type: StackTypes }[];
   program: Program;
 
   constructor(tokens: Token<TokenType>[], functions: StackFunctions) {
@@ -57,7 +57,7 @@ export class Parser {
             const module = (await import(`./modules/${this.#peek().value}.js`))
               .default as unknown as StackFunctions;
 
-            for (const stack of Object.values(StackType)) {
+            for (const stack of stackTypes) {
               for (const key in module[stack]) {
                 this.functions[stack][this.#peek().value + "." + key] =
                   module[stack][key];
@@ -482,7 +482,7 @@ export class Parser {
             );
           }
 
-          const params: Record<string, StackType> = {};
+          const params: Record<string, StackTypes> = {};
 
           // get all the parameters from the function
           while (!this.#isAtEnd() && !this.#expect("closeParen")) {
@@ -500,21 +500,18 @@ export class Parser {
             // parameters can have a type associated with them separated by a colon
             if (this.#expect("colon")) {
               this.#increment();
-              const typeKeywords: UnionSubset<
-                Keyword,
-                "int" | "str" | "float" | "bool" | "any"
-              >[] = ["int", "str", "float", "bool", "any"];
+              const typeKeywords: UnionSubset<Keyword, StackTypes>[] = [
+                "int",
+                "str",
+                "float",
+                "bool",
+                "any",
+              ];
               if (
                 this.#peek().type === "keyword" &&
                 includes(typeKeywords, this.#peek().value)
               ) {
-                params[name] = {
-                  int: StackType.Int,
-                  float: StackType.Float,
-                  str: StackType.Str,
-                  bool: StackType.Bool,
-                  any: StackType.Any,
-                }[this.#peek().value as string];
+                params[name] = this.#peek().value as StackTypes;
               } else {
                 return new TSError(
                   {
@@ -526,7 +523,7 @@ export class Parser {
               }
             } else {
               this.pointer -= 1;
-              params[name] = StackType.Any;
+              params[name] = "any";
             }
           }
 
@@ -540,7 +537,7 @@ export class Parser {
             );
           }
 
-          let functionType: StackType;
+          let functionType: StackTypes;
 
           this.#increment();
 
@@ -554,17 +551,17 @@ export class Parser {
             this.#peek().type === "keyword" &&
             includes(atKeywords, this.#peek().value)
           ) {
-            const atKeywordToStackType: Record<
+            const atKeywordToStackTypes: Record<
               typeof atKeywords[number],
-              StackType
+              StackTypes
             > = {
-              "@int": StackType.Int,
-              "@float": StackType.Float,
-              "@str": StackType.Str,
-              "@bool": StackType.Bool,
-              "@any": StackType.Any,
+              "@int": "int",
+              "@float": "float",
+              "@str": "str",
+              "@bool": "bool",
+              "@any": "any",
             };
-            functionType = atKeywordToStackType[this.#peek().value as string];
+            functionType = atKeywordToStackTypes[this.#peek().value as string];
           } else {
             return new TSError(
               {

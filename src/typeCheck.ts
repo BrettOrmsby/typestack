@@ -1,27 +1,24 @@
 import { StackFunctions } from "./functions.js";
 import { Program } from "./parse.js";
-import { StackType } from "./stack.js";
+import { stackTypes, StackTypes } from "./stack.js";
 import { TSError } from "./utils/error.js";
+import includes from "./utils/includes.js";
+import { Writeable } from "./utils/types.js";
 
 export default function typeCheck(
   program: Program,
   functions: StackFunctions,
-  newFunctions: { name: string; type: StackType }[]
+  newFunctions: { name: string; type: StackTypes }[]
 ): TSError[] {
-  const programTypeErrors = traverseCheckProgram(
-    program,
-    {},
-    StackType.Int,
-    functions
-  );
+  const programTypeErrors = traverseCheckProgram(program, {}, "int", functions);
 
   let functionErrors = [];
   for (const fn of newFunctions) {
     // overload all `any` type parameters to the function type
     const params = { ...functions[fn.type][fn.name].params };
-    if (fn.type !== StackType.Any) {
+    if (fn.type !== "any") {
       for (const param in params) {
-        if (params[param] === StackType.Any) {
+        if (params[param] === "any") {
           params[param] = fn.type;
         }
       }
@@ -42,8 +39,8 @@ export default function typeCheck(
 
 function traverseCheckProgram(
   program: Program,
-  otherIdentifiers: Record<string, StackType>,
-  stack: StackType,
+  otherIdentifiers: Record<string, StackTypes>,
+  stack: StackTypes,
   functions: StackFunctions
 ): TSError[] {
   let errors: TSError[] = [];
@@ -58,11 +55,11 @@ function traverseCheckProgram(
         } else if (
           !(
             value in functions[stack] ||
-            value in functions[StackType.Any] ||
-            (value in functions[StackType.Int] &&
-              value in functions[StackType.Float] &&
-              value in functions[StackType.Str] &&
-              value in functions[StackType.Bool])
+            value in functions.any ||
+            (value in functions.int &&
+              value in functions.float &&
+              value in functions.str &&
+              value in functions.bool)
           )
         ) {
           errors.push(
@@ -78,31 +75,14 @@ function traverseCheckProgram(
         }
       } else if (item.type === "keyword") {
         // certain keywords change the stack
-        switch (item.value as string) {
-          case "int":
-            stack = StackType.Int;
-            break;
-          case "float":
-            stack = StackType.Float;
-            break;
-          case "str":
-            stack = StackType.Str;
-            break;
-          case "bool":
-            stack = StackType.Bool;
-            break;
-          case "any":
-            stack = StackType.Any;
+        if (includes(stackTypes as Writeable<typeof stackTypes>, item.value)) {
+          stack = item.value;
         }
         // Type values change the stack
-      } else if (item.type === "int") {
-        stack = StackType.Int;
-      } else if (item.type === "float") {
-        stack = StackType.Float;
-      } else if (item.type === "str") {
-        stack = StackType.Str;
-      } else if (item.type === "bool") {
-        stack = StackType.Bool;
+      } else if (
+        includes(stackTypes as Writeable<typeof stackTypes>, item.type)
+      ) {
+        stack = item.type;
       }
     } else {
       // loops only need to check their block with the current type
@@ -122,40 +102,40 @@ function traverseCheckProgram(
         const result = traverseCheckProgram(
           item.block,
           otherIdentifiers,
-          StackType.Int,
+          "int",
           functions
         );
         if (result.length > 0) {
           errors = [...errors, ...result];
         }
-        stack = StackType.Int;
+        stack = "int";
 
         // while loops need to check their block with the bool type and change to the bool type after
       } else if (item.type === "wileLoop") {
         const result = traverseCheckProgram(
           item.block,
           otherIdentifiers,
-          StackType.Bool,
+          "bool",
           functions
         );
         if (result.length > 0) {
           errors = [...errors, ...result];
         }
-        stack = StackType.Bool;
+        stack = "bool";
 
         // if statements need to check their blocks with the bool type and turn it to the bool type after
       } else if (item.type === "if") {
         const firstBlock = traverseCheckProgram(
           item.block,
           otherIdentifiers,
-          StackType.Bool,
+          "bool",
           functions
         );
         if (item.else) {
           const secondBlock = traverseCheckProgram(
             item.block,
             otherIdentifiers,
-            StackType.Bool,
+            "bool",
             functions
           );
           if (secondBlock.length > 0 || firstBlock.length > 0) {
@@ -166,7 +146,7 @@ function traverseCheckProgram(
             errors = [...errors, ...firstBlock];
           }
         }
-        stack = StackType.Bool;
+        stack = "bool";
       }
     }
   }

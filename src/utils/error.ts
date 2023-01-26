@@ -1,10 +1,14 @@
 import { Pos } from "../scan.js";
 import { ConsoleEffects, consoleEffect } from "./consoleEffect.js";
 
-export const ErrorInputConfig: {
+type ErrorConfig = {
   input: string;
   consoleFunc: (string: string) => void;
-} = { input: "", consoleFunc: console.log };
+};
+export const ErrorInputConfig: ErrorConfig = {
+  input: "",
+  consoleFunc: console.log,
+};
 
 export class TSError {
   error: string;

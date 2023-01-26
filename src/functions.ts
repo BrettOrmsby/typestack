@@ -1,29 +1,29 @@
-import { StackType, Stacks } from "./stack.js";
+import { StackTypes, Stacks } from "./stack.js";
 import { Program } from "./parse.js";
 import * as readline from "readline";
 
 export type StackFunction = {
   body?: Program;
-  params: Record<string, StackType>;
+  params: Record<string, StackTypes>;
   rawCode?: (
     stacks: Stacks,
     params: Record<string, any>,
-    currentStack: StackType,
+    currentStack: StackTypes,
     consoleFunction: (string: string) => void
   ) => void | Error | Promise<void | Error>;
 };
 
 export type StackFunctions = {
-  [StackType.Int]: Record<string, StackFunction>;
-  [StackType.Float]: Record<string, StackFunction>;
-  [StackType.Str]: Record<string, StackFunction>;
-  [StackType.Bool]: Record<string, StackFunction>;
-  [StackType.Any]: Record<string, StackFunction>;
+  int: Record<string, StackFunction>;
+  float: Record<string, StackFunction>;
+  str: Record<string, StackFunction>;
+  bool: Record<string, StackFunction>;
+  any: Record<string, StackFunction>;
 };
 
 export function functionToText(
   name: string,
-  stack: StackType,
+  stack: StackTypes,
   func: StackFunction
 ): string {
   const parameters = Object.keys(func.params).map(
@@ -33,242 +33,242 @@ export function functionToText(
 }
 
 export const standardLibraryFunctions: StackFunctions = {
-  [StackType.Int]: {
+  int: {
     // comparison functions
     "<": {
-      params: { right: StackType.Int, left: StackType.Int },
+      params: { right: "int", left: "int" },
       rawCode: (stacks, params) => {
-        stacks[StackType.Bool].push(params.left < params.right);
+        stacks.bool.push(params.left < params.right);
       },
     },
     ">": {
-      params: { right: StackType.Int, left: StackType.Int },
+      params: { right: "int", left: "int" },
       rawCode: (stacks, params) => {
-        stacks[StackType.Bool].push(params.left > params.right);
+        stacks.bool.push(params.left > params.right);
       },
     },
     "<=": {
-      params: { right: StackType.Int, left: StackType.Int },
+      params: { right: "int", left: "int" },
       rawCode: (stacks, params) => {
-        stacks[StackType.Bool].push(params.left <= params.right);
+        stacks.bool.push(params.left <= params.right);
       },
     },
     ">=": {
-      params: { right: StackType.Int, left: StackType.Int },
+      params: { right: "int", left: "int" },
       rawCode: (stacks, params) => {
-        stacks[StackType.Bool].push(params.left >= params.right);
+        stacks.bool.push(params.left >= params.right);
       },
     },
 
     // math functions
     "+": {
-      params: { right: StackType.Int, left: StackType.Int },
+      params: { right: "int", left: "int" },
       rawCode: (stacks, params) => {
-        stacks[StackType.Int].push(params.left + params.right);
+        stacks.int.push(params.left + params.right);
       },
     },
     "-": {
-      params: { right: StackType.Int, left: StackType.Int },
+      params: { right: "int", left: "int" },
       rawCode: (stacks, params) => {
-        stacks[StackType.Int].push(params.left - params.right);
+        stacks.int.push(params.left - params.right);
       },
     },
     "*": {
-      params: { right: StackType.Int, left: StackType.Int },
+      params: { right: "int", left: "int" },
       rawCode: (stacks, params) => {
-        stacks[StackType.Int].push(params.left * params.right);
+        stacks.int.push(params.left * params.right);
       },
     },
     "/": {
-      params: { right: StackType.Int, left: StackType.Int },
+      params: { right: "int", left: "int" },
       rawCode: (stacks, params) => {
         if (params.right === 0) {
           return new Error(
             "divide by zero. `/(right: int, left: int)` must have `right` parameter not equal to `0`"
           );
         }
-        stacks[StackType.Float].push(params.left / params.right);
+        stacks.float.push(params.left / params.right);
       },
     },
     "//": {
-      params: { right: StackType.Int, left: StackType.Int },
+      params: { right: "int", left: "int" },
       rawCode: (stacks, params) => {
         if (params.right === 0) {
           return new Error(
             "divide by zero. `//(right: int, left: int)` must have `right` parameter not equal to `0`"
           );
         }
-        stacks[StackType.Int].push(Math.floor(params.left / params.right));
+        stacks.int.push(Math.floor(params.left / params.right));
       },
     },
     "%": {
-      params: { right: StackType.Int, left: StackType.Int },
+      params: { right: "int", left: "int" },
       rawCode: (stacks, params) => {
         if (params.right === 0) {
           return new Error(
             "divide by zero. `%(right: int, left: int)` must have `right` parameter not equal to `0`"
           );
         }
-        stacks[StackType.Int].push(params.left % params.right);
+        stacks.int.push(params.left % params.right);
       },
     },
     "^": {
-      params: { right: StackType.Int, left: StackType.Int },
+      params: { right: "int", left: "int" },
       rawCode: (stacks, params) => {
-        stacks[StackType.Int].push(params.left ^ params.right);
+        stacks.int.push(params.left ^ params.right);
       },
     },
     rand: {
-      params: { max: StackType.Int, min: StackType.Int },
+      params: { max: "int", min: "int" },
       rawCode: (stacks, params) => {
-        stacks[StackType.Int].push(
+        stacks.int.push(
           Math.floor(Math.random() * (params.max - params.min + 1)) + params.min
         );
       },
     },
   },
-  [StackType.Float]: {
+  float: {
     // comparison functions
     "<": {
-      params: { right: StackType.Float, left: StackType.Float },
+      params: { right: "float", left: "float" },
       rawCode: (stacks, params) => {
-        stacks[StackType.Bool].push(params.left < params.right);
+        stacks.bool.push(params.left < params.right);
       },
     },
     ">": {
-      params: { right: StackType.Float, left: StackType.Float },
+      params: { right: "float", left: "float" },
       rawCode: (stacks, params) => {
-        stacks[StackType.Bool].push(params.left > params.right);
+        stacks.bool.push(params.left > params.right);
       },
     },
     "<=": {
-      params: { right: StackType.Float, left: StackType.Float },
+      params: { right: "float", left: "float" },
       rawCode: (stacks, params) => {
-        stacks[StackType.Bool].push(params.left <= params.right);
+        stacks.bool.push(params.left <= params.right);
       },
     },
     ">=": {
-      params: { right: StackType.Float, left: StackType.Float },
+      params: { right: "float", left: "float" },
       rawCode: (stacks, params) => {
-        stacks[StackType.Bool].push(params.left >= params.right);
+        stacks.bool.push(params.left >= params.right);
       },
     },
 
     // math functions
     "+": {
-      params: { right: StackType.Float, left: StackType.Float },
+      params: { right: "float", left: "float" },
       rawCode: (stacks, params) => {
-        stacks[StackType.Float].push(params.left + params.right);
+        stacks.float.push(params.left + params.right);
       },
     },
     "-": {
-      params: { right: StackType.Float, left: StackType.Float },
+      params: { right: "float", left: "float" },
       rawCode: (stacks, params) => {
-        stacks[StackType.Float].push(params.left - params.right);
+        stacks.float.push(params.left - params.right);
       },
     },
     "*": {
-      params: { right: StackType.Float, left: StackType.Float },
+      params: { right: "float", left: "float" },
       rawCode: (stacks, params) => {
-        stacks[StackType.Float].push(params.left * params.right);
+        stacks.float.push(params.left * params.right);
       },
     },
     "/": {
-      params: { right: StackType.Float, left: StackType.Float },
+      params: { right: "float", left: "float" },
       rawCode: (stacks, params) => {
         if (params.right === 0) {
           return new Error(
             "divide by zero. `/(right: float, left: float)` must have `right` parameter not equal to `0.0`"
           );
         }
-        stacks[StackType.Float].push(params.left / params.right);
+        stacks.float.push(params.left / params.right);
       },
     },
     "//": {
-      params: { right: StackType.Float, left: StackType.Float },
+      params: { right: "float", left: "float" },
       rawCode: (stacks, params) => {
         if (params.right === 0) {
           return new Error(
             "divide by zero. `//(right: float, left: float)` must have `right` parameter not equal to `0.0`"
           );
         }
-        stacks[StackType.Float].push(Math.floor(params.left * params.right));
+        stacks.float.push(Math.floor(params.left * params.right));
       },
     },
     "%": {
-      params: { right: StackType.Float, left: StackType.Float },
+      params: { right: "float", left: "float" },
       rawCode: (stacks, params) => {
         if (params.right === 0) {
           return new Error(
             "divide by zero. `%(right: float, left: float)` must have `right` parameter not equal to `0.0`"
           );
         }
-        stacks[StackType.Int].push(params.left % params.right);
+        stacks.int.push(params.left % params.right);
       },
     },
     "^": {
-      params: { right: StackType.Float, left: StackType.Float },
+      params: { right: "float", left: "float" },
       rawCode: (stacks, params) => {
-        stacks[StackType.Float].push(params.left ^ params.right);
+        stacks.float.push(params.left ^ params.right);
       },
     },
   },
-  [StackType.Str]: {
+  str: {
     length: {
-      params: { string: StackType.Str },
+      params: { string: "str" },
       rawCode: (stacks, params) => {
-        stacks[StackType.Int].push(params.str.length);
+        stacks.int.push(params.str.length);
       },
     },
     "+": {
-      params: { right: StackType.Str, left: StackType.Str },
+      params: { right: "str", left: "str" },
       rawCode: (stacks, params) => {
-        stacks[StackType.Str].push(params.left + params.right);
+        stacks.str.push(params.left + params.right);
       },
     },
   },
-  [StackType.Bool]: {
+  bool: {
     // comparison functions
     "&": {
-      params: { right: StackType.Bool, left: StackType.Bool },
+      params: { right: "bool", left: "bool" },
       rawCode: (stacks, params) => {
-        stacks[StackType.Bool].push(params.left && params.right);
+        stacks.bool.push(params.left && params.right);
       },
     },
     "|": {
-      params: { right: StackType.Bool, left: StackType.Bool },
+      params: { right: "bool", left: "bool" },
       rawCode: (stacks, params) => {
-        stacks[StackType.Bool].push(params.left || params.right);
+        stacks.bool.push(params.left || params.right);
       },
     },
     "!": {
-      params: { boolean: StackType.Bool },
+      params: { boolean: "bool" },
       rawCode: (stacks, params) => {
-        stacks[StackType.Bool].push(!params.boolean);
+        stacks.bool.push(!params.boolean);
       },
     },
   },
-  [StackType.Any]: {
+  any: {
     // Word functions
     dup: {
-      params: { first: StackType.Any },
+      params: { first: "any" },
       rawCode: (stacks, params, stack) => {
         stacks[stack].push(params.first);
         stacks[stack].push(params.first);
       },
     },
     drop: {
-      params: { first: StackType.Any },
+      params: { first: "any" },
     },
     swap: {
-      params: { first: StackType.Any, second: StackType.Any },
+      params: { first: "any", second: "any" },
       rawCode: (stacks, params, stack) => {
         stacks[stack].push(params.first);
         stacks[stack].push(params.second);
       },
     },
     over: {
-      params: { first: StackType.Any, second: StackType.Any },
+      params: { first: "any", second: "any" },
       rawCode: (stacks, params, stack) => {
         stacks[stack].push(params.second);
         stacks[stack].push(params.first);
@@ -277,9 +277,9 @@ export const standardLibraryFunctions: StackFunctions = {
     },
     rot: {
       params: {
-        first: StackType.Any,
-        second: StackType.Any,
-        third: StackType.Any,
+        first: "any",
+        second: "any",
+        third: "any",
       },
       rawCode: (stacks, params, stack) => {
         stacks[stack].push(params.second);
@@ -288,12 +288,9 @@ export const standardLibraryFunctions: StackFunctions = {
       },
     },
     print: {
-      params: { item: StackType.Any },
+      params: { item: "any" },
       rawCode: (stacks, params, stack, consoleFunc) => {
-        if (
-          stack === StackType.Float &&
-          !params.item.toString().includes(".")
-        ) {
+        if (stack === "float" && !params.item.toString().includes(".")) {
           params.item = params.item.toFixed(1);
         }
         consoleFunc(params.item.toString());
@@ -301,7 +298,7 @@ export const standardLibraryFunctions: StackFunctions = {
       },
     },
     read: {
-      params: { prompt: StackType.Str },
+      params: { prompt: "str" },
       rawCode: async (stacks, params, stack) => {
         // does not work on browser
         if (window !== undefined) {
@@ -316,9 +313,9 @@ export const standardLibraryFunctions: StackFunctions = {
         });
         rl.close();
 
-        if (stack === StackType.Str) {
+        if (stack === "str") {
           stacks[stack].push(answer);
-        } else if (stack === StackType.Bool) {
+        } else if (stack === "bool") {
           if (answer.trim() === "true") {
             stacks[stack].push(true);
           } else if (answer.trim() === "false") {
@@ -330,7 +327,7 @@ export const standardLibraryFunctions: StackFunctions = {
           }
         } else {
           // int or float
-          const isFloat = stack === StackType.Float;
+          const isFloat = stack === "float";
           let isInDecimal = false;
           for (const char of answer.trim().split("")) {
             if (char === ".") {
@@ -360,47 +357,44 @@ export const standardLibraryFunctions: StackFunctions = {
 
     // comparison functions
     "==": {
-      params: { right: StackType.Any, left: StackType.Any },
+      params: { right: "any", left: "any" },
       rawCode: (stacks, params) => {
-        stacks[StackType.Bool].push(params.left === params.right);
+        stacks.bool.push(params.left === params.right);
       },
     },
     "!=": {
-      params: { right: StackType.Any, left: StackType.Any },
+      params: { right: "any", left: "any" },
       rawCode: (stacks, params) => {
-        stacks[StackType.Bool].push(params.left !== params.right);
+        stacks.bool.push(params.left !== params.right);
       },
     },
 
     // conversion functions
     toStr: {
-      params: { item: StackType.Any },
+      params: { item: "any" },
       rawCode: (stacks, params, stack) => {
-        if (
-          stack === StackType.Float &&
-          !params.item.toString().includes(".")
-        ) {
+        if (stack === "float" && !params.item.toString().includes(".")) {
           params.item = params.item.toFixed(1);
         }
 
-        stacks[StackType.Str].push(params.item.toString());
+        stacks.str.push(params.item.toString());
       },
     },
     toBool: {
-      params: { item: StackType.Any },
+      params: { item: "any" },
       rawCode: (stacks, params) => {
-        stacks[StackType.Bool].push(!!params.item);
+        stacks.bool.push(!!params.item);
       },
     },
     toInt: {
-      params: { item: StackType.Any },
+      params: { item: "any" },
       rawCode: (stacks, params, stack) => {
         let int: number;
-        if (stack === StackType.Int) {
+        if (stack === "int") {
           int = params.item;
-        } else if (stack === StackType.Float) {
+        } else if (stack === "float") {
           int = Math.trunc(params.item);
-        } else if (stack === StackType.Bool) {
+        } else if (stack === "bool") {
           int = params.item ? 1 : 0;
         } else {
           for (const char of params.item.split("")) {
@@ -412,16 +406,16 @@ export const standardLibraryFunctions: StackFunctions = {
           }
           int = parseInt(params.item);
         }
-        stacks[StackType.Int].push(int);
+        stacks.int.push(int);
       },
     },
     toFloat: {
-      params: { item: StackType.Any },
+      params: { item: "any" },
       rawCode: (stacks, params, stack) => {
         let float: number;
-        if (stack === StackType.Float || stack === StackType.Int) {
+        if (stack === "float" || stack === "int") {
           float = params.item;
-        } else if (stack === StackType.Bool) {
+        } else if (stack === "bool") {
           float = params.item ? 1 : 0;
         } else {
           let isInDecimal = false;
@@ -444,7 +438,7 @@ export const standardLibraryFunctions: StackFunctions = {
           }
           float = parseFloat(params.item);
         }
-        stacks[StackType.Float].push(float);
+        stacks.float.push(float);
       },
     },
   },
