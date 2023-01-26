@@ -1,4 +1,4 @@
-import { TokenType, Token, Pos } from "./scan.js";
+import { TokenType, Token, Pos, Keyword } from "./scan.js";
 import { type StackFunctions } from "./functions.js";
 import { StackType } from "./stack.js";
 import { TSError, isTSError } from "./utils/error.js";
@@ -10,22 +10,17 @@ type ExpressionType = UnionSubset<
   "int" | "float" | "str" | "bool" | "identifier" | "keyword"
 >;
 
-export enum StatementType {
-  ForLoop,
-  WhileLoop,
-  Loop,
-  If,
-}
+export type StatementType = "forLoop" | "wileLoop" | "loop" | "if";
 
-export type Statement = {
-  type: StatementType;
+export type Statement<T extends StatementType> = {
+  type: T;
   startPos: Pos;
   endPos: Pos;
   block: Program;
   else?: Program;
 };
 
-export type Program = Array<Token<ExpressionType> | Statement>;
+export type Program = Array<Token<ExpressionType> | Statement<StatementType>>;
 
 export class Parser {
   tokens: Token<TokenType>[];
@@ -91,6 +86,7 @@ export class Parser {
       }
     }
   }
+
   #parseStatement(
     isInRoot: boolean,
     isInLoop = false,
@@ -108,11 +104,11 @@ export class Parser {
       const current = this.#peek();
 
       // Punctuation should not be in the middle of nowhere
-      if (
-        ["openBracket", "closeParen", "openParen", "colon"].includes(
-          current.type
-        )
-      ) {
+      const puncTokens: UnionSubset<
+        TokenType,
+        "openBracket" | "closeParen" | "openParen" | "colon"
+      >[] = ["openBracket", "closeParen", "openParen", "colon"];
+      if (includes(puncTokens, current.value)) {
         return new TSError(
           {
             startPos: current.startPos,
@@ -121,15 +117,16 @@ export class Parser {
           "unexpected character"
         );
       }
+
       // literals become expressions
-      const literalsTypes: Exclude<ExpressionType, "keyword">[] = [
+      const literalTokens: Exclude<ExpressionType, "keyword">[] = [
         "int",
         "float",
         "str",
         "bool",
         "identifier",
       ];
-      if (includes(literalsTypes, current.type)) {
+      if (includes(literalTokens, current.type)) {
         current.type;
         block.push(current);
         this.#increment();
@@ -153,18 +150,22 @@ export class Parser {
 
       if ("keyword" === current.type) {
         // stack types become expressions
-        if (["int", "bool", "str", "float"].includes(current.value as string)) {
+        const mainTypeKeywords: UnionSubset<
+          Keyword,
+          "int" | "str" | "float" | "bool"
+        >[] = ["int", "str", "float", "bool"];
+        if (includes(mainTypeKeywords, current.value)) {
           block.push(current);
           this.#increment();
           continue;
         }
 
         // At keyword are invalid
-        if (
-          ["@int", "@bool", "@str", "@float", "@any"].includes(
-            current.value as string
-          )
-        ) {
+        const atKeywords: UnionSubset<
+          Keyword,
+          "@int" | "@float" | "@str" | "@bool" | "@any"
+        >[] = ["@int", "@bool", "@str", "@float", "@any"];
+        if (includes(atKeywords, current.value)) {
           return new TSError(
             {
               startPos: current.startPos,
@@ -280,7 +281,7 @@ export class Parser {
           block.push({
             startPos,
             endPos,
-            type: StatementType.Loop,
+            type: "loop",
             block: innerBlock,
           });
           continue;
@@ -326,7 +327,7 @@ export class Parser {
           block.push({
             startPos,
             endPos,
-            type: StatementType.ForLoop,
+            type: "forLoop",
             block: innerBlock,
           });
           continue;
@@ -372,7 +373,7 @@ export class Parser {
           block.push({
             startPos,
             endPos,
-            type: StatementType.WhileLoop,
+            type: "wileLoop",
             block: innerBlock,
           });
           continue;
@@ -431,7 +432,7 @@ export class Parser {
             block.push({
               startPos,
               endPos,
-              type: StatementType.If,
+              type: "if",
               block: innerBlock,
               else: elseBlock,
             });
@@ -440,7 +441,7 @@ export class Parser {
           block.push({
             startPos,
             endPos,
-            type: StatementType.If,
+            type: "if",
             block: innerBlock,
           });
           continue;
@@ -499,11 +500,13 @@ export class Parser {
             // parameters can have a type associated with them separated by a colon
             if (this.#expect("colon")) {
               this.#increment();
+              const typeKeywords: UnionSubset<
+                Keyword,
+                "int" | "str" | "float" | "bool" | "any"
+              >[] = ["int", "str", "float", "bool", "any"];
               if (
                 this.#peek().type === "keyword" &&
-                ["int", "str", "float", "bool", "any"].includes(
-                  this.#peek().value as string
-                )
+                includes(typeKeywords, this.#peek().value)
               ) {
                 params[name] = {
                   int: StackType.Int,
@@ -542,20 +545,26 @@ export class Parser {
           this.#increment();
 
           // a function type should follow
+          const atKeywords: UnionSubset<
+            Keyword,
+            "@int" | "@float" | "@str" | "@bool" | "@any"
+          >[] = ["@int", "@bool", "@str", "@float", "@any"];
           if (
             !this.#isAtEnd() &&
             this.#peek().type === "keyword" &&
-            ["@int", "@str", "@float", "@bool", "@any"].includes(
-              this.#peek().value as string
-            )
+            includes(atKeywords, this.#peek().value)
           ) {
-            functionType = {
+            const atKeywordToStackType: Record<
+              typeof atKeywords[number],
+              StackType
+            > = {
               "@int": StackType.Int,
               "@float": StackType.Float,
               "@str": StackType.Str,
               "@bool": StackType.Bool,
               "@any": StackType.Any,
-            }[this.#peek().value as string];
+            };
+            functionType = atKeywordToStackType[this.#peek().value as string];
           } else {
             return new TSError(
               {

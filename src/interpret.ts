@@ -1,4 +1,4 @@
-import { Program, StatementType } from "./parse.js";
+import { Program } from "./parse.js";
 import { StackFunctions, functionToText } from "./functions.js";
 import { stacks, StackType } from "./stack.js";
 import { TSError, isTSError } from "./utils/error.js";
@@ -166,7 +166,7 @@ export default class {
         }
       } else {
         // if it is a statement
-        if (item.type === StatementType.Loop) {
+        if (item.type === "loop") {
           // run the result to start the condition for the while loop that repeats until there is an error or break returned
           let resultOfIteration = await this.runProgram(
             item.block,
@@ -183,7 +183,7 @@ export default class {
           if (isTSError(resultOfIteration)) {
             return resultOfIteration;
           }
-        } else if (item.type === StatementType.ForLoop) {
+        } else if (item.type === "forLoop") {
           if (!stacks[StackType.Int].check()) {
             return new TSError(
               {
@@ -232,7 +232,7 @@ export default class {
 
           // move to the int stack on exit
           stack = StackType.Int;
-        } else if (item.type === StatementType.WhileLoop) {
+        } else if (item.type === "wileLoop") {
           if (!stacks[StackType.Bool].check()) {
             return new TSError(
               {
@@ -273,7 +273,7 @@ export default class {
 
           // move to the bool stack on exit
           stack = StackType.Bool;
-        } else if (item.type === StatementType.If) {
+        } else if (item.type === "if") {
           if (!stacks[StackType.Bool].check()) {
             return new TSError(
               {

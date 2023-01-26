@@ -1,5 +1,5 @@
 import { StackFunctions } from "./functions.js";
-import { Program, StatementType } from "./parse.js";
+import { Program } from "./parse.js";
 import { StackType } from "./stack.js";
 import { TSError } from "./utils/error.js";
 
@@ -106,7 +106,7 @@ function traverseCheckProgram(
       }
     } else {
       // loops only need to check their block with the current type
-      if (item.type === StatementType.Loop) {
+      if (item.type === "loop") {
         const result = traverseCheckProgram(
           item.block,
           otherIdentifiers,
@@ -118,7 +118,7 @@ function traverseCheckProgram(
         }
 
         // for loops need to check their block with the int type and change to the int type after
-      } else if (item.type === StatementType.ForLoop) {
+      } else if (item.type === "forLoop") {
         const result = traverseCheckProgram(
           item.block,
           otherIdentifiers,
@@ -131,7 +131,7 @@ function traverseCheckProgram(
         stack = StackType.Int;
 
         // while loops need to check their block with the bool type and change to the bool type after
-      } else if (item.type === StatementType.WhileLoop) {
+      } else if (item.type === "wileLoop") {
         const result = traverseCheckProgram(
           item.block,
           otherIdentifiers,
@@ -144,7 +144,7 @@ function traverseCheckProgram(
         stack = StackType.Bool;
 
         // if statements need to check their blocks with the bool type and turn it to the bool type after
-      } else if (item.type === StatementType.If) {
+      } else if (item.type === "if") {
         const firstBlock = traverseCheckProgram(
           item.block,
           otherIdentifiers,
