@@ -23,7 +23,12 @@ export default {
         </svg>
       </button>
     </div>
-    <PrismEditor v-model="text" :highlight="highlight" :line-numbers="true" />
+    <PrismEditor
+      v-model="text"
+      :highlight="highlight"
+      :line-numbers="true"
+      :auto-style-line-numbers="false"
+    />
     <pre class="console" ref="consoleElement"></pre>
   </div>
 </template>
