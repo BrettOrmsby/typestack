@@ -6,7 +6,7 @@ html {
   scroll-behavior: smooth;
 }
 
-body {
+header, main {
   padding: 2em;
   max-width: 70ch;
   margin: 0 auto;
