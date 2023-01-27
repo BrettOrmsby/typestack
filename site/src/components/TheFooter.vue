@@ -13,6 +13,9 @@ export default {
         <li><a href="https://github.com/BrettOrmsby/typestack">Github</a></li>
       </ul>
     </nav>
+    <p>
+      <small>© Brett Ormsby 2022-{{ new Date().getFullYear() }}</small>
+    </p>
   </footer>
 </template>
 
@@ -25,12 +28,17 @@ footer {
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-direction: column;
   border-top: var(--border-width) solid var(--muted-border-color);
+}
+footer p {
+  margin-bottom: var(--nav-element-spacing-vertical);
+  color: var(--muted-color);
 }
 ul {
   display: flex;
   flex-wrap: wrap;
-  padding-bottom: var(--nav-element-spacing-vertical);
+  margin-bottom: var(--nav-element-spacing-vertical);
 }
 li,
 a {
