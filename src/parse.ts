@@ -10,17 +10,36 @@ type ExpressionType = UnionSubset<
   "int" | "float" | "str" | "bool" | "identifier" | "keyword"
 >;
 
-export type StatementType = "forLoop" | "wileLoop" | "loop" | "if";
+export type StatementType = "forLoop" | "whileLoop" | "loop" | "if";
 
-export type Statement<T extends StatementType> = {
-  type: T;
+interface Statement {
+  type: StatementType;
   startPos: Pos;
   endPos: Pos;
   block: Program;
-  else?: Program;
-};
+}
 
-export type Program = Array<Token<ExpressionType> | Statement<StatementType>>;
+interface ForLoopStatement extends Statement {
+  type: "forLoop";
+}
+interface WhileLoopStatement extends Statement {
+  type: "whileLoop";
+}
+interface LoopStatement extends Statement {
+  type: "loop";
+}
+interface IfStatement extends Statement {
+  type: "if";
+  else?: Program;
+}
+
+export type Statements =
+  | ForLoopStatement
+  | WhileLoopStatement
+  | LoopStatement
+  | IfStatement;
+
+export type Program = Array<Token<ExpressionType> | Statements>;
 
 export class Parser {
   tokens: Token<TokenType>[];
@@ -90,7 +109,6 @@ export class Parser {
   #parseStatement(
     isInRoot: boolean,
     isInLoop = false,
-    isInIf = false,
     isInFunction = false
   ): TSError | Program {
     // increment past the `{` character
@@ -267,12 +285,7 @@ export class Parser {
             );
           }
 
-          const innerBlock = this.#parseStatement(
-            false,
-            true,
-            isInIf,
-            isInFunction
-          );
+          const innerBlock = this.#parseStatement(false, true, isInFunction);
 
           if (isTSError(innerBlock)) {
             return innerBlock;
@@ -313,12 +326,7 @@ export class Parser {
             );
           }
 
-          const innerBlock = this.#parseStatement(
-            false,
-            true,
-            isInIf,
-            isInFunction
-          );
+          const innerBlock = this.#parseStatement(false, true, isInFunction);
 
           if (isTSError(innerBlock)) {
             return innerBlock;
@@ -359,12 +367,7 @@ export class Parser {
             );
           }
 
-          const innerBlock = this.#parseStatement(
-            false,
-            true,
-            isInIf,
-            isInFunction
-          );
+          const innerBlock = this.#parseStatement(false, true, isInFunction);
 
           if (isTSError(innerBlock)) {
             return innerBlock;
@@ -373,7 +376,7 @@ export class Parser {
           block.push({
             startPos,
             endPos,
-            type: "wileLoop",
+            type: "whileLoop",
             block: innerBlock,
           });
           continue;
@@ -397,7 +400,6 @@ export class Parser {
           const innerBlock = this.#parseStatement(
             false,
             isInLoop,
-            true,
             isInFunction
           );
 
@@ -421,7 +423,6 @@ export class Parser {
             const elseBlock = this.#parseStatement(
               false,
               isInLoop,
-              true,
               isInFunction
             );
 
@@ -583,12 +584,7 @@ export class Parser {
             );
           }
 
-          const innerBlock = this.#parseStatement(
-            false,
-            isInLoop,
-            isInIf,
-            true
-          );
+          const innerBlock = this.#parseStatement(false, isInLoop, true);
 
           if (isTSError(innerBlock)) {
             return innerBlock;

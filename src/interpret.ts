@@ -226,7 +226,7 @@ export default class {
 
           // move to the int stack on exit
           stack = "int";
-        } else if (item.type === "wileLoop") {
+        } else if (item.type === "whileLoop") {
           if (!stacks.bool.check()) {
             return new TSError(
               {

@@ -111,7 +111,7 @@ function traverseCheckProgram(
         stack = "int";
 
         // while loops need to check their block with the bool type and change to the bool type after
-      } else if (item.type === "wileLoop") {
+      } else if (item.type === "whileLoop") {
         const result = traverseCheckProgram(
           item.block,
           otherIdentifiers,

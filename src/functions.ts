@@ -2,6 +2,28 @@ import { StackTypes, Stacks } from "./stack.js";
 import { Program } from "./parse.js";
 import * as readline from "readline";
 
+/*
+// ideally use this type but you cannot infer one generic and manually select the other so this type
+// will not work
+
+export type StackFunction<T extends StackTypes, P extends Params> = {
+  params: P;
+  body?: Program;
+  rawCode?: (
+    stacks: Stacks,
+    params: {
+      [key in keyof P]: P[key] extends "any"
+        ? T extends "any"
+          ? string | number | boolean
+          : T
+        : StackTypeToType<P[key]>;
+    },
+    currentStack: T extends "any" ? StackTypes : T,
+    consoleFunction: (string: string) => void
+  ) => void | Error | Promise<void | Error>;
+};
+*/
+
 export type StackFunction = {
   body?: Program;
   params: Record<string, StackTypes>;
