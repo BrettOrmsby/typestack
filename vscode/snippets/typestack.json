@@ -1,0 +1,54 @@
+{
+    "If Statement": {
+		"scope": "typestack",
+		"prefix": "if",
+		"body": [
+			"if {",
+            "\t$0",
+			"}"
+		],
+		"description": "create an if statement"
+	},
+    "If Else": {
+		"scope": "typestack",
+		"prefix": "if",
+		"body": [
+			"if {",
+            "\t$0",
+			"} else {",
+            "\t",
+            "}"
+		],
+		"description": "create an if else statement"
+	},
+	"Loop": {
+		"scope": "typestack",
+		"prefix": "loop",
+		"body": [
+			"loop {",
+            "\t$0",
+			"}"
+		],
+		"description": "create a loop statement"
+	},
+	"For Loop": {
+		"scope": "typestack",
+		"prefix": "for",
+		"body": [
+			"for loop {",
+            "\t$0",
+			"}"
+		],
+		"description": "create a for loop statement"
+	},
+	"While Loop": {
+		"scope": "typestack",
+		"prefix": "while",
+		"body": [
+			"while loop {",
+            "\t$0",
+			"}"
+		],
+		"description": "create a while loop statement"
+	}
+}

@@ -1,0 +1,82 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "TypeStack",
+	"patterns": [
+		{
+			"include": "#keywords"
+		},
+		{
+			"include": "#strings"
+		},
+		{
+			"include": "#booleans"
+		},
+		{
+			"include": "#comment"
+		},
+		{
+			"include": "#float"
+		},
+		{
+			"include": "#int"
+		},
+		{
+			"include": "#built-ins"
+		},
+		{
+			"include": "#identifier"
+		}
+	],
+	"repository": {
+		"keywords": {
+			"patterns": [{
+				"name": "keyword.control.typestack",
+				"match": "(?<=(^|[\\n\\t\\r :\\(\\)\\{\\}#]))(import|fn|loop|for|while|if|else|break|continue)(?=($|[\\n\\t\\r :\\(\\)\\{\\}#]))"
+			}, {
+				"name": "storage.type.typestack",
+				"match": "(?<=(^|[\\n\\t\\r :\\(\\)\\{\\}#]))(@int|@float|@str|@bool|@any|int|float|str|bool|any)(?=($|[\\n\\t\\r :\\(\\)\\{\\}#]))"
+			}]
+		},
+		"strings": {
+			"name": "string.quoted.double.typestack",
+			"begin": "\"",
+			"end": "\"",
+			"patterns": [
+				{
+					"name": "constant.character.escape.typestack",
+					"match": "\\\\(\\\\|n|r|t|\")"
+				},
+				{
+					"name": "invalid.illegal.typestack",
+					"match": "\\\\[^\\\\nrt\"]"
+				}
+			]
+		},
+		"booleans": {
+			"name": "constant.language.typestack",
+			"match": "(?<=(^|[\\n\\t\\r :\\(\\)\\{\\}#]))(true|false)(?=($|[\\n\\t\\r :\\(\\)\\{\\}#]))"
+		},
+		"comment": {
+			"name": "comment.line.number-sign",
+			"begin": "#",
+			"end": "\\n|$"
+		},
+		"float": {
+			"name": "constant.numeric.float.typestack",
+			"match": "(?<=(^|[\\n\\t\\r :\\(\\)\\{\\}#]))(\\d+\\.\\d*)(?=($|[\\n\\t\\r :\\(\\)\\{\\}#]))"
+		},
+		"int": {
+			"name": "constant.numeric.integer.typestack",
+			"match": "(?<=(^|[\\n\\t\\r :\\(\\)\\{\\}#]))(\\d+)(?=($|[\\n\\t\\r :\\(\\)\\{\\}#]))"
+		},
+		"identifier": {
+			"name": "variable.typestack",
+			"match": "(?<=(^|[\\n\\t\\r :\\(\\)\\{\\}#]))((\\S+))(?=($|[\\n\\t\\r :\\(\\)\\{\\}#]))"
+		},
+		"built-ins": {
+			"name": "support.function.builtin.typestack",
+			"match": "(?<=(^|[\\n\\t\\r :\\(\\)\\{\\}#]))((\\S+))(?=($|[\\n\\t\\r :\\(\\)\\{\\}#]))"
+		}
+	},
+	"scopeName": "source.typestack"
+}

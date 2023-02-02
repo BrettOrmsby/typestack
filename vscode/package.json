@@ -1,0 +1,35 @@
+{
+  "name": "type-stack",
+  "displayName": "type-stack",
+  "description": "Syntax highlighting for the TypeStack language",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [{
+      "id": "typestack",
+      "aliases": ["TypeStack", "typestack"],
+      "extensions": ["tsk"],
+      "icon": {
+        "light": "./images/typestack.png",
+        "dark": "./images/typestack.png"
+      },
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "typestack",
+      "scopeName": "source.typestack",
+      "path": "./syntaxes/typestack.tmLanguage.json"
+    }],
+    "snippets": [
+      {
+        "language": "typestack",
+        "path": "./snippets/typestack.json"
+      }
+    ]
+  }
+}
