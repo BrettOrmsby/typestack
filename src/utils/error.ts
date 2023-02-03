@@ -20,7 +20,6 @@ export class TSError {
     msg: string,
     ...params: Array<string | boolean | number>
   ) {
-    this.message = msg;
     this.pos = pos;
 
     const MAX_ERROR_WIDTH = 35; // characters on each side of the start of the error
@@ -30,6 +29,7 @@ export class TSError {
       replaceNum += 1;
       return params[replaceNum].toString();
     });
+    this.message = formattedMessage;
 
     let errorLine = ErrorInputConfig.input.split("\n")[pos.startPos.line - 1];
     let errorStartsAt = pos.startPos.char - 1;
