@@ -1,5 +1,5 @@
 {
-  "version": "1.6.4",
+  "version": "1.6.5",
   "name": "typestack-lang",
   "description": "A stack-based, type-safe programing language",
   "homepage": "https://brettormsby.github.io/typestack/",
