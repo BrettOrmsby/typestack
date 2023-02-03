@@ -59,24 +59,3 @@ function combineStackFunctions(
   }
   return main;
 }
-
-await typeStack(`
-# make the random number
-1 100 rand
-# repeat while the guess is wrong
-loop {
-  "Guess a \\hnumber: " int read
-  over over # create a copy of the guess and random number
-  == if {
-    "You are correct!" print
-    break
-  } else {
-    int over # create a copy of the random number on the top
-    > if {
-      "Too high!" print drop
-    } else {
-      "Too low!" print drop
-    }
-  }
-}
-`);
