@@ -323,7 +323,7 @@ export const standardLibraryFunctions: StackFunctions = {
       params: { prompt: "str" },
       rawCode: async (stacks, params, stack) => {
         // does not work on browser
-        if (window !== undefined) {
+        if (typeof window !== "undefined") {
           return;
         }
         const rl = readline.createInterface({
