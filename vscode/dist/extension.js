@@ -25,7 +25,6 @@ async function refreshDiagnostics(doc, diagnosticCollection) {
     const diagnostics = [];
     const fileText = doc.getText();
     const errors = await getErrors(fileText);
-    console.log(errors);
     if (errors) {
         if (errors instanceof error_1.TSError) {
             diagnostics.push(createDiagnostic(doc, errors));
@@ -66,16 +65,13 @@ function subscribeToDocumentChanges(context, diagnosticCollection) {
 exports.subscribeToDocumentChanges = subscribeToDocumentChanges;
 async function getErrors(text) {
     const scanner = new scan_1.Scanner(text, console.log);
-    const scanError = scanner.scan();
-    if (scanError instanceof error_1.TSError) {
-        return scanError;
-    }
+    const scanErrors = scanner.scan();
     const parser = new parse_1.Parser(scanner.tokens, functions_1.standardLibraryFunctions);
     const parseError = await parser.parse();
     if (parseError instanceof error_1.TSError) {
-        return parseError;
+        return [...scanErrors, parseError];
     }
-    return (0, typeCheck_1.default)(parser.program, functions_1.standardLibraryFunctions, parser.newFunctions);
+    return [...scanErrors, ...(0, typeCheck_1.default)(parser.program, functions_1.standardLibraryFunctions, parser.newFunctions)];
 }
 
 
@@ -117,6 +113,7 @@ class Scanner {
     pointer;
     char;
     line;
+    errors;
     constructor(input, consoleFunc) {
         input = input.trimEnd();
         _utils_error_js__WEBPACK_IMPORTED_MODULE_0__.ErrorInputConfig.input = input;
@@ -126,6 +123,7 @@ class Scanner {
         this.pointer = 0;
         this.char = 1;
         this.line = 1;
+        this.errors = [];
     }
     scan() {
         while (!this.#isAtEnd()) {
@@ -190,10 +188,10 @@ class Scanner {
                             str += '"';
                         }
                         else {
-                            return new _utils_error_js__WEBPACK_IMPORTED_MODULE_0__.TSError({
+                            this.errors.push(new _utils_error_js__WEBPACK_IMPORTED_MODULE_0__.TSError({
                                 startPos: { line: this.line, char: this.char - 1 },
                                 endPos: { line: this.line, char: this.char + 1 },
-                            }, "unknown escape code");
+                            }, "unknown escape code"));
                         }
                         this.#increment();
                     }
@@ -208,24 +206,18 @@ class Scanner {
                     }
                 }
                 if (this.#isAtEnd()) {
-                    return new _utils_error_js__WEBPACK_IMPORTED_MODULE_0__.TSError({
+                    this.errors.push(new _utils_error_js__WEBPACK_IMPORTED_MODULE_0__.TSError({
                         startPos: startPos,
                         endPos: { line: this.line, char: this.char },
-                    }, 'expected an ending string literal `"`');
+                    }, 'expected an ending string literal `"`'));
                 }
                 this.#increment();
                 this.#addToken("str", str, startPos);
-                const posError = this.#expectSeparator();
-                if (posError) {
-                    return posError;
-                }
+                this.#expectSeparator();
                 continue;
             }
             if (current >= "0" && current <= "9") {
-                const posError = this.#number();
-                if (posError) {
-                    return posError;
-                }
+                this.#number();
             }
             else {
                 this.#identifier();
@@ -233,6 +225,7 @@ class Scanner {
         }
         this.#increment();
         this.#addToken("EOF", "");
+        return this.errors;
     }
     #addToken(type, value, startPos = { line: this.line, char: this.char }, endPos = { line: this.line, char: this.char }) {
         this.tokens.push({
@@ -260,10 +253,10 @@ class Scanner {
     #expectSeparator() {
         if (!this.#isAtEnd() &&
             !["\n", "\r", "\t", " ", "{", "}", "(", ")", ":", "#"].includes(this.#peek())) {
-            return new _utils_error_js__WEBPACK_IMPORTED_MODULE_0__.TSError({
+            this.errors.push(new _utils_error_js__WEBPACK_IMPORTED_MODULE_0__.TSError({
                 startPos: { line: this.line, char: this.char },
-                endPos: { line: this.line, char: this.char },
-            }, "Expected separator (`\\n`, `\\r`, `\\t`, ` `, `{`, `}`, `(`, `)`, `:`)`");
+                endPos: { line: this.line, char: this.char + 1 },
+            }, "Expected separator (`\\n`, `\\r`, `\\t`, ` `, `{`, `}`, `(`, `)`, `:`)"));
         }
     }
     #number() {
@@ -285,24 +278,24 @@ class Scanner {
             }
             const float = parseFloat(strOfNumber);
             if (Number.isNaN(float)) {
-                return new _utils_error_js__WEBPACK_IMPORTED_MODULE_0__.TSError({
+                this.errors.push(new _utils_error_js__WEBPACK_IMPORTED_MODULE_0__.TSError({
                     startPos: { line: startPos.line, char: startPos.char },
                     endPos: { line: this.line, char: this.char },
-                }, "Unable to parse float");
+                }, "Unable to parse float"));
             }
             this.#addToken("float", float, startPos);
         }
         else {
             const int = parseInt(strOfNumber);
             if (Number.isNaN(int)) {
-                return new _utils_error_js__WEBPACK_IMPORTED_MODULE_0__.TSError({
+                this.errors.push(new _utils_error_js__WEBPACK_IMPORTED_MODULE_0__.TSError({
                     startPos: { line: startPos.line, char: startPos.char },
                     endPos: { line: this.line, char: this.char },
-                }, "Unable to parse int");
+                }, "Unable to parse int"));
             }
             this.#addToken("int", int, startPos);
         }
-        return this.#expectSeparator();
+        this.#expectSeparator();
     }
     #identifier() {
         const startPos = {
@@ -353,7 +346,6 @@ class TSError {
     message;
     pos;
     constructor(pos, msg, ...params) {
-        this.message = msg;
         this.pos = pos;
         const MAX_ERROR_WIDTH = 35; // characters on each side of the start of the error
         let replaceNum = -1;
@@ -361,6 +353,7 @@ class TSError {
             replaceNum += 1;
             return params[replaceNum].toString();
         });
+        this.message = formattedMessage;
         let errorLine = ErrorInputConfig.input.split("\n")[pos.startPos.line - 1];
         let errorStartsAt = pos.startPos.char - 1;
         if (!(errorLine.length < MAX_ERROR_WIDTH * 2 + 1)) {
@@ -1106,15 +1099,11 @@ function traverseCheckProgram(program, otherIdentifiers, stack, functions) {
             else if (item.type === "if") {
                 const firstBlock = traverseCheckProgram(item.block, otherIdentifiers, "bool", functions);
                 if (item.else) {
-                    const secondBlock = traverseCheckProgram(item.block, otherIdentifiers, "bool", functions);
-                    if (secondBlock.length > 0 || firstBlock.length > 0) {
-                        errors = [...errors, ...secondBlock, ...firstBlock];
-                    }
+                    const secondBlock = traverseCheckProgram(item.else, otherIdentifiers, "bool", functions);
+                    errors = [...errors, ...firstBlock, ...secondBlock];
                 }
                 else {
-                    if (firstBlock.length > 0) {
-                        errors = [...errors, ...firstBlock];
-                    }
+                    errors = [...errors, ...firstBlock];
                 }
                 stack = "bool";
             }
@@ -1393,7 +1382,7 @@ const standardLibraryFunctions = {
             params: { prompt: "str" },
             rawCode: async (stacks, params, stack) => {
                 // does not work on browser
-                if (window !== undefined) {
+                if (typeof window !== "undefined") {
                     return;
                 }
                 const rl = readline__WEBPACK_IMPORTED_MODULE_0__.createInterface({

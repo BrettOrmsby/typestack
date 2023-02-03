@@ -10,7 +10,7 @@ export async function refreshDiagnostics(doc: vscode.TextDocument, diagnosticCol
 	const diagnostics: vscode.Diagnostic[] = [];
     const fileText = doc.getText();
 	const errors = await getErrors(fileText);
-    console.log(errors)
+
     if(errors) {
         if(errors instanceof TSError) {
             diagnostics.push(createDiagnostic(doc, errors));
@@ -63,19 +63,17 @@ export function subscribeToDocumentChanges(context: vscode.ExtensionContext, dia
 
 async function getErrors(text: string): Promise<TSError | void | TSError[]> {
         const scanner = new Scanner(text, console.log);
-        const scanError = scanner.scan();
-        if (scanError instanceof TSError) {
-            return scanError;
-        }
+        const scanErrors = scanner.scan();
+        
         const parser = new Parser(scanner.tokens, standardLibraryFunctions);
         const parseError = await parser.parse();
         if (parseError instanceof TSError) {
-            return parseError;
+            return [...scanErrors, parseError];
         }
     
-        return typeCheck(
+        return [...scanErrors, ...typeCheck(
             parser.program,
             standardLibraryFunctions,
             parser.newFunctions
-        );
+        )];
 }
