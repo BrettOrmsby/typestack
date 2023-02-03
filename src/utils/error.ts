@@ -12,12 +12,16 @@ export const ErrorInputConfig: ErrorConfig = {
 
 export class TSError {
   error: string;
+  message: string;
+  pos: { startPos: Pos; endPos: Pos };
 
   constructor(
     pos: { startPos: Pos; endPos: Pos },
     msg: string,
     ...params: Array<string | boolean | number>
   ) {
+    this.message = msg;
+    this.pos = pos;
     const MAX_ERROR_WIDTH = 35; // characters on each side of the start of the error
 
     let replaceNum = -1;
