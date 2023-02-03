@@ -6,7 +6,7 @@ import { TSError } from "../src/utils/error";
 
 async function check(input: string) {
     const scanner = new Scanner(input, console.log);
-    const scanError = scanner.scan();
+    const scanError = scanner.scan()[0];
     expect(scanError).not.toBeInstanceOf(TSError);
     if (scanError instanceof TSError) {
         return;

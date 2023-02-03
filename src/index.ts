@@ -16,16 +16,14 @@ export default async function typeStack(
   }
 
   const scanner = new Scanner(input, consoleFunc);
-  const scanError = scanner.scan();
-  if (isTSError(scanError)) {
-    scanError.fire();
-    return;
-  }
+  const scanErrors = scanner.scan();
+  scanErrors.forEach((e) => e.fire());
 
   const parser = new Parser(scanner.tokens, importedFunctions);
   const parseError = await parser.parse();
   if (parseError) {
     parseError.fire();
+    return;
   }
 
   const typeErrors = typeCheck(
@@ -33,8 +31,9 @@ export default async function typeStack(
     importedFunctions,
     parser.newFunctions
   );
-  if (typeErrors.length > 0) {
-    typeErrors.forEach((e) => e.fire());
+  typeErrors.forEach((e) => e.fire());
+
+  if (scanErrors.length > 0 || typeErrors.length > 0) {
     return;
   }
 
@@ -60,3 +59,24 @@ function combineStackFunctions(
   }
   return main;
 }
+
+await typeStack(`
+# make the random number
+1 100 rand
+# repeat while the guess is wrong
+loop {
+  "Guess a \\hnumber: " int read
+  over over # create a copy of the guess and random number
+  == if {
+    "You are correct!" print
+    break
+  } else {
+    int over # create a copy of the random number on the top
+    > if {
+      "Too high!" print drop
+    } else {
+      "Too low!" print drop
+    }
+  }
+}
+`);

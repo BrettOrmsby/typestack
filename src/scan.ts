@@ -64,19 +64,22 @@ export class Scanner {
   pointer: number;
   char: number;
   line: number;
+  errors: TSError[];
 
   constructor(input: string, consoleFunc: (string: string) => void) {
     input = input.trimEnd();
     ErrorInputConfig.input = input;
     ErrorInputConfig.consoleFunc = consoleFunc;
+
     this.input = input;
     this.tokens = [];
     this.pointer = 0;
     this.char = 1;
     this.line = 1;
+    this.errors = [];
   }
 
-  scan(): TSError | void {
+  scan(): TSError[] {
     while (!this.#isAtEnd()) {
       const current = this.#peek();
 
@@ -141,12 +144,14 @@ export class Scanner {
             } else if (this.#peek() === '"') {
               str += '"';
             } else {
-              return new TSError(
-                {
-                  startPos: { line: this.line, char: this.char - 1 },
-                  endPos: { line: this.line, char: this.char + 1 },
-                },
-                "unknown escape code"
+              this.errors.push(
+                new TSError(
+                  {
+                    startPos: { line: this.line, char: this.char - 1 },
+                    endPos: { line: this.line, char: this.char + 1 },
+                  },
+                  "unknown escape code"
+                )
               );
             }
             this.#increment();
@@ -162,12 +167,14 @@ export class Scanner {
         }
 
         if (this.#isAtEnd()) {
-          return new TSError(
-            {
-              startPos: startPos,
-              endPos: { line: this.line, char: this.char },
-            },
-            'expected an ending string literal `"`'
+          this.errors.push(
+            new TSError(
+              {
+                startPos: startPos,
+                endPos: { line: this.line, char: this.char },
+              },
+              'expected an ending string literal `"`'
+            )
           );
         }
 
@@ -175,24 +182,19 @@ export class Scanner {
 
         this.#addToken("str", str, startPos);
 
-        const posError = this.#expectSeparator();
-        if (posError) {
-          return posError;
-        }
+        this.#expectSeparator();
         continue;
       }
 
       if (current >= "0" && current <= "9") {
-        const posError = this.#number();
-        if (posError) {
-          return posError;
-        }
+        this.#number();
       } else {
         this.#identifier();
       }
     }
     this.#increment();
     this.#addToken("EOF", "");
+    return this.errors;
   }
 
   #addToken<T extends TokenType>(
@@ -224,19 +226,21 @@ export class Scanner {
     this.line += 1;
     this.char = 1;
   }
-  #expectSeparator(): TSError | void {
+  #expectSeparator() {
     if (
       !this.#isAtEnd() &&
       !["\n", "\r", "\t", " ", "{", "}", "(", ")", ":", "#"].includes(
         this.#peek()
       )
     ) {
-      return new TSError(
-        {
-          startPos: { line: this.line, char: this.char },
-          endPos: { line: this.line, char: this.char },
-        },
-        "Expected separator (`\\n`, `\\r`, `\\t`, ` `, `{`, `}`, `(`, `)`, `:`)`"
+      this.errors.push(
+        new TSError(
+          {
+            startPos: { line: this.line, char: this.char },
+            endPos: { line: this.line, char: this.char + 1 },
+          },
+          "Expected separator (`\\n`, `\\r`, `\\t`, ` `, `{`, `}`, `(`, `)`, `:`)"
+        )
       );
     }
   }
@@ -264,12 +268,14 @@ export class Scanner {
 
       const float = parseFloat(strOfNumber);
       if (Number.isNaN(float)) {
-        return new TSError(
-          {
-            startPos: { line: startPos.line, char: startPos.char },
-            endPos: { line: this.line, char: this.char },
-          },
-          "Unable to parse float"
+        this.errors.push(
+          new TSError(
+            {
+              startPos: { line: startPos.line, char: startPos.char },
+              endPos: { line: this.line, char: this.char },
+            },
+            "Unable to parse float"
+          )
         );
       }
 
@@ -277,19 +283,20 @@ export class Scanner {
     } else {
       const int = parseInt(strOfNumber);
       if (Number.isNaN(int)) {
-        return new TSError(
-          {
-            startPos: { line: startPos.line, char: startPos.char },
-            endPos: { line: this.line, char: this.char },
-          },
-          "Unable to parse int"
+        this.errors.push(
+          new TSError(
+            {
+              startPos: { line: startPos.line, char: startPos.char },
+              endPos: { line: this.line, char: this.char },
+            },
+            "Unable to parse int"
+          )
         );
       }
 
       this.#addToken("int", int, startPos);
     }
-
-    return this.#expectSeparator();
+    this.#expectSeparator();
   }
 
   #identifier() {
