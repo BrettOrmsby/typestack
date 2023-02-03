@@ -3,6 +3,7 @@ node_modules
 /package-lock.json
 /dist
 /site
+/vscode
 
 # local env files
 .env.local

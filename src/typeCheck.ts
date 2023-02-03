@@ -34,6 +34,7 @@ export default function typeCheck(
       functionErrors = [...functionErrors, ...functionError];
     }
   }
+
   return [...programTypeErrors, ...functionErrors];
 }
 
@@ -133,18 +134,14 @@ function traverseCheckProgram(
         );
         if (item.else) {
           const secondBlock = traverseCheckProgram(
-            item.block,
+            item.else,
             otherIdentifiers,
             "bool",
             functions
           );
-          if (secondBlock.length > 0 || firstBlock.length > 0) {
-            errors = [...errors, ...secondBlock, ...firstBlock];
-          }
+          errors = [...errors, ...firstBlock, ...secondBlock];
         } else {
-          if (firstBlock.length > 0) {
-            errors = [...errors, ...firstBlock];
-          }
+          errors = [...errors, ...firstBlock];
         }
         stack = "bool";
       }
