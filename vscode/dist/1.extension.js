@@ -3,195 +3,193 @@ exports.id = 1;
 exports.ids = [1];
 exports.modules = {
 
-/***/ 12:
+/***/ 13:
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var _stack_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(7);
-
 const date = {
-    [_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int]: {
+    int: {
         now: {
             params: {},
             rawCode: (stacks) => {
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int].push(Date.now());
+                stacks.int.push(Date.now());
             },
         },
         getTimezoneOffset: {
-            params: { date: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { date: "int" },
             rawCode: (stacks, params) => {
                 const date = new Date(params.date);
                 if (!isValidDate(date)) {
                     return new Error(`unable to convert to a date: \`${params.date}\``);
                 }
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int].push(date.getTimezoneOffset());
+                stacks.int.push(date.getTimezoneOffset());
             },
         },
         getDate: {
-            params: { date: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { date: "int" },
             rawCode: (stacks, params) => {
                 const date = new Date(params.date);
                 if (!isValidDate(date)) {
                     return new Error(`unable to convert to a date: \`${params.date}\``);
                 }
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int].push(date.getDate());
+                stacks.int.push(date.getDate());
             },
         },
         getDay: {
-            params: { date: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { date: "int" },
             rawCode: (stacks, params) => {
                 const date = new Date(params.date);
                 if (!isValidDate(date)) {
                     return new Error(`unable to convert to a date: \`${params.date}\``);
                 }
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int].push(date.getDay());
+                stacks.int.push(date.getDay());
             },
         },
         getYear: {
-            params: { date: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { date: "int" },
             rawCode: (stacks, params) => {
                 const date = new Date(params.date);
                 if (!isValidDate(date)) {
                     return new Error(`unable to convert to a date: \`${params.date}\``);
                 }
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int].push(date.getFullYear());
+                stacks.int.push(date.getFullYear());
             },
         },
         getHours: {
-            params: { date: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { date: "int" },
             rawCode: (stacks, params) => {
                 const date = new Date(params.date);
                 if (!isValidDate(date)) {
                     return new Error(`unable to convert to a date: \`${params.date}\``);
                 }
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int].push(date.getHours());
+                stacks.int.push(date.getHours());
             },
         },
         getMilliseconds: {
-            params: { date: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { date: "int" },
             rawCode: (stacks, params) => {
                 const date = new Date(params.date);
                 if (!isValidDate(date)) {
                     return new Error(`unable to convert to a date: \`${params.date}\``);
                 }
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int].push(date.getMilliseconds());
+                stacks.int.push(date.getMilliseconds());
             },
         },
         getMinutes: {
-            params: { date: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { date: "int" },
             rawCode: (stacks, params) => {
                 const date = new Date(params.date);
                 if (!isValidDate(date)) {
                     return new Error(`unable to convert to a date: \`${params.date}\``);
                 }
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int].push(date.getMinutes());
+                stacks.int.push(date.getMinutes());
             },
         },
         getMonth: {
-            params: { date: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { date: "int" },
             rawCode: (stacks, params) => {
                 const date = new Date(params.date);
                 if (!isValidDate(date)) {
                     return new Error(`unable to convert to a date: \`${params.date}\``);
                 }
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int].push(date.getMonth());
+                stacks.int.push(date.getMonth());
             },
         },
         getSeconds: {
-            params: { date: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { date: "int" },
             rawCode: (stacks, params) => {
                 const date = new Date(params.date);
                 if (!isValidDate(date)) {
                     return new Error(`unable to convert to a date: \`${params.date}\``);
                 }
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int].push(date.getSeconds());
+                stacks.int.push(date.getSeconds());
             },
         },
         getUTCDate: {
-            params: { date: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { date: "int" },
             rawCode: (stacks, params) => {
                 const date = new Date(params.date);
                 if (!isValidDate(date)) {
                     return new Error(`unable to convert to a date: \`${params.date}\``);
                 }
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int].push(date.getUTCDate());
+                stacks.int.push(date.getUTCDate());
             },
         },
         getUTCDay: {
-            params: { date: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { date: "int" },
             rawCode: (stacks, params) => {
                 const date = new Date(params.date);
                 if (!isValidDate(date)) {
                     return new Error(`unable to convert to a date: \`${params.date}\``);
                 }
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int].push(date.getUTCDay());
+                stacks.int.push(date.getUTCDay());
             },
         },
         getUTCYear: {
-            params: { date: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { date: "int" },
             rawCode: (stacks, params) => {
                 const date = new Date(params.date);
                 if (!isValidDate(date)) {
                     return new Error(`unable to convert to a date: \`${params.date}\``);
                 }
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int].push(date.getUTCFullYear());
+                stacks.int.push(date.getUTCFullYear());
             },
         },
         getUTCHours: {
-            params: { date: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { date: "int" },
             rawCode: (stacks, params) => {
                 const date = new Date(params.date);
                 if (!isValidDate(date)) {
                     return new Error(`unable to convert to a date: \`${params.date}\``);
                 }
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int].push(date.getUTCHours());
+                stacks.int.push(date.getUTCHours());
             },
         },
         getUTCMilliseconds: {
-            params: { date: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { date: "int" },
             rawCode: (stacks, params) => {
                 const date = new Date(params.date);
                 if (!isValidDate(date)) {
                     return new Error(`unable to convert to a date: \`${params.date}\``);
                 }
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int].push(date.getUTCMilliseconds());
+                stacks.int.push(date.getUTCMilliseconds());
             },
         },
         getUTCMinutes: {
-            params: { date: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { date: "int" },
             rawCode: (stacks, params) => {
                 const date = new Date(params.date);
                 if (!isValidDate(date)) {
                     return new Error(`unable to convert to a date: \`${params.date}\``);
                 }
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int].push(date.getUTCMinutes());
+                stacks.int.push(date.getUTCMinutes());
             },
         },
         getUTCMonth: {
-            params: { date: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { date: "int" },
             rawCode: (stacks, params) => {
                 const date = new Date(params.date);
                 if (!isValidDate(date)) {
                     return new Error(`unable to convert to a date: \`${params.date}\``);
                 }
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int].push(date.getUTCMonth());
+                stacks.int.push(date.getUTCMonth());
             },
         },
         getUTCSeconds: {
-            params: { date: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { date: "int" },
             rawCode: (stacks, params) => {
                 const date = new Date(params.date);
                 if (!isValidDate(date)) {
                     return new Error(`unable to convert to a date: \`${params.date}\``);
                 }
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int].push(date.getUTCSeconds());
+                stacks.int.push(date.getUTCSeconds());
             },
         },
         setDate: {
-            params: { day: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int, date: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { day: "int", date: "int" },
             rawCode: (stacks, params) => {
                 const date = new Date(params.date);
                 if (!isValidDate(date)) {
@@ -201,11 +199,11 @@ const date = {
                 if (!isValidDate(newDate)) {
                     return new Error("invalid date created");
                 }
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int].push(newDate);
+                stacks.int.push(newDate);
             },
         },
         setFullYear: {
-            params: { year: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int, date: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { year: "int", date: "int" },
             rawCode: (stacks, params) => {
                 const date = new Date(params.date);
                 if (!isValidDate(date)) {
@@ -215,11 +213,11 @@ const date = {
                 if (!isValidDate(newDate)) {
                     return new Error("invalid date created");
                 }
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int].push(newDate);
+                stacks.int.push(newDate);
             },
         },
         setHours: {
-            params: { hour: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int, date: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { hour: "int", date: "int" },
             rawCode: (stacks, params) => {
                 const date = new Date(params.date);
                 if (!isValidDate(date)) {
@@ -229,11 +227,11 @@ const date = {
                 if (!isValidDate(newDate)) {
                     return new Error("invalid date created");
                 }
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int].push(newDate);
+                stacks.int.push(newDate);
             },
         },
         setMilliseconds: {
-            params: { millisecond: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int, date: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { millisecond: "int", date: "int" },
             rawCode: (stacks, params) => {
                 const date = new Date(params.date);
                 if (!isValidDate(date)) {
@@ -243,11 +241,11 @@ const date = {
                 if (!isValidDate(newDate)) {
                     return new Error("invalid date created");
                 }
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int].push(newDate);
+                stacks.int.push(newDate);
             },
         },
         setMinutes: {
-            params: { minute: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int, date: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { minute: "int", date: "int" },
             rawCode: (stacks, params) => {
                 const date = new Date(params.date);
                 if (!isValidDate(date)) {
@@ -257,11 +255,11 @@ const date = {
                 if (!isValidDate(newDate)) {
                     return new Error("invalid date created");
                 }
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int].push(newDate);
+                stacks.int.push(newDate);
             },
         },
         setMonth: {
-            params: { month: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int, date: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { month: "int", date: "int" },
             rawCode: (stacks, params) => {
                 const date = new Date(params.date);
                 if (!isValidDate(date)) {
@@ -271,11 +269,11 @@ const date = {
                 if (!isValidDate(newDate)) {
                     return new Error("invalid date created");
                 }
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int].push(newDate);
+                stacks.int.push(newDate);
             },
         },
         setSeconds: {
-            params: { second: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int, date: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { second: "int", date: "int" },
             rawCode: (stacks, params) => {
                 const date = new Date(params.date);
                 if (!isValidDate(date)) {
@@ -285,11 +283,11 @@ const date = {
                 if (!isValidDate(newDate)) {
                     return new Error("invalid date created");
                 }
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int].push(newDate);
+                stacks.int.push(newDate);
             },
         },
         setUTCDate: {
-            params: { day: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int, date: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { day: "int", date: "int" },
             rawCode: (stacks, params) => {
                 const date = new Date(params.date);
                 if (!isValidDate(date)) {
@@ -299,11 +297,11 @@ const date = {
                 if (!isValidDate(newDate)) {
                     return new Error("invalid date created");
                 }
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int].push(newDate);
+                stacks.int.push(newDate);
             },
         },
         setUTCFullYear: {
-            params: { year: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int, date: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { year: "int", date: "int" },
             rawCode: (stacks, params) => {
                 const date = new Date(params.date);
                 if (!isValidDate(date)) {
@@ -313,11 +311,11 @@ const date = {
                 if (!isValidDate(newDate)) {
                     return new Error("invalid date created");
                 }
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int].push(newDate);
+                stacks.int.push(newDate);
             },
         },
         setUTCHours: {
-            params: { hour: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int, date: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { hour: "int", date: "int" },
             rawCode: (stacks, params) => {
                 const date = new Date(params.date);
                 if (!isValidDate(date)) {
@@ -327,11 +325,11 @@ const date = {
                 if (!isValidDate(newDate)) {
                     return new Error("invalid date created");
                 }
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int].push(newDate);
+                stacks.int.push(newDate);
             },
         },
         seUTCMilliseconds: {
-            params: { millisecond: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int, date: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { millisecond: "int", date: "int" },
             rawCode: (stacks, params) => {
                 const date = new Date(params.date);
                 if (!isValidDate(date)) {
@@ -341,11 +339,11 @@ const date = {
                 if (!isValidDate(newDate)) {
                     return new Error("invalid date created");
                 }
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int].push(newDate);
+                stacks.int.push(newDate);
             },
         },
         setUTCMinutes: {
-            params: { minute: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int, date: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { minute: "int", date: "int" },
             rawCode: (stacks, params) => {
                 const date = new Date(params.date);
                 if (!isValidDate(date)) {
@@ -355,11 +353,11 @@ const date = {
                 if (!isValidDate(newDate)) {
                     return new Error("invalid date created");
                 }
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int].push(newDate);
+                stacks.int.push(newDate);
             },
         },
         setUTCMonth: {
-            params: { month: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int, date: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { month: "int", date: "int" },
             rawCode: (stacks, params) => {
                 const date = new Date(params.date);
                 if (!isValidDate(date)) {
@@ -369,11 +367,11 @@ const date = {
                 if (!isValidDate(newDate)) {
                     return new Error("invalid date created");
                 }
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int].push(newDate);
+                stacks.int.push(newDate);
             },
         },
         setUTCSeconds: {
-            params: { second: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int, date: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { second: "int", date: "int" },
             rawCode: (stacks, params) => {
                 const date = new Date(params.date);
                 if (!isValidDate(date)) {
@@ -383,75 +381,75 @@ const date = {
                 if (!isValidDate(newDate)) {
                     return new Error("invalid date created");
                 }
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int].push(newDate);
+                stacks.int.push(newDate);
             },
         },
         toStr: {
-            params: { date: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { date: "int" },
             rawCode: (stacks, params) => {
                 const date = new Date(params.date);
                 if (!isValidDate(date)) {
                     return new Error(`unable to convert to a date: \`${params.date}\``);
                 }
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str].push(date.toString());
+                stacks.str.push(date.toString());
             },
         },
         toDateStr: {
-            params: { date: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { date: "int" },
             rawCode: (stacks, params) => {
                 const date = new Date(params.date);
                 if (!isValidDate(date)) {
                     return new Error(`unable to convert to a date: \`${params.date}\``);
                 }
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str].push(date.toDateString());
+                stacks.str.push(date.toDateString());
             },
         },
         toISOStr: {
-            params: { date: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { date: "int" },
             rawCode: (stacks, params) => {
                 const date = new Date(params.date);
                 if (!isValidDate(date)) {
                     return new Error(`unable to convert to a date: \`${params.date}\``);
                 }
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str].push(date.toISOString());
+                stacks.str.push(date.toISOString());
             },
         },
         toUTCStr: {
-            params: { date: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { date: "int" },
             rawCode: (stacks, params) => {
                 const date = new Date(params.date);
                 if (!isValidDate(date)) {
                     return new Error(`unable to convert to a date: \`${params.date}\``);
                 }
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str].push(date.toUTCString());
+                stacks.str.push(date.toUTCString());
             },
         },
         toTimeStr: {
-            params: { date: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { date: "int" },
             rawCode: (stacks, params) => {
                 const date = new Date(params.date);
                 if (!isValidDate(date)) {
                     return new Error(`unable to convert to a date: \`${params.date}\``);
                 }
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str].push(date.toTimeString());
+                stacks.str.push(date.toTimeString());
             },
         },
     },
-    [_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Float]: {},
-    [_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str]: {
+    float: {},
+    str: {
         parse: {
-            params: { date: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str },
+            params: { date: "str" },
             rawCode: (stacks, params) => {
                 const date = Date.parse(params.date);
                 if (!isValidDate(date)) {
                     return new Error(`unable to convert to a date: \`${params.date}\``);
                 }
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int].push(Date.parse(params.date));
+                stacks.int.push(Date.parse(params.date));
             },
         },
     },
-    [_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Bool]: {},
-    [_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Any]: {},
+    bool: {},
+    any: {},
 };
 function isValidDate(d) {
     return typeof d === "number" ? !isNaN(d) : !isNaN(d.getDate());

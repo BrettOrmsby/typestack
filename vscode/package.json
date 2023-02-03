@@ -70,6 +70,6 @@
     "webpack-cli": "^5.0.1"
   },
   "dependencies": {
-    "typestack-lang": "^1.5.2"
+    "typestack-lang": "^1.6.0"
   }
 }

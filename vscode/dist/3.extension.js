@@ -3,25 +3,23 @@ exports.id = 3;
 exports.ids = [3];
 exports.modules = {
 
-/***/ 14:
+/***/ 15:
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var _stack_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(7);
-
 const str = {
-    [_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int]: {
+    int: {
         fromCharCode: {
-            params: { code: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { code: "int" },
             rawCode: (stacks, params) => {
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str].push(String.fromCharCode(params.code));
+                stacks.str.push(String.fromCharCode(params.code));
             },
         },
         fromCodePoint: {
-            params: { code: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { code: "int" },
             rawCode: (stacks, params) => {
                 let char;
                 try {
@@ -30,193 +28,193 @@ const str = {
                 catch (e) {
                     return new Error(`\`code\` is an invalid code point: \`${params.code}\``);
                 }
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str].push(char);
+                stacks.str.push(char);
             },
         },
         repeat: {
-            params: { string: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str, amount: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { string: "str", amount: "int" },
             rawCode: (stacks, params) => {
                 if (params.amount < 0) {
                     return new Error(`unable to repeat a negative \`amount\`: \`${params.amount}\``);
                 }
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str].push(params.string.repeat(params.amount));
+                stacks.str.push(params.string.repeat(params.amount));
             },
         },
         charAt: {
-            params: { string: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str, index: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { string: "str", index: "int" },
             rawCode: (stacks, params) => {
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str].push(params.string.charAt(params.index));
+                stacks.str.push(params.string.charAt(params.index));
             },
         },
         charCodeAt: {
-            params: { string: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str, index: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { string: "str", index: "int" },
             rawCode: (stacks, params) => {
                 const code = params.string.charCodeAt(params.index);
                 if (isNaN(code)) {
                     return new Error(`\`index\` out of range: \`"${params.string}"\`, \`${params.index}\``);
                 }
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int].push(code);
+                stacks.int.push(code);
             },
         },
         codePointAt: {
-            params: { string: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str, index: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { string: "str", index: "int" },
             rawCode: (stacks, params) => {
                 const code = params.string.codePointAt(params.index);
                 if (!code) {
                     return new Error(`\`index\` out of range: \`"${params.string}"\`, \`${params.index}\``);
                 }
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int].push(code);
+                stacks.int.push(code);
             },
         },
         slice: {
             params: {
-                string: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str,
-                endIndex: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int,
-                startIndex: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int,
+                string: "str",
+                endIndex: "int",
+                startIndex: "int",
             },
             rawCode: (stacks, params) => {
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str].push(params.string.slice(params.startIndex, params.endIndex));
+                stacks.str.push(params.string.slice(params.startIndex, params.endIndex));
             },
         },
     },
-    [_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Float]: {},
-    [_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str]: {
+    float: {},
+    str: {
         endsWith: {
-            params: { end: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str, string: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str },
+            params: { end: "str", string: "str" },
             rawCode: (stacks, params) => {
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Bool].push(params.string.endsWith(params.end));
+                stacks.bool.push(params.string.endsWith(params.end));
             },
         },
         startsWith: {
-            params: { start: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str, string: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str },
+            params: { start: "str", string: "str" },
             rawCode: (stacks, params) => {
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Bool].push(params.string.startsWith(params.start));
+                stacks.bool.push(params.string.startsWith(params.start));
             },
         },
         includes: {
-            params: { search: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str, string: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str },
+            params: { search: "str", string: "str" },
             rawCode: (stacks, params) => {
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Bool].push(params.string.includes(params.search));
+                stacks.bool.push(params.string.includes(params.search));
             },
         },
         occurrence: {
-            params: { search: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str, string: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str },
+            params: { search: "str", string: "str" },
             rawCode: (stacks, params) => {
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int].push(params.string.split(params.search).length - 1);
+                stacks.int.push(params.string.split(params.search).length - 1);
             },
         },
         toUpper: {
-            params: { string: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str },
+            params: { string: "str" },
             rawCode: (stacks, params) => {
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str].push(params.string.toUpperCase());
+                stacks.str.push(params.string.toUpperCase());
             },
         },
         toLower: {
-            params: { string: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str },
+            params: { string: "str" },
             rawCode: (stacks, params) => {
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str].push(params.string.toLowerCase());
+                stacks.str.push(params.string.toLowerCase());
             },
         },
         trim: {
-            params: { string: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str },
+            params: { string: "str" },
             rawCode: (stacks, params) => {
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str].push(params.string.trim());
+                stacks.str.push(params.string.trim());
             },
         },
         reverse: {
-            params: { string: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str },
+            params: { string: "str" },
             rawCode: (stacks, params) => {
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str].push(params.string.split("").reverse().join(""));
+                stacks.str.push(params.string.split("").reverse().join(""));
             },
         },
         replace: {
             params: {
-                replacement: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str,
-                search: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str,
-                string: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str,
+                replacement: "str",
+                search: "str",
+                string: "str",
             },
             rawCode: (stacks, params) => {
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str].push(params.string.replace(params.search, params.replacement));
+                stacks.str.push(params.string.replace(params.search, params.replacement));
             },
         },
         replaceAll: {
             params: {
-                replacement: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str,
-                search: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str,
-                string: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str,
+                replacement: "str",
+                search: "str",
+                string: "str",
             },
             rawCode: (stacks, params) => {
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str].push(params.string.replaceAll(params.search, params.replacement));
+                stacks.str.push(params.string.replaceAll(params.search, params.replacement));
             },
         },
         repeat: {
-            params: { string: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str, amount: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { string: "str", amount: "int" },
             rawCode: (stacks, params) => {
                 if (params.amount < 0) {
                     return new Error(`unable to repeat a negative \`amount\`: \`${params.amount}\``);
                 }
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str].push(params.string.repeat(params.amount));
+                stacks.str.push(params.string.repeat(params.amount));
             },
         },
         indexOf: {
-            params: { search: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str, string: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str },
+            params: { search: "str", string: "str" },
             rawCode: (stacks, params) => {
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int].push(params.string.indexOf(params.search));
+                stacks.int.push(params.string.indexOf(params.search));
             },
         },
         lastIndexOf: {
-            params: { search: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str, string: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str },
+            params: { search: "str", string: "str" },
             rawCode: (stacks, params) => {
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int].push(params.string.lastIndexOf(params.search));
+                stacks.int.push(params.string.lastIndexOf(params.search));
             },
         },
         charAt: {
-            params: { string: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str, index: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { string: "str", index: "int" },
             rawCode: (stacks, params) => {
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str].push(params.string.charAt(params.index));
+                stacks.str.push(params.string.charAt(params.index));
             },
         },
         charCodeAt: {
-            params: { string: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str, index: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { string: "str", index: "int" },
             rawCode: (stacks, params) => {
                 const code = params.string.charCodeAt(params.index);
                 if (isNaN(code)) {
                     return new Error(`\`index\` out of range: \`"${params.string}"\`, \`${params.index}\``);
                 }
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int].push(code);
+                stacks.int.push(code);
             },
         },
         codePointAt: {
-            params: { string: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str, index: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { string: "str", index: "int" },
             rawCode: (stacks, params) => {
                 const code = params.string.codePointAt(params.index);
                 if (!code) {
                     return new Error(`\`index\` out of range: \`"${params.string}"\`, \`${params.index}\``);
                 }
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int].push(code);
+                stacks.int.push(code);
             },
         },
         slice: {
             params: {
-                string: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str,
-                endIndex: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int,
-                startIndex: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int,
+                string: "str",
+                endIndex: "int",
+                startIndex: "int",
             },
             rawCode: (stacks, params) => {
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str].push(params.string.slice(params.startIndex, params.endIndex));
+                stacks.str.push(params.string.slice(params.startIndex, params.endIndex));
             },
         },
         split: {
-            params: { separator: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str, string: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str },
+            params: { separator: "str", string: "str" },
             rawCode: (stacks, params) => {
                 params.string
                     .split(params.separator)
-                    .forEach((e) => stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str].push(e));
+                    .forEach((e) => stacks.str.push(e));
             },
         },
     },
-    [_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Bool]: {},
-    [_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Any]: {},
+    bool: {},
+    any: {},
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (str);
 

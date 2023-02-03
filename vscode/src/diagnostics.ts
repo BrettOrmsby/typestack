@@ -10,6 +10,7 @@ export async function refreshDiagnostics(doc: vscode.TextDocument, diagnosticCol
 	const diagnostics: vscode.Diagnostic[] = [];
     const fileText = doc.getText();
 	const errors = await getErrors(fileText);
+    console.log(errors)
     if(errors) {
         if(errors instanceof TSError) {
             diagnostics.push(createDiagnostic(doc, errors));
@@ -24,13 +25,14 @@ export async function refreshDiagnostics(doc: vscode.TextDocument, diagnosticCol
 }
 
 function createDiagnostic(doc: vscode.TextDocument, error: TSError): vscode.Diagnostic {
-	// do the error parsing here
-	const index = 1;
-
 	// create range that represents, where in the document the word is
-	const range = new vscode.Range(1, index, 1, index + 6);
+    let errorLength = error.pos.endPos.char - error.pos.startPos.char;
+    if (errorLength === 0) {
+      errorLength = 1;
+    }
+	const range = new vscode.Range(error.pos.startPos.line - 1, error.pos.startPos.char - 1, error.pos.endPos.line - 1, error.pos.startPos.char -1 + errorLength);
 
-	const diagnostic = new vscode.Diagnostic(range, error.error,
+	const diagnostic = new vscode.Diagnostic(range, error.message,
 		vscode.DiagnosticSeverity.Error);
 	diagnostic.code = "typestack";
     console.log(diagnostic);
@@ -67,7 +69,6 @@ async function getErrors(text: string): Promise<TSError | void | TSError[]> {
         }
         const parser = new Parser(scanner.tokens, standardLibraryFunctions);
         const parseError = await parser.parse();
-        expect(parseError).not.toBeInstanceOf(TSError);
         if (parseError instanceof TSError) {
             return parseError;
         }

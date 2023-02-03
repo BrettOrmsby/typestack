@@ -22,6 +22,7 @@ export class TSError {
   ) {
     this.message = msg;
     this.pos = pos;
+    
     const MAX_ERROR_WIDTH = 35; // characters on each side of the start of the error
 
     let replaceNum = -1;

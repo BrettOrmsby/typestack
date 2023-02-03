@@ -18,13 +18,14 @@ exports.subscribeToDocumentChanges = exports.refreshDiagnostics = void 0;
 const vscode = __webpack_require__(1);
 const scan_1 = __webpack_require__(3);
 const parse_1 = __webpack_require__(6);
-const typeCheck_1 = __webpack_require__(9);
-const functions_1 = __webpack_require__(10);
+const typeCheck_1 = __webpack_require__(10);
+const functions_1 = __webpack_require__(11);
 const error_1 = __webpack_require__(4);
 async function refreshDiagnostics(doc, diagnosticCollection) {
     const diagnostics = [];
     const fileText = doc.getText();
     const errors = await getErrors(fileText);
+    console.log(errors);
     if (errors) {
         if (errors instanceof error_1.TSError) {
             diagnostics.push(createDiagnostic(doc, errors));
@@ -39,11 +40,13 @@ async function refreshDiagnostics(doc, diagnosticCollection) {
 }
 exports.refreshDiagnostics = refreshDiagnostics;
 function createDiagnostic(doc, error) {
-    // do the error parsing here
-    const index = 1;
     // create range that represents, where in the document the word is
-    const range = new vscode.Range(1, index, 1, index + 6);
-    const diagnostic = new vscode.Diagnostic(range, error.error, vscode.DiagnosticSeverity.Error);
+    let errorLength = error.pos.endPos.char - error.pos.startPos.char;
+    if (errorLength === 0) {
+        errorLength = 1;
+    }
+    const range = new vscode.Range(error.pos.startPos.line - 1, error.pos.startPos.char - 1, error.pos.endPos.line - 1, error.pos.startPos.char - 1 + errorLength);
+    const diagnostic = new vscode.Diagnostic(range, error.message, vscode.DiagnosticSeverity.Error);
     diagnostic.code = "typestack";
     console.log(diagnostic);
     return diagnostic;
@@ -69,7 +72,6 @@ async function getErrors(text) {
     }
     const parser = new parse_1.Parser(scanner.tokens, functions_1.standardLibraryFunctions);
     const parseError = await parser.parse();
-    expect(parseError).not.toBeInstanceOf(error_1.TSError);
     if (parseError instanceof error_1.TSError) {
         return parseError;
     }
@@ -84,31 +86,31 @@ async function getErrors(text) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "Scanner": () => (/* binding */ Scanner),
-/* harmony export */   "TokenType": () => (/* binding */ TokenType)
+/* harmony export */   "Scanner": () => (/* binding */ Scanner)
 /* harmony export */ });
 /* harmony import */ var _utils_error_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(4);
-/* TODO: fix this error with any type params that auto go to the type of function
-fn combineStr(top second) @str {
-    top + second
-}
-*/
 
-var TokenType;
-(function (TokenType) {
-    TokenType[TokenType["Int"] = 0] = "Int";
-    TokenType[TokenType["Float"] = 1] = "Float";
-    TokenType[TokenType["Str"] = 2] = "Str";
-    TokenType[TokenType["Bool"] = 3] = "Bool";
-    TokenType[TokenType["Keyword"] = 4] = "Keyword";
-    TokenType[TokenType["Identifier"] = 5] = "Identifier";
-    TokenType[TokenType["Colon"] = 6] = "Colon";
-    TokenType[TokenType["OpenParen"] = 7] = "OpenParen";
-    TokenType[TokenType["CloseParen"] = 8] = "CloseParen";
-    TokenType[TokenType["OpenBracket"] = 9] = "OpenBracket";
-    TokenType[TokenType["CloseBracket"] = 10] = "CloseBracket";
-    TokenType[TokenType["EOF"] = 11] = "EOF";
-})(TokenType || (TokenType = {}));
+const keywords = [
+    "import",
+    "fn",
+    "loop",
+    "for",
+    "while",
+    "if",
+    "else",
+    "break",
+    "continue",
+    "int",
+    "bool",
+    "str",
+    "float",
+    "any",
+    "@int",
+    "@float",
+    "@str",
+    "@bool",
+    "@any",
+];
 class Scanner {
     input;
     tokens;
@@ -131,19 +133,19 @@ class Scanner {
             if (["(", ")", "{", "}", ":"].includes(current)) {
                 switch (current) {
                     case "(":
-                        this.#addToken(TokenType.OpenParen, "(");
+                        this.#addToken("openParen", "(");
                         break;
                     case ")":
-                        this.#addToken(TokenType.CloseParen, ")");
+                        this.#addToken("closeParen", ")");
                         break;
                     case "{":
-                        this.#addToken(TokenType.OpenBracket, "{");
+                        this.#addToken("openBracket", "{");
                         break;
                     case "}":
-                        this.#addToken(TokenType.CloseBracket, "}");
+                        this.#addToken("closeBracket", "}");
                         break;
                     case ":":
-                        this.#addToken(TokenType.Colon, ":");
+                        this.#addToken("colon", ":");
                 }
                 this.#increment();
                 continue;
@@ -212,7 +214,7 @@ class Scanner {
                     }, 'expected an ending string literal `"`');
                 }
                 this.#increment();
-                this.#addToken(TokenType.Str, str, startPos);
+                this.#addToken("str", str, startPos);
                 const posError = this.#expectSeparator();
                 if (posError) {
                     return posError;
@@ -230,15 +232,14 @@ class Scanner {
             }
         }
         this.#increment();
-        this.#addToken(TokenType.EOF, false);
+        this.#addToken("EOF", "");
     }
-    #addToken(type, value, startPos, endPos) {
-        startPos = startPos ? startPos : { line: this.line, char: this.char };
+    #addToken(type, value, startPos = { line: this.line, char: this.char }, endPos = { line: this.line, char: this.char }) {
         this.tokens.push({
             type,
             value,
             startPos,
-            endPos: endPos ? endPos : { line: this.line, char: this.char },
+            endPos,
         });
     }
     #isAtEnd() {
@@ -289,7 +290,7 @@ class Scanner {
                     endPos: { line: this.line, char: this.char },
                 }, "Unable to parse float");
             }
-            this.#addToken(TokenType.Float, float, startPos);
+            this.#addToken("float", float, startPos);
         }
         else {
             const int = parseInt(strOfNumber);
@@ -299,7 +300,7 @@ class Scanner {
                     endPos: { line: this.line, char: this.char },
                 }, "Unable to parse int");
             }
-            this.#addToken(TokenType.Int, int, startPos);
+            this.#addToken("int", int, startPos);
         }
         return this.#expectSeparator();
     }
@@ -314,38 +315,17 @@ class Scanner {
             str += this.#peek();
             this.#increment();
         }
-        const keywords = [
-            "import",
-            "fn",
-            "loop",
-            "for",
-            "while",
-            "if",
-            "else",
-            "break",
-            "continue",
-            "int",
-            "bool",
-            "str",
-            "float",
-            "any",
-            "@int",
-            "@float",
-            "@str",
-            "@bool",
-            "@any",
-        ];
         if (str === "false") {
-            this.#addToken(TokenType.Bool, false, startPos);
+            this.#addToken("bool", false, startPos);
         }
         else if (str === "true") {
-            this.#addToken(TokenType.Bool, true, startPos);
+            this.#addToken("bool", true, startPos);
         }
-        else if (keywords.includes(str)) {
-            this.#addToken(TokenType.Keyword, str, startPos);
+        else if (keywords.some((e) => e === str)) {
+            this.#addToken("keyword", str, startPos);
         }
         else {
-            this.#addToken(TokenType.Identifier, str, startPos);
+            this.#addToken("identifier", str, startPos);
         }
     }
 }
@@ -364,15 +344,22 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _consoleEffect_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(5);
 
-const ErrorInputConfig = { input: "", consoleFunc: console.log };
+const ErrorInputConfig = {
+    input: "",
+    consoleFunc: console.log,
+};
 class TSError {
     error;
+    message;
+    pos;
     constructor(pos, msg, ...params) {
+        this.message = msg;
+        this.pos = pos;
         const MAX_ERROR_WIDTH = 35; // characters on each side of the start of the error
         let replaceNum = -1;
         const formattedMessage = msg.replace(/{}/g, () => {
             replaceNum += 1;
-            return params[replaceNum];
+            return params[replaceNum].toString();
         });
         let errorLine = ErrorInputConfig.input.split("\n")[pos.startPos.line - 1];
         let errorStartsAt = pos.startPos.char - 1;
@@ -481,22 +468,14 @@ function consoleEffect(str, ...effects) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "Parser": () => (/* binding */ Parser),
-/* harmony export */   "StatementType": () => (/* binding */ StatementType)
+/* harmony export */   "Parser": () => (/* binding */ Parser)
 /* harmony export */ });
-/* harmony import */ var _scan_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(3);
-/* harmony import */ var _stack_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(7);
-/* harmony import */ var _utils_error_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(4);
+/* harmony import */ var _stack_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(7);
+/* harmony import */ var _utils_error_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(4);
+/* harmony import */ var _utils_includes_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(8);
 
 
 
-var StatementType;
-(function (StatementType) {
-    StatementType[StatementType["ForLoop"] = 0] = "ForLoop";
-    StatementType[StatementType["WhileLoop"] = 1] = "WhileLoop";
-    StatementType[StatementType["Loop"] = 2] = "Loop";
-    StatementType[StatementType["If"] = 3] = "If";
-})(StatementType || (StatementType = {}));
 class Parser {
     tokens;
     pointer;
@@ -512,11 +491,11 @@ class Parser {
     }
     async parse() {
         const importError = await this.#parseImports();
-        if ((0,_utils_error_js__WEBPACK_IMPORTED_MODULE_2__.isTSError)(importError)) {
+        if ((0,_utils_error_js__WEBPACK_IMPORTED_MODULE_1__.isTSError)(importError)) {
             return importError;
         }
         const block = this.#parseStatement(true);
-        if ((0,_utils_error_js__WEBPACK_IMPORTED_MODULE_2__.isTSError)(block)) {
+        if ((0,_utils_error_js__WEBPACK_IMPORTED_MODULE_1__.isTSError)(block)) {
             return block;
         }
         this.program = block;
@@ -524,13 +503,13 @@ class Parser {
     async #parseImports() {
         this.pointer -= 1;
         while (this.pointer < 0 || !this.#isAtEnd()) {
-            if (this.#expect(_scan_js__WEBPACK_IMPORTED_MODULE_0__.TokenType.Keyword, "import")) {
-                if (this.#expect(_scan_js__WEBPACK_IMPORTED_MODULE_0__.TokenType.Identifier)) {
+            if (this.#expect("keyword", "import")) {
+                if (this.#expect("identifier")) {
                     // dynamically import the file and add the module functions to the functions
                     try {
-                        const module = (await __webpack_require__(8)(`./${this.#peek().value}.js`))
+                        const module = (await __webpack_require__(9)(`./${this.#peek().value}.js`))
                             .default;
-                        for (const stack of Object.values(_stack_js__WEBPACK_IMPORTED_MODULE_1__.StackType)) {
+                        for (const stack of _stack_js__WEBPACK_IMPORTED_MODULE_0__.stackTypes) {
                             for (const key in module[stack]) {
                                 this.functions[stack][this.#peek().value + "." + key] =
                                     module[stack][key];
@@ -538,14 +517,14 @@ class Parser {
                         }
                     }
                     catch (_) {
-                        return new _utils_error_js__WEBPACK_IMPORTED_MODULE_2__.TSError({
+                        return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                             startPos: this.#peek().startPos,
                             endPos: this.#peek().endPos,
                         }, "unable to import module");
                     }
                 }
                 else {
-                    return new _utils_error_js__WEBPACK_IMPORTED_MODULE_2__.TSError({
+                    return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                         startPos: this.#peek().startPos,
                         endPos: this.#peek().endPos,
                     }, "expected an identifier after an `import` keyword");
@@ -556,7 +535,7 @@ class Parser {
             }
         }
     }
-    #parseStatement(isInRoot, isInLoop = false, isInIf = false, isInFunction = false) {
+    #parseStatement(isInRoot, isInLoop = false, isInFunction = false) {
         // increment past the `{` character
         if (!isInRoot) {
             this.#increment();
@@ -565,33 +544,31 @@ class Parser {
         while (!this.#isAtEnd()) {
             const current = this.#peek();
             // Punctuation should not be in the middle of nowhere
-            if ([
-                _scan_js__WEBPACK_IMPORTED_MODULE_0__.TokenType.OpenBracket,
-                _scan_js__WEBPACK_IMPORTED_MODULE_0__.TokenType.CloseParen,
-                _scan_js__WEBPACK_IMPORTED_MODULE_0__.TokenType.OpenParen,
-                _scan_js__WEBPACK_IMPORTED_MODULE_0__.TokenType.Colon,
-            ].includes(current.type)) {
-                return new _utils_error_js__WEBPACK_IMPORTED_MODULE_2__.TSError({
+            const puncTokens = ["openBracket", "closeParen", "openParen", "colon"];
+            if ((0,_utils_includes_js__WEBPACK_IMPORTED_MODULE_2__["default"])(puncTokens, current.value)) {
+                return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                     startPos: current.startPos,
                     endPos: current.endPos,
                 }, "unexpected character");
             }
             // literals become expressions
-            if ([
-                _scan_js__WEBPACK_IMPORTED_MODULE_0__.TokenType.Int,
-                _scan_js__WEBPACK_IMPORTED_MODULE_0__.TokenType.Float,
-                _scan_js__WEBPACK_IMPORTED_MODULE_0__.TokenType.Str,
-                _scan_js__WEBPACK_IMPORTED_MODULE_0__.TokenType.Bool,
-                _scan_js__WEBPACK_IMPORTED_MODULE_0__.TokenType.Identifier,
-            ].includes(current.type)) {
+            const literalTokens = [
+                "int",
+                "float",
+                "str",
+                "bool",
+                "identifier",
+            ];
+            if ((0,_utils_includes_js__WEBPACK_IMPORTED_MODULE_2__["default"])(literalTokens, current.type)) {
+                current.type;
                 block.push(current);
                 this.#increment();
                 continue;
             }
             // return the block when hitting a `}` unless in the root witch would be an error
-            if (_scan_js__WEBPACK_IMPORTED_MODULE_0__.TokenType.CloseBracket === current.type) {
+            if ("closeBracket" === current.type) {
                 if (isInRoot) {
-                    return new _utils_error_js__WEBPACK_IMPORTED_MODULE_2__.TSError({
+                    return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                         startPos: current.startPos,
                         endPos: current.endPos,
                     }, "unexpected character");
@@ -599,23 +576,25 @@ class Parser {
                 this.#increment();
                 return block;
             }
-            if (_scan_js__WEBPACK_IMPORTED_MODULE_0__.TokenType.Keyword === current.type) {
+            if ("keyword" === current.type) {
                 // stack types become expressions
-                if (["int", "bool", "str", "float"].includes(current.value)) {
+                const mainTypeKeywords = ["int", "str", "float", "bool"];
+                if ((0,_utils_includes_js__WEBPACK_IMPORTED_MODULE_2__["default"])(mainTypeKeywords, current.value)) {
                     block.push(current);
                     this.#increment();
                     continue;
                 }
                 // At keyword are invalid
-                if (["@int", "@bool", "@str", "@float", "@any"].includes(current.value)) {
-                    return new _utils_error_js__WEBPACK_IMPORTED_MODULE_2__.TSError({
+                const atKeywords = ["@int", "@bool", "@str", "@float", "@any"];
+                if ((0,_utils_includes_js__WEBPACK_IMPORTED_MODULE_2__["default"])(atKeywords, current.value)) {
+                    return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                         startPos: current.startPos,
                         endPos: current.endPos,
                     }, "unexpected keyword `{}`. Keyword `{}` must only be found after parameters in a function declaration", current.value, current.value);
                 }
                 // else is invalid
                 if ("else" === current.value) {
-                    return new _utils_error_js__WEBPACK_IMPORTED_MODULE_2__.TSError({
+                    return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                         startPos: current.startPos,
                         endPos: current.endPos,
                     }, "unexpected keyword `else`. Keyword `else` must only be found after if statements");
@@ -628,7 +607,7 @@ class Parser {
                         continue;
                     }
                     else {
-                        return new _utils_error_js__WEBPACK_IMPORTED_MODULE_2__.TSError({
+                        return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                             startPos: current.startPos,
                             endPos: current.endPos,
                         }, "unexpected keyword `any`. Keyword `any` must only be found in `@any` functions");
@@ -642,7 +621,7 @@ class Parser {
                         continue;
                     }
                     else {
-                        return new _utils_error_js__WEBPACK_IMPORTED_MODULE_2__.TSError({
+                        return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                             startPos: current.startPos,
                             endPos: current.endPos,
                         }, "unexpected keyword `break`. Keyword `break` must only be found in loops");
@@ -656,7 +635,7 @@ class Parser {
                         continue;
                     }
                     else {
-                        return new _utils_error_js__WEBPACK_IMPORTED_MODULE_2__.TSError({
+                        return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                             startPos: current.startPos,
                             endPos: current.endPos,
                         }, "unexpected keyword `continue`. Keyword `continue` must only be found in loops");
@@ -664,7 +643,7 @@ class Parser {
                 }
                 // import is invalid unless at th top of the program
                 if ("import" === current.value) {
-                    return new _utils_error_js__WEBPACK_IMPORTED_MODULE_2__.TSError({
+                    return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                         startPos: current.startPos,
                         endPos: current.endPos,
                     }, "unexpected keyword `import`. Keyword `import` must only be found at the top of programs");
@@ -674,20 +653,20 @@ class Parser {
                     const startPos = current.startPos;
                     const endPos = current.endPos;
                     // opening bracket should follow a loop keyword
-                    if (!this.#expect(_scan_js__WEBPACK_IMPORTED_MODULE_0__.TokenType.OpenBracket)) {
-                        return new _utils_error_js__WEBPACK_IMPORTED_MODULE_2__.TSError({
+                    if (!this.#expect("openBracket")) {
+                        return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                             startPos: this.#peek().startPos,
                             endPos: this.#peek().endPos,
                         }, "expected an opening bracket `{` after a `loop` keyword");
                     }
-                    const innerBlock = this.#parseStatement(false, true, isInIf, isInFunction);
-                    if ((0,_utils_error_js__WEBPACK_IMPORTED_MODULE_2__.isTSError)(innerBlock)) {
+                    const innerBlock = this.#parseStatement(false, true, isInFunction);
+                    if ((0,_utils_error_js__WEBPACK_IMPORTED_MODULE_1__.isTSError)(innerBlock)) {
                         return innerBlock;
                     }
                     block.push({
                         startPos,
                         endPos,
-                        type: StatementType.Loop,
+                        type: "loop",
                         block: innerBlock,
                     });
                     continue;
@@ -695,27 +674,27 @@ class Parser {
                 if ("for" === current.value) {
                     const startPos = current.startPos;
                     // loop and an opening bracket should follow a for keyword
-                    if (!this.#expect(_scan_js__WEBPACK_IMPORTED_MODULE_0__.TokenType.Keyword, "loop")) {
-                        return new _utils_error_js__WEBPACK_IMPORTED_MODULE_2__.TSError({
+                    if (!this.#expect("keyword", "loop")) {
+                        return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                             startPos: this.#peek().startPos,
                             endPos: this.#peek().endPos,
                         }, "expected a `loop` keyword after a `for` keyword");
                     }
                     const endPos = this.#peek().endPos;
-                    if (!this.#expect(_scan_js__WEBPACK_IMPORTED_MODULE_0__.TokenType.OpenBracket)) {
-                        return new _utils_error_js__WEBPACK_IMPORTED_MODULE_2__.TSError({
+                    if (!this.#expect("openBracket")) {
+                        return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                             startPos: this.#peek().startPos,
                             endPos: this.#peek().endPos,
                         }, "expected an opening bracket `{` after a `loop` keyword");
                     }
-                    const innerBlock = this.#parseStatement(false, true, isInIf, isInFunction);
-                    if ((0,_utils_error_js__WEBPACK_IMPORTED_MODULE_2__.isTSError)(innerBlock)) {
+                    const innerBlock = this.#parseStatement(false, true, isInFunction);
+                    if ((0,_utils_error_js__WEBPACK_IMPORTED_MODULE_1__.isTSError)(innerBlock)) {
                         return innerBlock;
                     }
                     block.push({
                         startPos,
                         endPos,
-                        type: StatementType.ForLoop,
+                        type: "forLoop",
                         block: innerBlock,
                     });
                     continue;
@@ -723,27 +702,27 @@ class Parser {
                 if ("while" === current.value) {
                     const startPos = current.startPos;
                     // loop and an opening bracket should follow a while keyword
-                    if (!this.#expect(_scan_js__WEBPACK_IMPORTED_MODULE_0__.TokenType.Keyword, "loop")) {
-                        return new _utils_error_js__WEBPACK_IMPORTED_MODULE_2__.TSError({
+                    if (!this.#expect("keyword", "loop")) {
+                        return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                             startPos: this.#peek().startPos,
                             endPos: this.#peek().endPos,
                         }, "expected a `loop` keyword after a `while` keyword");
                     }
                     const endPos = this.#peek().endPos;
-                    if (!this.#expect(_scan_js__WEBPACK_IMPORTED_MODULE_0__.TokenType.OpenBracket)) {
-                        return new _utils_error_js__WEBPACK_IMPORTED_MODULE_2__.TSError({
+                    if (!this.#expect("openBracket")) {
+                        return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                             startPos: this.#peek().startPos,
                             endPos: this.#peek().endPos,
                         }, "expected an opening bracket `{` after a `loop` keyword");
                     }
-                    const innerBlock = this.#parseStatement(false, true, isInIf, isInFunction);
-                    if ((0,_utils_error_js__WEBPACK_IMPORTED_MODULE_2__.isTSError)(innerBlock)) {
+                    const innerBlock = this.#parseStatement(false, true, isInFunction);
+                    if ((0,_utils_error_js__WEBPACK_IMPORTED_MODULE_1__.isTSError)(innerBlock)) {
                         return innerBlock;
                     }
                     block.push({
                         startPos,
                         endPos,
-                        type: StatementType.WhileLoop,
+                        type: "whileLoop",
                         block: innerBlock,
                     });
                     continue;
@@ -752,33 +731,33 @@ class Parser {
                     const startPos = current.startPos;
                     const endPos = current.endPos;
                     // an opening bracket should follow an if
-                    if (!this.#expect(_scan_js__WEBPACK_IMPORTED_MODULE_0__.TokenType.OpenBracket)) {
-                        return new _utils_error_js__WEBPACK_IMPORTED_MODULE_2__.TSError({
+                    if (!this.#expect("openBracket")) {
+                        return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                             startPos: this.#peek().startPos,
                             endPos: this.#peek().endPos,
                         }, "expected an opening bracket `{` after an `if` keyword");
                     }
-                    const innerBlock = this.#parseStatement(false, isInLoop, true, isInFunction);
-                    if ((0,_utils_error_js__WEBPACK_IMPORTED_MODULE_2__.isTSError)(innerBlock)) {
+                    const innerBlock = this.#parseStatement(false, isInLoop, isInFunction);
+                    if ((0,_utils_error_js__WEBPACK_IMPORTED_MODULE_1__.isTSError)(innerBlock)) {
                         return innerBlock;
                     }
                     // an optional else keyword can follow with an opening bracket
                     this.pointer -= 1;
-                    if (this.#expect(_scan_js__WEBPACK_IMPORTED_MODULE_0__.TokenType.Keyword, "else")) {
-                        if (!this.#expect(_scan_js__WEBPACK_IMPORTED_MODULE_0__.TokenType.OpenBracket)) {
-                            return new _utils_error_js__WEBPACK_IMPORTED_MODULE_2__.TSError({
+                    if (this.#expect("keyword", "else")) {
+                        if (!this.#expect("openBracket")) {
+                            return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                                 startPos: this.#peek().startPos,
                                 endPos: this.#peek().endPos,
                             }, "expected an opening bracket `{` after an `else` keyword");
                         }
-                        const elseBlock = this.#parseStatement(false, isInLoop, true, isInFunction);
-                        if ((0,_utils_error_js__WEBPACK_IMPORTED_MODULE_2__.isTSError)(elseBlock)) {
+                        const elseBlock = this.#parseStatement(false, isInLoop, isInFunction);
+                        if ((0,_utils_error_js__WEBPACK_IMPORTED_MODULE_1__.isTSError)(elseBlock)) {
                             return elseBlock;
                         }
                         block.push({
                             startPos,
                             endPos,
-                            type: StatementType.If,
+                            type: "if",
                             block: innerBlock,
                             else: elseBlock,
                         });
@@ -787,7 +766,7 @@ class Parser {
                     block.push({
                         startPos,
                         endPos,
-                        type: StatementType.If,
+                        type: "if",
                         block: innerBlock,
                     });
                     continue;
@@ -795,52 +774,53 @@ class Parser {
                 if ("fn" === current.value) {
                     // functions must not be nestled
                     if (!isInRoot) {
-                        return new _utils_error_js__WEBPACK_IMPORTED_MODULE_2__.TSError({
+                        return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                             startPos: current.startPos,
                             endPos: current.endPos,
                         }, "unexpected `fn` keyword. Function declarations must not be nestled in other statements");
                     }
                     // the name of the function (identifier) should follow
-                    if (!this.#expect(_scan_js__WEBPACK_IMPORTED_MODULE_0__.TokenType.Identifier)) {
-                        return new _utils_error_js__WEBPACK_IMPORTED_MODULE_2__.TSError({
+                    if (!this.#expect("identifier")) {
+                        return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                             startPos: this.#peek().startPos,
                             endPos: this.#peek().endPos,
                         }, "expected an identifier after a `fn` keyword");
                     }
                     const name = this.#peek().value;
                     // an opening parenthesis should follow
-                    if (!this.#expect(_scan_js__WEBPACK_IMPORTED_MODULE_0__.TokenType.OpenParen)) {
-                        return new _utils_error_js__WEBPACK_IMPORTED_MODULE_2__.TSError({
+                    if (!this.#expect("openParen")) {
+                        return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                             startPos: this.#peek().startPos,
                             endPos: this.#peek().endPos,
                         }, "expected an opening parenthesis `(` after a function identifier");
                     }
                     const params = {};
                     // get all the parameters from the function
-                    while (!this.#isAtEnd() && !this.#expect(_scan_js__WEBPACK_IMPORTED_MODULE_0__.TokenType.CloseParen)) {
+                    while (!this.#isAtEnd() && !this.#expect("closeParen")) {
                         this.pointer -= 1;
-                        if (!this.#expect(_scan_js__WEBPACK_IMPORTED_MODULE_0__.TokenType.Identifier)) {
-                            return new _utils_error_js__WEBPACK_IMPORTED_MODULE_2__.TSError({
+                        if (!this.#expect("identifier")) {
+                            return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                                 startPos: this.#peek().startPos,
                                 endPos: this.#peek().endPos,
                             }, "expected an identifier or closing bracket `)` after a function's opening bracket `(`");
                         }
                         const name = this.#peek().value;
                         // parameters can have a type associated with them separated by a colon
-                        if (this.#expect(_scan_js__WEBPACK_IMPORTED_MODULE_0__.TokenType.Colon)) {
+                        if (this.#expect("colon")) {
                             this.#increment();
-                            if (this.#peek().type === _scan_js__WEBPACK_IMPORTED_MODULE_0__.TokenType.Keyword &&
-                                ["int", "str", "float", "bool", "any"].includes(this.#peek().value)) {
-                                params[name] = {
-                                    int: _stack_js__WEBPACK_IMPORTED_MODULE_1__.StackType.Int,
-                                    float: _stack_js__WEBPACK_IMPORTED_MODULE_1__.StackType.Float,
-                                    str: _stack_js__WEBPACK_IMPORTED_MODULE_1__.StackType.Str,
-                                    bool: _stack_js__WEBPACK_IMPORTED_MODULE_1__.StackType.Bool,
-                                    any: _stack_js__WEBPACK_IMPORTED_MODULE_1__.StackType.Any,
-                                }[this.#peek().value];
+                            const typeKeywords = [
+                                "int",
+                                "str",
+                                "float",
+                                "bool",
+                                "any",
+                            ];
+                            if (this.#peek().type === "keyword" &&
+                                (0,_utils_includes_js__WEBPACK_IMPORTED_MODULE_2__["default"])(typeKeywords, this.#peek().value)) {
+                                params[name] = this.#peek().value;
                             }
                             else {
-                                return new _utils_error_js__WEBPACK_IMPORTED_MODULE_2__.TSError({
+                                return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                                     startPos: this.#peek().startPos,
                                     endPos: this.#peek().endPos,
                                 }, "expected a type `int`, `float`, `str`, `bool` or `any` after a colon for a function parameter");
@@ -848,11 +828,11 @@ class Parser {
                         }
                         else {
                             this.pointer -= 1;
-                            params[name] = _stack_js__WEBPACK_IMPORTED_MODULE_1__.StackType.Any;
+                            params[name] = "any";
                         }
                     }
                     if (this.#isAtEnd()) {
-                        return new _utils_error_js__WEBPACK_IMPORTED_MODULE_2__.TSError({
+                        return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                             startPos: this.#peek().startPos,
                             endPos: this.#peek().endPos,
                         }, "expected a closing parenthesis `)`");
@@ -860,32 +840,34 @@ class Parser {
                     let functionType;
                     this.#increment();
                     // a function type should follow
+                    const atKeywords = ["@int", "@bool", "@str", "@float", "@any"];
                     if (!this.#isAtEnd() &&
-                        this.#peek().type === _scan_js__WEBPACK_IMPORTED_MODULE_0__.TokenType.Keyword &&
-                        ["@int", "@str", "@float", "@bool", "@any"].includes(this.#peek().value)) {
-                        functionType = {
-                            "@int": _stack_js__WEBPACK_IMPORTED_MODULE_1__.StackType.Int,
-                            "@float": _stack_js__WEBPACK_IMPORTED_MODULE_1__.StackType.Float,
-                            "@str": _stack_js__WEBPACK_IMPORTED_MODULE_1__.StackType.Str,
-                            "@bool": _stack_js__WEBPACK_IMPORTED_MODULE_1__.StackType.Bool,
-                            "@any": _stack_js__WEBPACK_IMPORTED_MODULE_1__.StackType.Any,
-                        }[this.#peek().value];
+                        this.#peek().type === "keyword" &&
+                        (0,_utils_includes_js__WEBPACK_IMPORTED_MODULE_2__["default"])(atKeywords, this.#peek().value)) {
+                        const atKeywordToStackTypes = {
+                            "@int": "int",
+                            "@float": "float",
+                            "@str": "str",
+                            "@bool": "bool",
+                            "@any": "any",
+                        };
+                        functionType = atKeywordToStackTypes[this.#peek().value];
                     }
                     else {
-                        return new _utils_error_js__WEBPACK_IMPORTED_MODULE_2__.TSError({
+                        return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                             startPos: this.#peek().startPos,
                             endPos: this.#peek().endPos,
                         }, "expected a `@int`, `@float`, `@str`, `@bool` or `@any` after function parameters");
                     }
                     // finally, a opening bracket is needed
-                    if (!this.#expect(_scan_js__WEBPACK_IMPORTED_MODULE_0__.TokenType.OpenBracket)) {
-                        return new _utils_error_js__WEBPACK_IMPORTED_MODULE_2__.TSError({
+                    if (!this.#expect("openBracket")) {
+                        return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                             startPos: this.#peek().startPos,
                             endPos: this.#peek().endPos,
                         }, "expected an opening bracket `{` after a `function` declaration");
                     }
-                    const innerBlock = this.#parseStatement(false, isInLoop, isInIf, true);
-                    if ((0,_utils_error_js__WEBPACK_IMPORTED_MODULE_2__.isTSError)(innerBlock)) {
+                    const innerBlock = this.#parseStatement(false, isInLoop, true);
+                    if ((0,_utils_error_js__WEBPACK_IMPORTED_MODULE_1__.isTSError)(innerBlock)) {
                         return innerBlock;
                     }
                     this.newFunctions.push({
@@ -898,18 +880,18 @@ class Parser {
                     };
                     continue;
                 }
-                return new _utils_error_js__WEBPACK_IMPORTED_MODULE_2__.TSError({
+                return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                     startPos: current.startPos,
                     endPos: current.endPos,
                 }, "unknown keyword `{}`", current.value);
             }
-            return new _utils_error_js__WEBPACK_IMPORTED_MODULE_2__.TSError({
+            return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                 startPos: current.startPos,
                 endPos: current.endPos,
             }, "unknown token `{}`", current.value);
         }
         if (this.#isAtEnd() && !isInRoot) {
-            return new _utils_error_js__WEBPACK_IMPORTED_MODULE_2__.TSError({
+            return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                 startPos: this.#peek().startPos,
                 endPos: this.#peek().endPos,
             }, "expected an ending bracket `}`");
@@ -917,7 +899,7 @@ class Parser {
         return block;
     }
     #isAtEnd() {
-        return this.tokens[this.pointer].type === _scan_js__WEBPACK_IMPORTED_MODULE_0__.TokenType.EOF;
+        return this.tokens[this.pointer].type === "EOF";
     }
     #peek() {
         if (this.#isAtEnd()) {
@@ -947,17 +929,10 @@ class Parser {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "Stack": () => (/* binding */ Stack),
-/* harmony export */   "StackType": () => (/* binding */ StackType),
+/* harmony export */   "stackTypes": () => (/* binding */ stackTypes),
 /* harmony export */   "stacks": () => (/* binding */ stacks)
 /* harmony export */ });
-var StackType;
-(function (StackType) {
-    StackType["Int"] = "int";
-    StackType["Float"] = "float";
-    StackType["Str"] = "str";
-    StackType["Bool"] = "bool";
-    StackType["Any"] = "any";
-})(StackType || (StackType = {}));
+const stackTypes = ["int", "float", "str", "bool", "any"];
 class Stack {
     stack;
     constructor() {
@@ -977,28 +952,42 @@ class Stack {
     }
 }
 const stacks = {
-    [StackType.Int]: new Stack(),
-    [StackType.Float]: new Stack(),
-    [StackType.Str]: new Stack(),
-    [StackType.Bool]: new Stack(),
+    int: new Stack(),
+    float: new Stack(),
+    str: new Stack(),
+    bool: new Stack(),
 };
 
 
 /***/ }),
 /* 8 */
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ includes)
+/* harmony export */ });
+function includes(arr, searchElement) {
+    return arr.some((e) => e === searchElement);
+}
+
+
+/***/ }),
+/* 9 */
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var map = {
 	"./Date.js": [
-		12,
+		13,
 		1
 	],
 	"./Math.js": [
-		13,
+		14,
 		2
 	],
 	"./Str.js": [
-		14,
+		15,
 		3
 	]
 };
@@ -1017,11 +1006,11 @@ function webpackAsyncContext(req) {
 	});
 }
 webpackAsyncContext.keys = () => (Object.keys(map));
-webpackAsyncContext.id = 8;
+webpackAsyncContext.id = 9;
 module.exports = webpackAsyncContext;
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
@@ -1029,23 +1018,21 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (/* binding */ typeCheck)
 /* harmony export */ });
-/* harmony import */ var _scan_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(3);
-/* harmony import */ var _parse_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(6);
-/* harmony import */ var _stack_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(7);
-/* harmony import */ var _utils_error_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(4);
-
+/* harmony import */ var _stack_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(7);
+/* harmony import */ var _utils_error_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(4);
+/* harmony import */ var _utils_includes_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(8);
 
 
 
 function typeCheck(program, functions, newFunctions) {
-    const programTypeErrors = traverseCheckProgram(program, {}, _stack_js__WEBPACK_IMPORTED_MODULE_2__.StackType.Int, functions);
+    const programTypeErrors = traverseCheckProgram(program, {}, "int", functions);
     let functionErrors = [];
     for (const fn of newFunctions) {
         // overload all `any` type parameters to the function type
         const params = { ...functions[fn.type][fn.name].params };
-        if (fn.type !== _stack_js__WEBPACK_IMPORTED_MODULE_2__.StackType.Any) {
+        if (fn.type !== "any") {
             for (const param in params) {
-                if (params[param] === _stack_js__WEBPACK_IMPORTED_MODULE_2__.StackType.Any) {
+                if (params[param] === "any") {
                     params[param] = fn.type;
                 }
             }
@@ -1062,86 +1049,64 @@ function traverseCheckProgram(program, otherIdentifiers, stack, functions) {
     for (const item of program) {
         // if it is an expression
         if ("value" in item) {
-            if (item.type === _scan_js__WEBPACK_IMPORTED_MODULE_0__.TokenType.Identifier) {
+            if (item.type === "identifier") {
                 // The identifier must be in the parameters or a function at the current stack, in the any stack or in each individual stack
                 const value = item.value;
                 if (value in otherIdentifiers) {
                     stack = otherIdentifiers[value];
                 }
                 else if (!(value in functions[stack] ||
-                    value in functions[_stack_js__WEBPACK_IMPORTED_MODULE_2__.StackType.Any] ||
-                    (value in functions[_stack_js__WEBPACK_IMPORTED_MODULE_2__.StackType.Int] &&
-                        value in functions[_stack_js__WEBPACK_IMPORTED_MODULE_2__.StackType.Float] &&
-                        value in functions[_stack_js__WEBPACK_IMPORTED_MODULE_2__.StackType.Str] &&
-                        value in functions[_stack_js__WEBPACK_IMPORTED_MODULE_2__.StackType.Bool]))) {
-                    errors.push(new _utils_error_js__WEBPACK_IMPORTED_MODULE_3__.TSError({
+                    value in functions.any ||
+                    (value in functions.int &&
+                        value in functions.float &&
+                        value in functions.str &&
+                        value in functions.bool))) {
+                    errors.push(new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                         startPos: item.startPos,
                         endPos: item.endPos,
                     }, "Attempt to call function not found at stack `{}`", stack));
                 }
             }
-            else if (item.type === _scan_js__WEBPACK_IMPORTED_MODULE_0__.TokenType.Keyword) {
+            else if (item.type === "keyword") {
                 // certain keywords change the stack
-                switch (item.value) {
-                    case "int":
-                        stack = _stack_js__WEBPACK_IMPORTED_MODULE_2__.StackType.Int;
-                        break;
-                    case "float":
-                        stack = _stack_js__WEBPACK_IMPORTED_MODULE_2__.StackType.Float;
-                        break;
-                    case "str":
-                        stack = _stack_js__WEBPACK_IMPORTED_MODULE_2__.StackType.Str;
-                        break;
-                    case "bool":
-                        stack = _stack_js__WEBPACK_IMPORTED_MODULE_2__.StackType.Bool;
-                        break;
-                    case "any":
-                        stack = _stack_js__WEBPACK_IMPORTED_MODULE_2__.StackType.Any;
+                if ((0,_utils_includes_js__WEBPACK_IMPORTED_MODULE_2__["default"])(_stack_js__WEBPACK_IMPORTED_MODULE_0__.stackTypes, item.value)) {
+                    stack = item.value;
                 }
                 // Type values change the stack
             }
-            else if (item.type === _scan_js__WEBPACK_IMPORTED_MODULE_0__.TokenType.Int) {
-                stack = _stack_js__WEBPACK_IMPORTED_MODULE_2__.StackType.Int;
-            }
-            else if (item.type === _scan_js__WEBPACK_IMPORTED_MODULE_0__.TokenType.Float) {
-                stack = _stack_js__WEBPACK_IMPORTED_MODULE_2__.StackType.Float;
-            }
-            else if (item.type === _scan_js__WEBPACK_IMPORTED_MODULE_0__.TokenType.Str) {
-                stack = _stack_js__WEBPACK_IMPORTED_MODULE_2__.StackType.Str;
-            }
-            else if (item.type === _scan_js__WEBPACK_IMPORTED_MODULE_0__.TokenType.Bool) {
-                stack = _stack_js__WEBPACK_IMPORTED_MODULE_2__.StackType.Bool;
+            else if ((0,_utils_includes_js__WEBPACK_IMPORTED_MODULE_2__["default"])(_stack_js__WEBPACK_IMPORTED_MODULE_0__.stackTypes, item.type)) {
+                stack = item.type;
             }
         }
         else {
             // loops only need to check their block with the current type
-            if (item.type === _parse_js__WEBPACK_IMPORTED_MODULE_1__.StatementType.Loop) {
+            if (item.type === "loop") {
                 const result = traverseCheckProgram(item.block, otherIdentifiers, stack, functions);
                 if (result.length > 0) {
                     errors = [...errors, ...result];
                 }
                 // for loops need to check their block with the int type and change to the int type after
             }
-            else if (item.type === _parse_js__WEBPACK_IMPORTED_MODULE_1__.StatementType.ForLoop) {
-                const result = traverseCheckProgram(item.block, otherIdentifiers, _stack_js__WEBPACK_IMPORTED_MODULE_2__.StackType.Int, functions);
+            else if (item.type === "forLoop") {
+                const result = traverseCheckProgram(item.block, otherIdentifiers, "int", functions);
                 if (result.length > 0) {
                     errors = [...errors, ...result];
                 }
-                stack = _stack_js__WEBPACK_IMPORTED_MODULE_2__.StackType.Int;
+                stack = "int";
                 // while loops need to check their block with the bool type and change to the bool type after
             }
-            else if (item.type === _parse_js__WEBPACK_IMPORTED_MODULE_1__.StatementType.WhileLoop) {
-                const result = traverseCheckProgram(item.block, otherIdentifiers, _stack_js__WEBPACK_IMPORTED_MODULE_2__.StackType.Bool, functions);
+            else if (item.type === "whileLoop") {
+                const result = traverseCheckProgram(item.block, otherIdentifiers, "bool", functions);
                 if (result.length > 0) {
                     errors = [...errors, ...result];
                 }
-                stack = _stack_js__WEBPACK_IMPORTED_MODULE_2__.StackType.Bool;
+                stack = "bool";
                 // if statements need to check their blocks with the bool type and turn it to the bool type after
             }
-            else if (item.type === _parse_js__WEBPACK_IMPORTED_MODULE_1__.StatementType.If) {
-                const firstBlock = traverseCheckProgram(item.block, otherIdentifiers, _stack_js__WEBPACK_IMPORTED_MODULE_2__.StackType.Bool, functions);
+            else if (item.type === "if") {
+                const firstBlock = traverseCheckProgram(item.block, otherIdentifiers, "bool", functions);
                 if (item.else) {
-                    const secondBlock = traverseCheckProgram(item.block, otherIdentifiers, _stack_js__WEBPACK_IMPORTED_MODULE_2__.StackType.Bool, functions);
+                    const secondBlock = traverseCheckProgram(item.block, otherIdentifiers, "bool", functions);
                     if (secondBlock.length > 0 || firstBlock.length > 0) {
                         errors = [...errors, ...secondBlock, ...firstBlock];
                     }
@@ -1151,7 +1116,7 @@ function traverseCheckProgram(program, otherIdentifiers, stack, functions) {
                         errors = [...errors, ...firstBlock];
                     }
                 }
-                stack = _stack_js__WEBPACK_IMPORTED_MODULE_2__.StackType.Bool;
+                stack = "bool";
             }
         }
     }
@@ -1160,7 +1125,7 @@ function traverseCheckProgram(program, otherIdentifiers, stack, functions) {
 
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
@@ -1169,235 +1134,233 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "functionToText": () => (/* binding */ functionToText),
 /* harmony export */   "standardLibraryFunctions": () => (/* binding */ standardLibraryFunctions)
 /* harmony export */ });
-/* harmony import */ var _stack_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(7);
-/* harmony import */ var readline__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(11);
-
+/* harmony import */ var readline__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(12);
 
 function functionToText(name, stack, func) {
     const parameters = Object.keys(func.params).map((e) => `${e}: ${func.params[e]}`);
     return `${name}(${parameters.join(" ")}) @${stack}`;
 }
 const standardLibraryFunctions = {
-    [_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int]: {
+    int: {
         // comparison functions
         "<": {
-            params: { right: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int, left: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { right: "int", left: "int" },
             rawCode: (stacks, params) => {
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Bool].push(params.left < params.right);
+                stacks.bool.push(params.left < params.right);
             },
         },
         ">": {
-            params: { right: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int, left: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { right: "int", left: "int" },
             rawCode: (stacks, params) => {
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Bool].push(params.left > params.right);
+                stacks.bool.push(params.left > params.right);
             },
         },
         "<=": {
-            params: { right: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int, left: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { right: "int", left: "int" },
             rawCode: (stacks, params) => {
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Bool].push(params.left <= params.right);
+                stacks.bool.push(params.left <= params.right);
             },
         },
         ">=": {
-            params: { right: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int, left: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { right: "int", left: "int" },
             rawCode: (stacks, params) => {
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Bool].push(params.left >= params.right);
+                stacks.bool.push(params.left >= params.right);
             },
         },
         // math functions
         "+": {
-            params: { right: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int, left: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { right: "int", left: "int" },
             rawCode: (stacks, params) => {
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int].push(params.left + params.right);
+                stacks.int.push(params.left + params.right);
             },
         },
         "-": {
-            params: { right: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int, left: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { right: "int", left: "int" },
             rawCode: (stacks, params) => {
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int].push(params.left - params.right);
+                stacks.int.push(params.left - params.right);
             },
         },
         "*": {
-            params: { right: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int, left: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { right: "int", left: "int" },
             rawCode: (stacks, params) => {
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int].push(params.left * params.right);
+                stacks.int.push(params.left * params.right);
             },
         },
         "/": {
-            params: { right: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int, left: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { right: "int", left: "int" },
             rawCode: (stacks, params) => {
                 if (params.right === 0) {
                     return new Error("divide by zero. `/(right: int, left: int)` must have `right` parameter not equal to `0`");
                 }
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Float].push(params.left / params.right);
+                stacks.float.push(params.left / params.right);
             },
         },
         "//": {
-            params: { right: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int, left: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { right: "int", left: "int" },
             rawCode: (stacks, params) => {
                 if (params.right === 0) {
                     return new Error("divide by zero. `//(right: int, left: int)` must have `right` parameter not equal to `0`");
                 }
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int].push(Math.floor(params.left / params.right));
+                stacks.int.push(Math.floor(params.left / params.right));
             },
         },
         "%": {
-            params: { right: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int, left: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { right: "int", left: "int" },
             rawCode: (stacks, params) => {
                 if (params.right === 0) {
                     return new Error("divide by zero. `%(right: int, left: int)` must have `right` parameter not equal to `0`");
                 }
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int].push(params.left % params.right);
+                stacks.int.push(params.left % params.right);
             },
         },
         "^": {
-            params: { right: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int, left: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { right: "int", left: "int" },
             rawCode: (stacks, params) => {
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int].push(params.left ^ params.right);
+                stacks.int.push(params.left ^ params.right);
             },
         },
         rand: {
-            params: { max: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int, min: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int },
+            params: { max: "int", min: "int" },
             rawCode: (stacks, params) => {
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int].push(Math.floor(Math.random() * (params.max - params.min + 1)) + params.min);
+                stacks.int.push(Math.floor(Math.random() * (params.max - params.min + 1)) + params.min);
             },
         },
     },
-    [_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Float]: {
+    float: {
         // comparison functions
         "<": {
-            params: { right: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Float, left: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Float },
+            params: { right: "float", left: "float" },
             rawCode: (stacks, params) => {
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Bool].push(params.left < params.right);
+                stacks.bool.push(params.left < params.right);
             },
         },
         ">": {
-            params: { right: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Float, left: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Float },
+            params: { right: "float", left: "float" },
             rawCode: (stacks, params) => {
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Bool].push(params.left > params.right);
+                stacks.bool.push(params.left > params.right);
             },
         },
         "<=": {
-            params: { right: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Float, left: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Float },
+            params: { right: "float", left: "float" },
             rawCode: (stacks, params) => {
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Bool].push(params.left <= params.right);
+                stacks.bool.push(params.left <= params.right);
             },
         },
         ">=": {
-            params: { right: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Float, left: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Float },
+            params: { right: "float", left: "float" },
             rawCode: (stacks, params) => {
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Bool].push(params.left >= params.right);
+                stacks.bool.push(params.left >= params.right);
             },
         },
         // math functions
         "+": {
-            params: { right: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Float, left: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Float },
+            params: { right: "float", left: "float" },
             rawCode: (stacks, params) => {
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Float].push(params.left + params.right);
+                stacks.float.push(params.left + params.right);
             },
         },
         "-": {
-            params: { right: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Float, left: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Float },
+            params: { right: "float", left: "float" },
             rawCode: (stacks, params) => {
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Float].push(params.left - params.right);
+                stacks.float.push(params.left - params.right);
             },
         },
         "*": {
-            params: { right: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Float, left: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Float },
+            params: { right: "float", left: "float" },
             rawCode: (stacks, params) => {
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Float].push(params.left * params.right);
+                stacks.float.push(params.left * params.right);
             },
         },
         "/": {
-            params: { right: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Float, left: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Float },
+            params: { right: "float", left: "float" },
             rawCode: (stacks, params) => {
                 if (params.right === 0) {
                     return new Error("divide by zero. `/(right: float, left: float)` must have `right` parameter not equal to `0.0`");
                 }
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Float].push(params.left / params.right);
+                stacks.float.push(params.left / params.right);
             },
         },
         "//": {
-            params: { right: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Float, left: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Float },
+            params: { right: "float", left: "float" },
             rawCode: (stacks, params) => {
                 if (params.right === 0) {
                     return new Error("divide by zero. `//(right: float, left: float)` must have `right` parameter not equal to `0.0`");
                 }
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Float].push(Math.floor(params.left * params.right));
+                stacks.float.push(Math.floor(params.left * params.right));
             },
         },
         "%": {
-            params: { right: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Float, left: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Float },
+            params: { right: "float", left: "float" },
             rawCode: (stacks, params) => {
                 if (params.right === 0) {
                     return new Error("divide by zero. `%(right: float, left: float)` must have `right` parameter not equal to `0.0`");
                 }
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int].push(params.left % params.right);
+                stacks.int.push(params.left % params.right);
             },
         },
         "^": {
-            params: { right: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Float, left: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Float },
+            params: { right: "float", left: "float" },
             rawCode: (stacks, params) => {
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Float].push(params.left ^ params.right);
+                stacks.float.push(params.left ^ params.right);
             },
         },
     },
-    [_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str]: {
+    str: {
         length: {
-            params: { string: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str },
+            params: { string: "str" },
             rawCode: (stacks, params) => {
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int].push(params.str.length);
+                stacks.int.push(params.str.length);
             },
         },
         "+": {
-            params: { right: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str, left: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str },
+            params: { right: "str", left: "str" },
             rawCode: (stacks, params) => {
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str].push(params.left + params.right);
+                stacks.str.push(params.left + params.right);
             },
         },
     },
-    [_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Bool]: {
+    bool: {
         // comparison functions
         "&": {
-            params: { right: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Bool, left: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Bool },
+            params: { right: "bool", left: "bool" },
             rawCode: (stacks, params) => {
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Bool].push(params.left && params.right);
+                stacks.bool.push(params.left && params.right);
             },
         },
         "|": {
-            params: { right: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Bool, left: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Bool },
+            params: { right: "bool", left: "bool" },
             rawCode: (stacks, params) => {
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Bool].push(params.left || params.right);
+                stacks.bool.push(params.left || params.right);
             },
         },
         "!": {
-            params: { boolean: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Bool },
+            params: { boolean: "bool" },
             rawCode: (stacks, params) => {
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Bool].push(!params.boolean);
+                stacks.bool.push(!params.boolean);
             },
         },
     },
-    [_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Any]: {
+    any: {
         // Word functions
         dup: {
-            params: { first: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Any },
+            params: { first: "any" },
             rawCode: (stacks, params, stack) => {
                 stacks[stack].push(params.first);
                 stacks[stack].push(params.first);
             },
         },
         drop: {
-            params: { first: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Any },
+            params: { first: "any" },
         },
         swap: {
-            params: { first: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Any, second: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Any },
+            params: { first: "any", second: "any" },
             rawCode: (stacks, params, stack) => {
                 stacks[stack].push(params.first);
                 stacks[stack].push(params.second);
             },
         },
         over: {
-            params: { first: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Any, second: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Any },
+            params: { first: "any", second: "any" },
             rawCode: (stacks, params, stack) => {
                 stacks[stack].push(params.second);
                 stacks[stack].push(params.first);
@@ -1406,9 +1369,9 @@ const standardLibraryFunctions = {
         },
         rot: {
             params: {
-                first: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Any,
-                second: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Any,
-                third: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Any,
+                first: "any",
+                second: "any",
+                third: "any",
             },
             rawCode: (stacks, params, stack) => {
                 stacks[stack].push(params.second);
@@ -1417,10 +1380,9 @@ const standardLibraryFunctions = {
             },
         },
         print: {
-            params: { item: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Any },
+            params: { item: "any" },
             rawCode: (stacks, params, stack, consoleFunc) => {
-                if (stack === _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Float &&
-                    !params.item.toString().includes(".")) {
+                if (stack === "float" && !params.item.toString().includes(".")) {
                     params.item = params.item.toFixed(1);
                 }
                 consoleFunc(params.item.toString());
@@ -1428,13 +1390,13 @@ const standardLibraryFunctions = {
             },
         },
         read: {
-            params: { prompt: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str },
+            params: { prompt: "str" },
             rawCode: async (stacks, params, stack) => {
                 // does not work on browser
                 if (window !== undefined) {
                     return;
                 }
-                const rl = readline__WEBPACK_IMPORTED_MODULE_1__.createInterface({
+                const rl = readline__WEBPACK_IMPORTED_MODULE_0__.createInterface({
                     input: process.stdin,
                     output: process.stdout,
                 });
@@ -1442,10 +1404,10 @@ const standardLibraryFunctions = {
                     rl.question(params.prompt, resolve);
                 });
                 rl.close();
-                if (stack === _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str) {
+                if (stack === "str") {
                     stacks[stack].push(answer);
                 }
-                else if (stack === _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Bool) {
+                else if (stack === "bool") {
                     if (answer.trim() === "true") {
                         stacks[stack].push(true);
                     }
@@ -1458,7 +1420,7 @@ const standardLibraryFunctions = {
                 }
                 else {
                     // int or float
-                    const isFloat = stack === _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Float;
+                    const isFloat = stack === "float";
                     let isInDecimal = false;
                     for (const char of answer.trim().split("")) {
                         if (char === ".") {
@@ -1485,45 +1447,44 @@ const standardLibraryFunctions = {
         },
         // comparison functions
         "==": {
-            params: { right: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Any, left: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Any },
+            params: { right: "any", left: "any" },
             rawCode: (stacks, params) => {
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Bool].push(params.left === params.right);
+                stacks.bool.push(params.left === params.right);
             },
         },
         "!=": {
-            params: { right: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Any, left: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Any },
+            params: { right: "any", left: "any" },
             rawCode: (stacks, params) => {
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Bool].push(params.left !== params.right);
+                stacks.bool.push(params.left !== params.right);
             },
         },
         // conversion functions
         toStr: {
-            params: { item: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Any },
+            params: { item: "any" },
             rawCode: (stacks, params, stack) => {
-                if (stack === _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Float &&
-                    !params.item.toString().includes(".")) {
+                if (stack === "float" && !params.item.toString().includes(".")) {
                     params.item = params.item.toFixed(1);
                 }
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Str].push(params.item.toString());
+                stacks.str.push(params.item.toString());
             },
         },
         toBool: {
-            params: { item: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Any },
+            params: { item: "any" },
             rawCode: (stacks, params) => {
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Bool].push(!!params.item);
+                stacks.bool.push(!!params.item);
             },
         },
         toInt: {
-            params: { item: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Any },
+            params: { item: "any" },
             rawCode: (stacks, params, stack) => {
                 let int;
-                if (stack === _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int) {
+                if (stack === "int") {
                     int = params.item;
                 }
-                else if (stack === _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Float) {
+                else if (stack === "float") {
                     int = Math.trunc(params.item);
                 }
-                else if (stack === _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Bool) {
+                else if (stack === "bool") {
                     int = params.item ? 1 : 0;
                 }
                 else {
@@ -1534,17 +1495,17 @@ const standardLibraryFunctions = {
                     }
                     int = parseInt(params.item);
                 }
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int].push(int);
+                stacks.int.push(int);
             },
         },
         toFloat: {
-            params: { item: _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Any },
+            params: { item: "any" },
             rawCode: (stacks, params, stack) => {
                 let float;
-                if (stack === _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Float || stack === _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Int) {
+                if (stack === "float" || stack === "int") {
                     float = params.item;
                 }
-                else if (stack === _stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Bool) {
+                else if (stack === "bool") {
                     float = params.item ? 1 : 0;
                 }
                 else {
@@ -1565,7 +1526,7 @@ const standardLibraryFunctions = {
                     }
                     float = parseFloat(params.item);
                 }
-                stacks[_stack_js__WEBPACK_IMPORTED_MODULE_0__.StackType.Float].push(float);
+                stacks.float.push(float);
             },
         },
     },
@@ -1573,7 +1534,7 @@ const standardLibraryFunctions = {
 
 
 /***/ }),
-/* 11 */
+/* 12 */
 /***/ ((module) => {
 
 "use strict";
