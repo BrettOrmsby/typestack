@@ -35,7 +35,6 @@ function createDiagnostic(doc: vscode.TextDocument, error: TSError): vscode.Diag
 	const diagnostic = new vscode.Diagnostic(range, error.message,
 		vscode.DiagnosticSeverity.Error);
 	diagnostic.code = "typestack";
-    console.log(diagnostic);
 	return diagnostic;
 }
 

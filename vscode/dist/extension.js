@@ -47,7 +47,6 @@ function createDiagnostic(doc, error) {
     const range = new vscode.Range(error.pos.startPos.line - 1, error.pos.startPos.char - 1, error.pos.endPos.line - 1, error.pos.startPos.char - 1 + errorLength);
     const diagnostic = new vscode.Diagnostic(range, error.message, vscode.DiagnosticSeverity.Error);
     diagnostic.code = "typestack";
-    console.log(diagnostic);
     return diagnostic;
 }
 function subscribeToDocumentChanges(context, diagnosticCollection) {
@@ -1046,15 +1045,15 @@ function includes(arr, searchElement) {
 
 var map = {
 	"./Date.js": [
-		13,
+		14,
 		1
 	],
 	"./Math.js": [
-		14,
+		15,
 		2
 	],
 	"./Str.js": [
-		15,
+		16,
 		3
 	]
 };
@@ -1603,6 +1602,87 @@ const standardLibraryFunctions = {
 "use strict";
 module.exports = require("readline");
 
+/***/ }),
+/* 13 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const vscode = __webpack_require__(1);
+const scan_1 = __webpack_require__(3);
+const parse_1 = __webpack_require__(6);
+const functions_1 = __webpack_require__(11);
+function activate(context) {
+    const provider1 = vscode.languages.registerCompletionItemProvider("typestack", {
+        async provideCompletionItems(document, position, token, context) {
+            //TODO: use position and document to provide different suggestions (functions, @int, continue/break, import ...)
+            const keywords = [
+                "import",
+                "fn",
+                "loop",
+                "for",
+                "while",
+                "if",
+                "else",
+                "break",
+                "continue",
+                "int",
+                "bool",
+                "str",
+                "float",
+                "any",
+                "@int",
+                "@float",
+                "@str",
+                "@bool",
+                "@any",
+                "true",
+                "false",
+            ];
+            const keywordCompletions = keywords.map(e => new vscode.CompletionItem(e, vscode.CompletionItemKind.Keyword));
+            const scanner = new scan_1.Scanner(document.getText(), console.log);
+            scanner.scan();
+            const parser = new parse_1.Parser(scanner.tokens, functions_1.standardLibraryFunctions);
+            await parser.parse();
+            const functions = parser.functions;
+            const functionNames = [];
+            Object.keys(functions).forEach(e => Object.keys(functions[e]).forEach(funcName => {
+                functionNames.push(funcName);
+            }));
+            const uniqueFunctionNames = [...new Set(functionNames)];
+            const functionCompletions = uniqueFunctionNames.map(e => new vscode.CompletionItem(e, vscode.CompletionItemKind.Function));
+            /*
+            // a completion item that inserts its text as snippet,
+            // the `insertText`-property is a `SnippetString` which will be
+            // honored by the editor.
+            const snippetCompletion = new vscode.CompletionItem('Good part of the day');
+            snippetCompletion.insertText = new vscode.SnippetString('Good ${1|morning,afternoon,evening|}. It is ${1}, right?');
+            const docs: any = new vscode.MarkdownString("Inserts a snippet that lets you select [link](x.ts).");
+            snippetCompletion.documentation = docs;
+            docs.baseUri = vscode.Uri.parse('http://example.com/a/b/c/');
+
+            // a completion item that retriggers IntelliSense when being accepted,
+            // the `command`-property is set which the editor will execute after
+            // completion has been inserted. Also, the `insertText` is set so that
+            // a space is inserted after `new`
+            const commandCompletion = new vscode.CompletionItem('new');
+            commandCompletion.kind = vscode.CompletionItemKind.Keyword;
+            commandCompletion.insertText = 'new ';
+            commandCompletion.command = { command: 'editor.action.triggerSuggest', title: 'Re-trigger completions...' };
+            */
+            // return all completion items as array
+            return [
+                ...keywordCompletions,
+                ...functionCompletions,
+            ];
+        }
+    });
+    context.subscriptions.push(provider1);
+}
+exports["default"] = activate;
+
+
 /***/ })
 /******/ 	]);
 /************************************************************************/
@@ -1737,10 +1817,12 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.activate = void 0;
 const vscode = __webpack_require__(1);
 const diagnostics_1 = __webpack_require__(2);
+const codeCompletion_1 = __webpack_require__(13);
 function activate(context) {
     const parseAndTypeErrors = vscode.languages.createDiagnosticCollection("parseAndTypeErrors");
     context.subscriptions.push(parseAndTypeErrors);
     (0, diagnostics_1.subscribeToDocumentChanges)(context, parseAndTypeErrors);
+    (0, codeCompletion_1.default)(context);
 }
 exports.activate = activate;
 
