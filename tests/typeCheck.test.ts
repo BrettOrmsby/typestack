@@ -12,7 +12,7 @@ async function check(input: string) {
         return;
     }
     const parser = new Parser(scanner.tokens, standardLibraryFunctions);
-    const parseError = await parser.parse();
+    const parseError = await parser.parse()[0];
     expect(parseError).not.toBeInstanceOf(TSError);
     if (parseError instanceof TSError) {
         return;

@@ -11,7 +11,8 @@ async function parse(input: string) {
         return;
     }
     const parser = new Parser(scanner.tokens, standardLibraryFunctions);
-    return await parser.parse();
+    console.log(await parser.parse());
+    return (await parser.parse())[0];
 }
 
 describe("Parser correctly parse functions", () => {
@@ -31,8 +32,8 @@ describe("Parser correctly parse functions", () => {
         const input = "fn identifier()";
         expect(await parse(input)).toBeInstanceOf(TSError);
     });
-    test("No bracket following params", async () => {
-        const input = "fn identifier() @int {";
+    test("No type of a param", async () => {
+        const input = "fn identifier(i: ) @int {";
         expect(await parse(input)).toBeInstanceOf(TSError);
     });
     test("No closing bracket", async () => {
@@ -97,7 +98,23 @@ describe("Parser correctly parse functions", () => {
         expect(await parse(input)).toBeInstanceOf(TSError);
     });
     test("Function with keyword not identifier", async () => {
-        const input = "fn bool() {}";
+        const input = "fn bool() @int {}";
+        expect(await parse(input)).toBeInstanceOf(TSError);
+    });
+    test("Function with missing type but everything else", async () => {
+        const input = "fn negate() {}";
+        expect(await parse(input)).toBeInstanceOf(TSError);
+    });
+    test("Correctly formatted, multi-parameter function", async () => {
+        const input = `fn add(t: int s: int g) @int {
+            t s g +
+        }`;
+        expect(await parse(input)).not.toBeInstanceOf(TSError);
+    });
+    test("Function with parameters with the same name", async () => {
+        const input = `fn add(t: int t) @int {
+            t t +
+        }`;
         expect(await parse(input)).toBeInstanceOf(TSError);
     });
 });

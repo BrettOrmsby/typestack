@@ -20,11 +20,8 @@ export default async function typeStack(
   scanErrors.forEach((e) => e.fire());
 
   const parser = new Parser(scanner.tokens, importedFunctions);
-  const parseError = await parser.parse();
-  if (parseError) {
-    parseError.fire();
-    return;
-  }
+  const parseErrors = await parser.parse();
+  parseErrors.forEach((e) => e.fire());
 
   const typeErrors = typeCheck(
     parser.program,
@@ -33,7 +30,11 @@ export default async function typeStack(
   );
   typeErrors.forEach((e) => e.fire());
 
-  if (scanErrors.length > 0 || typeErrors.length > 0) {
+  if (
+    scanErrors.length > 0 ||
+    parseErrors.length > 0 ||
+    typeErrors.length > 0
+  ) {
     return;
   }
 
