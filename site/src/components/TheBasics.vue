@@ -299,7 +299,7 @@ str print drop
           Function parameters can have any type. Parameters remove the top of
           their stack in the order that they come in the brackets. To use
           parameters, you just need to type the identifier in the function
-          block.
+          block. Functions cannot have multiple parameters with the same name.
         </p>
         <TypeStackEditor
           :code="`55 negate print # -55

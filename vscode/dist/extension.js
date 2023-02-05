@@ -67,11 +67,8 @@ async function getErrors(text) {
     const scanner = new scan_1.Scanner(text, console.log);
     const scanErrors = scanner.scan();
     const parser = new parse_1.Parser(scanner.tokens, functions_1.standardLibraryFunctions);
-    const parseError = await parser.parse();
-    if (parseError instanceof error_1.TSError) {
-        return [...scanErrors, parseError];
-    }
-    return [...scanErrors, ...(0, typeCheck_1.default)(parser.program, functions_1.standardLibraryFunctions, parser.newFunctions)];
+    const parseErrors = await parser.parse();
+    return [...scanErrors, ...parseErrors, ...(0, typeCheck_1.default)(parser.program, functions_1.standardLibraryFunctions, parser.newFunctions)];
 }
 
 
@@ -475,29 +472,28 @@ class Parser {
     functions;
     newFunctions;
     program;
+    errors;
     constructor(tokens, functions) {
         this.tokens = tokens;
         this.functions = functions;
         this.newFunctions = [];
         this.pointer = 0;
         this.program = [];
+        this.errors = [];
     }
     async parse() {
-        const importError = await this.#parseImports();
-        if ((0,_utils_error_js__WEBPACK_IMPORTED_MODULE_1__.isTSError)(importError)) {
-            return importError;
-        }
+        await this.#parseImports();
         const block = this.#parseStatement(true);
-        if ((0,_utils_error_js__WEBPACK_IMPORTED_MODULE_1__.isTSError)(block)) {
-            return block;
-        }
         this.program = block;
+        return this.errors;
     }
     async #parseImports() {
-        this.pointer -= 1;
+        this.#decrement();
         while (this.pointer < 0 || !this.#isAtEnd()) {
             if (this.#expect("keyword", "import")) {
+                this.#increment();
                 if (this.#expect("identifier")) {
+                    this.#increment();
                     // dynamically import the file and add the module functions to the functions
                     try {
                         const module = (await __webpack_require__(9)(`./${this.#peek().value}.js`))
@@ -510,27 +506,30 @@ class Parser {
                         }
                     }
                     catch (_) {
-                        return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
+                        this.errors.push(new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                             startPos: this.#peek().startPos,
                             endPos: this.#peek().endPos,
-                        }, "unable to import module");
+                        }, "unable to import module"));
                     }
                 }
                 else {
-                    return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
+                    this.#increment();
+                    this.errors.push(new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                         startPos: this.#peek().startPos,
                         endPos: this.#peek().endPos,
-                    }, "expected an identifier after an `import` keyword");
+                    }, "expected an identifier after an `import` keyword"));
+                    this.#decrement();
                 }
             }
             else {
+                this.#increment();
                 return;
             }
         }
     }
     #parseStatement(isInRoot, isInLoop = false, isInFunction = false) {
         // increment past the `{` character
-        if (!isInRoot) {
+        if (!isInRoot && this.#peek().type === "openBracket") {
             this.#increment();
         }
         const block = [];
@@ -538,11 +537,13 @@ class Parser {
             const current = this.#peek();
             // Punctuation should not be in the middle of nowhere
             const puncTokens = ["openBracket", "closeParen", "openParen", "colon"];
-            if ((0,_utils_includes_js__WEBPACK_IMPORTED_MODULE_2__["default"])(puncTokens, current.value)) {
-                return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
+            if ((0,_utils_includes_js__WEBPACK_IMPORTED_MODULE_2__["default"])(puncTokens, current.type)) {
+                this.errors.push(new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                     startPos: current.startPos,
                     endPos: current.endPos,
-                }, "unexpected character");
+                }, "unexpected character"));
+                this.#increment();
+                continue;
             }
             // literals become expressions
             const literalTokens = [
@@ -553,7 +554,6 @@ class Parser {
                 "identifier",
             ];
             if ((0,_utils_includes_js__WEBPACK_IMPORTED_MODULE_2__["default"])(literalTokens, current.type)) {
-                current.type;
                 block.push(current);
                 this.#increment();
                 continue;
@@ -561,10 +561,12 @@ class Parser {
             // return the block when hitting a `}` unless in the root witch would be an error
             if ("closeBracket" === current.type) {
                 if (isInRoot) {
-                    return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
+                    this.errors.push(new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                         startPos: current.startPos,
                         endPos: current.endPos,
-                    }, "unexpected character");
+                    }, "unexpected character"));
+                    this.#increment();
+                    continue;
                 }
                 this.#increment();
                 return block;
@@ -580,82 +582,89 @@ class Parser {
                 // At keyword are invalid
                 const atKeywords = ["@int", "@bool", "@str", "@float", "@any"];
                 if ((0,_utils_includes_js__WEBPACK_IMPORTED_MODULE_2__["default"])(atKeywords, current.value)) {
-                    return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
+                    this.errors.push(new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                         startPos: current.startPos,
                         endPos: current.endPos,
-                    }, "unexpected keyword `{}`. Keyword `{}` must only be found after parameters in a function declaration", current.value, current.value);
+                    }, "unexpected keyword `{}`. Keyword `{}` must only be found after parameters in a function declaration", current.value, current.value));
+                    this.#increment();
+                    continue;
                 }
                 // else is invalid
                 if ("else" === current.value) {
-                    return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
+                    this.errors.push(new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                         startPos: current.startPos,
                         endPos: current.endPos,
-                    }, "unexpected keyword `else`. Keyword `else` must only be found after if statements");
+                    }, "unexpected keyword `else`. Keyword `else` must only be found after if statements"));
+                    this.#increment();
+                    continue;
                 }
                 // any can only be found in functions
                 if ("any" === current.value) {
                     if (isInFunction) {
                         block.push(current);
-                        this.#increment();
-                        continue;
                     }
                     else {
-                        return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
+                        this.errors.push(new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                             startPos: current.startPos,
                             endPos: current.endPos,
-                        }, "unexpected keyword `any`. Keyword `any` must only be found in `@any` functions");
+                        }, "unexpected keyword `any`. Keyword `any` must only be found in `@any` functions"));
                     }
+                    this.#increment();
+                    continue;
                 }
                 // break can only be found in loops
                 if ("break" === current.value) {
                     if (isInLoop) {
                         block.push(current);
-                        this.#increment();
-                        continue;
                     }
                     else {
-                        return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
+                        this.errors.push(new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                             startPos: current.startPos,
                             endPos: current.endPos,
-                        }, "unexpected keyword `break`. Keyword `break` must only be found in loops");
+                        }, "unexpected keyword `break`. Keyword `break` must only be found in loops"));
                     }
+                    this.#increment();
+                    continue;
                 }
                 // continue can only be found in loops
                 if ("continue" === current.value) {
                     if (isInLoop) {
                         block.push(current);
-                        this.#increment();
-                        continue;
                     }
                     else {
-                        return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
+                        this.errors.push(new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                             startPos: current.startPos,
                             endPos: current.endPos,
-                        }, "unexpected keyword `continue`. Keyword `continue` must only be found in loops");
+                        }, "unexpected keyword `continue`. Keyword `continue` must only be found in loops"));
                     }
+                    this.#increment();
+                    continue;
                 }
                 // import is invalid unless at th top of the program
                 if ("import" === current.value) {
-                    return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
+                    this.errors.push(new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                         startPos: current.startPos,
                         endPos: current.endPos,
-                    }, "unexpected keyword `import`. Keyword `import` must only be found at the top of programs");
+                    }, "unexpected keyword `import`. Keyword `import` must only be found at the top of programs"));
+                    this.#increment();
+                    continue;
                 }
                 // parsing statements
                 if ("loop" === current.value) {
                     const startPos = current.startPos;
                     const endPos = current.endPos;
                     // opening bracket should follow a loop keyword
-                    if (!this.#expect("openBracket")) {
-                        return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
+                    if (this.#expect("openBracket")) {
+                        this.#increment();
+                    }
+                    else {
+                        this.#increment();
+                        this.errors.push(new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                             startPos: this.#peek().startPos,
                             endPos: this.#peek().endPos,
-                        }, "expected an opening bracket `{` after a `loop` keyword");
+                        }, "expected an opening bracket `{` after a `loop` keyword"));
                     }
                     const innerBlock = this.#parseStatement(false, true, isInFunction);
-                    if ((0,_utils_error_js__WEBPACK_IMPORTED_MODULE_1__.isTSError)(innerBlock)) {
-                        return innerBlock;
-                    }
                     block.push({
                         startPos,
                         endPos,
@@ -667,23 +676,29 @@ class Parser {
                 if ("for" === current.value) {
                     const startPos = current.startPos;
                     // loop and an opening bracket should follow a for keyword
-                    if (!this.#expect("keyword", "loop")) {
-                        return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
+                    if (this.#expect("keyword", "loop")) {
+                        this.#increment();
+                    }
+                    else {
+                        this.#increment();
+                        this.errors.push(new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                             startPos: this.#peek().startPos,
                             endPos: this.#peek().endPos,
-                        }, "expected a `loop` keyword after a `for` keyword");
+                        }, "expected a `loop` keyword after a `for` keyword"));
+                        this.#decrement();
                     }
                     const endPos = this.#peek().endPos;
-                    if (!this.#expect("openBracket")) {
-                        return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
+                    if (this.#expect("openBracket")) {
+                        this.#increment();
+                    }
+                    else {
+                        this.#increment();
+                        this.errors.push(new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                             startPos: this.#peek().startPos,
                             endPos: this.#peek().endPos,
-                        }, "expected an opening bracket `{` after a `loop` keyword");
+                        }, "expected an opening bracket `{` after a `loop` keyword"));
                     }
                     const innerBlock = this.#parseStatement(false, true, isInFunction);
-                    if ((0,_utils_error_js__WEBPACK_IMPORTED_MODULE_1__.isTSError)(innerBlock)) {
-                        return innerBlock;
-                    }
                     block.push({
                         startPos,
                         endPos,
@@ -695,23 +710,29 @@ class Parser {
                 if ("while" === current.value) {
                     const startPos = current.startPos;
                     // loop and an opening bracket should follow a while keyword
-                    if (!this.#expect("keyword", "loop")) {
-                        return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
+                    if (this.#expect("keyword", "loop")) {
+                        this.#increment();
+                    }
+                    else {
+                        this.#increment();
+                        this.errors.push(new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                             startPos: this.#peek().startPos,
                             endPos: this.#peek().endPos,
-                        }, "expected a `loop` keyword after a `while` keyword");
+                        }, "expected a `loop` keyword after a `while` keyword"));
+                        this.#decrement();
                     }
                     const endPos = this.#peek().endPos;
-                    if (!this.#expect("openBracket")) {
-                        return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
+                    if (this.#expect("openBracket")) {
+                        this.#increment();
+                    }
+                    else {
+                        this.#increment();
+                        this.errors.push(new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                             startPos: this.#peek().startPos,
                             endPos: this.#peek().endPos,
-                        }, "expected an opening bracket `{` after a `loop` keyword");
+                        }, "expected an opening bracket `{` after a `loop` keyword"));
                     }
                     const innerBlock = this.#parseStatement(false, true, isInFunction);
-                    if ((0,_utils_error_js__WEBPACK_IMPORTED_MODULE_1__.isTSError)(innerBlock)) {
-                        return innerBlock;
-                    }
                     block.push({
                         startPos,
                         endPos,
@@ -724,29 +745,32 @@ class Parser {
                     const startPos = current.startPos;
                     const endPos = current.endPos;
                     // an opening bracket should follow an if
-                    if (!this.#expect("openBracket")) {
-                        return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
+                    if (this.#expect("openBracket")) {
+                        this.#increment();
+                    }
+                    else {
+                        this.#increment();
+                        this.errors.push(new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                             startPos: this.#peek().startPos,
                             endPos: this.#peek().endPos,
-                        }, "expected an opening bracket `{` after an `if` keyword");
+                        }, "expected an opening bracket `{` after an `if` keyword"));
                     }
                     const innerBlock = this.#parseStatement(false, isInLoop, isInFunction);
-                    if ((0,_utils_error_js__WEBPACK_IMPORTED_MODULE_1__.isTSError)(innerBlock)) {
-                        return innerBlock;
-                    }
                     // an optional else keyword can follow with an opening bracket
                     this.pointer -= 1;
                     if (this.#expect("keyword", "else")) {
-                        if (!this.#expect("openBracket")) {
-                            return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
+                        this.#increment();
+                        if (this.#expect("openBracket")) {
+                            this.#increment();
+                        }
+                        else {
+                            this.#increment();
+                            this.errors.push(new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                                 startPos: this.#peek().startPos,
                                 endPos: this.#peek().endPos,
-                            }, "expected an opening bracket `{` after an `else` keyword");
+                            }, "expected an opening bracket `{` after an `else` keyword"));
                         }
                         const elseBlock = this.#parseStatement(false, isInLoop, isInFunction);
-                        if ((0,_utils_error_js__WEBPACK_IMPORTED_MODULE_1__.isTSError)(elseBlock)) {
-                            return elseBlock;
-                        }
                         block.push({
                             startPos,
                             endPos,
@@ -756,6 +780,7 @@ class Parser {
                         });
                         continue;
                     }
+                    this.#increment();
                     block.push({
                         startPos,
                         endPos,
@@ -767,39 +792,67 @@ class Parser {
                 if ("fn" === current.value) {
                     // functions must not be nestled
                     if (!isInRoot) {
-                        return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
+                        this.errors.push(new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                             startPos: current.startPos,
                             endPos: current.endPos,
-                        }, "unexpected `fn` keyword. Function declarations must not be nestled in other statements");
+                        }, "unexpected `fn` keyword. Function declarations must not be nestled in other statements"));
                     }
+                    let isErrorWithFunction = false;
                     // the name of the function (identifier) should follow
-                    if (!this.#expect("identifier")) {
-                        return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
+                    if (this.#expect("identifier")) {
+                        this.#increment();
+                    }
+                    else {
+                        // having an invalid identifier name will cause a problem with the function
+                        isErrorWithFunction = true;
+                        this.#increment();
+                        this.errors.push(new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                             startPos: this.#peek().startPos,
                             endPos: this.#peek().endPos,
-                        }, "expected an identifier after a `fn` keyword");
+                        }, "expected an identifier after a `fn` keyword"));
+                        this.#decrement();
                     }
+                    // the name of the function if there is no error
                     const name = this.#peek().value;
                     // an opening parenthesis should follow
-                    if (!this.#expect("openParen")) {
-                        return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
+                    if (this.#expect("openParen")) {
+                        this.#increment();
+                    }
+                    else {
+                        // forgetting an open paren will NOT cause a problem with the function
+                        this.#increment();
+                        this.errors.push(new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                             startPos: this.#peek().startPos,
                             endPos: this.#peek().endPos,
-                        }, "expected an opening parenthesis `(` after a function identifier");
+                        }, "expected an opening parenthesis `(` after a function identifier"));
+                        this.#decrement();
                     }
                     const params = {};
                     // get all the parameters from the function
-                    while (!this.#isAtEnd() && !this.#expect("closeParen")) {
-                        this.pointer -= 1;
+                    while (!this.#isAtEnd() &&
+                        !this.#expect("EOF") &&
+                        !this.#expect("closeParen") &&
+                        this.#peek().type !== "closeParen") {
                         if (!this.#expect("identifier")) {
-                            return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
+                            this.#increment();
+                            this.errors.push(new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                                 startPos: this.#peek().startPos,
                                 endPos: this.#peek().endPos,
-                            }, "expected an identifier or closing bracket `)` after a function's opening bracket `(`");
+                            }, "expected an identifier or closing bracket `)` within a function's opening bracket `(`"));
+                            continue;
                         }
+                        // name of the parameter
+                        this.#increment();
                         const name = this.#peek().value;
+                        if (name in params) {
+                            this.errors.push(new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
+                                startPos: this.#peek().startPos,
+                                endPos: this.#peek().endPos,
+                            }, "duplicate parameter name. Function parameters must have unique names"));
+                        }
                         // parameters can have a type associated with them separated by a colon
                         if (this.#expect("colon")) {
+                            this.#increment();
                             this.#increment();
                             const typeKeywords = [
                                 "int",
@@ -813,25 +866,30 @@ class Parser {
                                 params[name] = this.#peek().value;
                             }
                             else {
-                                return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
+                                // a function without a type is not invalid
+                                this.errors.push(new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                                     startPos: this.#peek().startPos,
                                     endPos: this.#peek().endPos,
-                                }, "expected a type `int`, `float`, `str`, `bool` or `any` after a colon for a function parameter");
+                                }, "expected a type `int`, `float`, `str`, `bool` or `any` after a colon for a function parameter"));
+                                this.#decrement();
                             }
                         }
                         else {
-                            this.pointer -= 1;
+                            // parameters without a colon are `any` type
                             params[name] = "any";
                         }
                     }
+                    this.#increment();
                     if (this.#isAtEnd()) {
-                        return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
+                        this.errors.push(new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                             startPos: this.#peek().startPos,
                             endPos: this.#peek().endPos,
-                        }, "expected a closing parenthesis `)`");
+                        }, "expected a closing parenthesis `)`"));
+                    }
+                    else {
+                        this.#increment();
                     }
                     let functionType;
-                    this.#increment();
                     // a function type should follow
                     const atKeywords = ["@int", "@bool", "@str", "@float", "@any"];
                     if (!this.#isAtEnd() &&
@@ -847,47 +905,57 @@ class Parser {
                         functionType = atKeywordToStackTypes[this.#peek().value];
                     }
                     else {
-                        return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
+                        // a function without a type is invalid
+                        isErrorWithFunction = true;
+                        this.errors.push(new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                             startPos: this.#peek().startPos,
                             endPos: this.#peek().endPos,
-                        }, "expected a `@int`, `@float`, `@str`, `@bool` or `@any` after function parameters");
+                        }, "expected a `@int`, `@float`, `@str`, `@bool` or `@any` after function parameters"));
+                        this.#decrement();
                     }
                     // finally, a opening bracket is needed
-                    if (!this.#expect("openBracket")) {
-                        return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
+                    if (this.#expect("openBracket")) {
+                        this.#increment();
+                    }
+                    else {
+                        this.#increment();
+                        this.errors.push(new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                             startPos: this.#peek().startPos,
                             endPos: this.#peek().endPos,
-                        }, "expected an opening bracket `{` after a `function` declaration");
+                        }, "expected an opening bracket `{` after a `function` declaration"));
                     }
                     const innerBlock = this.#parseStatement(false, isInLoop, true);
-                    if ((0,_utils_error_js__WEBPACK_IMPORTED_MODULE_1__.isTSError)(innerBlock)) {
-                        return innerBlock;
+                    if (!isErrorWithFunction) {
+                        this.newFunctions.push({
+                            name,
+                            type: functionType,
+                        });
+                        this.functions[functionType][name] = {
+                            params: params,
+                            body: innerBlock,
+                        };
                     }
-                    this.newFunctions.push({
-                        name,
-                        type: functionType,
-                    });
-                    this.functions[functionType][name] = {
-                        params: params,
-                        body: innerBlock,
-                    };
                     continue;
                 }
-                return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
+                this.errors.push(new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                     startPos: current.startPos,
                     endPos: current.endPos,
-                }, "unknown keyword `{}`", current.value);
+                }, "unknown keyword `{}`", current.value));
+                this.#increment();
+                continue;
             }
-            return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
+            this.errors.push(new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                 startPos: current.startPos,
                 endPos: current.endPos,
-            }, "unknown token `{}`", current.value);
+            }, "unknown token `{}`", current.value));
+            this.#increment();
+            continue;
         }
         if (this.#isAtEnd() && !isInRoot) {
-            return new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
+            this.errors.push(new _utils_error_js__WEBPACK_IMPORTED_MODULE_1__.TSError({
                 startPos: this.#peek().startPos,
                 endPos: this.#peek().endPos,
-            }, "expected an ending bracket `}`");
+            }, "expected an ending bracket `}`"));
         }
         return block;
     }
@@ -903,13 +971,19 @@ class Parser {
     #increment() {
         this.pointer += 1;
     }
+    #decrement() {
+        this.pointer -= 1;
+    }
     #expect(type, value) {
         this.#increment();
         if (this.#isAtEnd()) {
-            return false;
+            this.#decrement();
+            return type === "EOF";
         }
-        return (this.#peek().type === type &&
-            (!value || (value && value === this.#peek().value)));
+        const isExpected = this.#peek().type === type &&
+            (!value || (value && value === this.#peek().value));
+        this.#decrement();
+        return isExpected;
     }
 }
 

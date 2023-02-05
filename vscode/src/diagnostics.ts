@@ -66,12 +66,9 @@ async function getErrors(text: string): Promise<TSError | void | TSError[]> {
         const scanErrors = scanner.scan();
         
         const parser = new Parser(scanner.tokens, standardLibraryFunctions);
-        const parseError = await parser.parse();
-        if (parseError instanceof TSError) {
-            return [...scanErrors, parseError];
-        }
+        const parseErrors = await parser.parse();
     
-        return [...scanErrors, ...typeCheck(
+        return [...scanErrors, ...parseErrors, ...typeCheck(
             parser.program,
             standardLibraryFunctions,
             parser.newFunctions
