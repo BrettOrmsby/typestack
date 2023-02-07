@@ -148,6 +148,16 @@ export const standardLibraryFunctions: StackFunctions = {
         );
       },
     },
+    wait: {
+      params: { milliseconds: "int" },
+      rawCode: async (_, params) => {
+        await new Promise((resolve) => {
+          setTimeout(() => {
+            resolve("resolved");
+          }, params.milliseconds);
+        });
+      },
+    },
   },
   float: {
     // comparison functions

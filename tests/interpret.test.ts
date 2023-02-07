@@ -119,4 +119,16 @@ describe("Interpreter runs basic programs", () => {
         await run(input);
         expect(consoleSpy).toHaveBeenCalledWith("-99");
     });
+    test("It can run async functions", async () => {
+        const input = `
+        fn negate(num: int) @int {
+            0 num -
+        }
+        1000 wait 
+        99 negate print
+        `;
+        const consoleSpy = jest.spyOn(console, "log");
+        await run(input);
+        expect(consoleSpy).toHaveBeenCalledWith("-99");
+    });
 });
