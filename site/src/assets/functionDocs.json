@@ -12,7 +12,8 @@
         "//(right: int left: int)": "adds the floored quotient of <code>left</code> and <code>right</code> to the <code>int</code> stack (removes the decimal of the float)",
         "%(right: int left: int)": "adds the remainder of the division of <code>left</code> and <code>right</code> to the <code>int</code> stack",
         "^(right: int left: int)": "adds the power of <code>left</code> and <code>right</code> to the <code>int</code> stack",
-        "rand(max: int min: int)": "adds a random number inclusively between <code>min</code> and <code>max</code> to the <code>int</code> stack"
+        "rand(max: int min: int)": "adds a random number inclusively between <code>min</code> and <code>max</code> to the <code>int</code> stack",
+        "wait(milliseconds: int)": "waits for <code>millisecond</code> milliseconds before continuing"
       },
       "@float": {
         "<(right: float left: float)": "compares if <code>left</code> is less than <code>right</code> and adds <code>true</code> or <code>false</code> to the <code>bool</code> stack",

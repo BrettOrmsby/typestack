@@ -49,6 +49,7 @@ export default function activate(context: vscode.ExtensionContext) {
 
         const functions = parser.functions;
         const functionNames: string[] = [];
+
         Object.keys(functions).forEach((e) =>
           Object.keys(functions[e as keyof typeof functions]).forEach(
             (funcName) => {

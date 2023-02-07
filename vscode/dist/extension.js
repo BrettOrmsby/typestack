@@ -1049,15 +1049,15 @@ function includes(arr, searchElement) {
 
 var map = {
 	"./Date.js": [
-		17,
+		15,
 		1
 	],
 	"./Math.js": [
-		18,
+		16,
 		2
 	],
 	"./Str.js": [
-		19,
+		17,
 		3
 	]
 };
@@ -1289,6 +1289,16 @@ const standardLibraryFunctions = {
             params: { max: "int", min: "int" },
             rawCode: (stacks, params) => {
                 stacks.int.push(Math.floor(Math.random() * (params.max - params.min + 1)) + params.min);
+            },
+        },
+        wait: {
+            params: { milliseconds: "int" },
+            rawCode: async (_, params) => {
+                await new Promise((resolve) => {
+                    setTimeout(() => {
+                        resolve("resolved");
+                    }, params.milliseconds);
+                });
             },
         },
     },
@@ -1693,9 +1703,13 @@ exports["default"] = activate;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const vscode = __webpack_require__(1);
 function activate(context) {
-    context.subscriptions.push(vscode.commands.registerCommand("typestack.run", () => {
+    context.subscriptions.push(vscode.commands.registerCommand("typestack.run", async () => {
         try {
             vscode.window.terminals[0].show();
+            const trySave = await vscode.window.activeTextEditor?.document?.save();
+            if (!trySave) {
+                throw new Error();
+            }
             (vscode.window.activeTerminal || vscode.window.createTerminal()).sendText("typestack " + vscode.window.activeTextEditor?.document?.fileName);
         }
         catch (e) {

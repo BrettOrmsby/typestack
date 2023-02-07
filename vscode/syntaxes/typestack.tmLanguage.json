@@ -75,7 +75,7 @@
 		},
 		"built-ins": {
 			"name": "support.function.builtin.typestack",
-			"match": "(?<=(^|[\\n\\t\\r :\\(\\)\\{\\}#]))(>|<|<=|>=|\\+|-|\\*|\\/|\\/\\/|\\%|\\^|rand|length|\\&|\\||\\!|dup|drop|over|swap|rot|print|read|==|!=|toInt|toFloat|toStr|toBool)(?=($|[\\n\\t\\r :\\(\\)\\{\\}#]))"
+			"match": "(?<=(^|[\\n\\t\\r :\\(\\)\\{\\}#]))(>|<|<=|>=|\\+|-|\\*|\\/|\\/\\/|\\%|\\^|rand|wait|length|\\&|\\||\\!|dup|drop|over|swap|rot|print|read|==|!=|toInt|toFloat|toStr|toBool)(?=($|[\\n\\t\\r :\\(\\)\\{\\}#]))"
 		}
 	},
 	"scopeName": "source.typestack"
