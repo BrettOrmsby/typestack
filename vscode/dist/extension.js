@@ -1693,11 +1693,15 @@ exports["default"] = activate;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const vscode = __webpack_require__(1);
 function activate(context) {
-    const command = "typestack.run";
-    const commandHandler = (name = "world") => {
-        (vscode.window.activeTerminal || vscode.window.createTerminal()).sendText("typestack " + vscode.window.activeTextEditor?.document?.fileName);
-    };
-    context.subscriptions.push(vscode.commands.registerCommand(command, commandHandler));
+    context.subscriptions.push(vscode.commands.registerCommand("typestack.run", () => {
+        try {
+            vscode.window.terminals[0].show();
+            (vscode.window.activeTerminal || vscode.window.createTerminal()).sendText("typestack " + vscode.window.activeTextEditor?.document?.fileName);
+        }
+        catch (e) {
+            vscode.window.showErrorMessage("Unable to run code.");
+        }
+    }));
 }
 exports["default"] = activate;
 

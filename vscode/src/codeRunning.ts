@@ -1,16 +1,18 @@
 import * as vscode from "vscode";
-import typeStack from "typestack-lang/dist/index";
 
 export default function activate(context: vscode.ExtensionContext) {
-  const command = "typestack.run";
-
-  const commandHandler = (name = "world") => {
-    (vscode.window.activeTerminal || vscode.window.createTerminal()).sendText(
-      "typestack " + vscode.window.activeTextEditor?.document?.fileName
-    );
-  };
-
   context.subscriptions.push(
-    vscode.commands.registerCommand(command, commandHandler)
+    vscode.commands.registerCommand("typestack.run", () => {
+      try {
+        vscode.window.terminals[0].show();
+        (
+          vscode.window.activeTerminal || vscode.window.createTerminal()
+        ).sendText(
+          "typestack " + vscode.window.activeTextEditor?.document?.fileName
+        );
+      } catch (e) {
+        vscode.window.showErrorMessage("Unable to run code.");
+      }
+    })
   );
 }
