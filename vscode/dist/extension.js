@@ -30,7 +30,7 @@ async function refreshDiagnostics(doc, diagnosticCollection) {
             diagnostics.push(createDiagnostic(doc, errors));
         }
         else {
-            errors.forEach(error => {
+            errors.forEach((error) => {
                 diagnostics.push(createDiagnostic(doc, error));
             });
         }
@@ -53,13 +53,13 @@ function subscribeToDocumentChanges(context, diagnosticCollection) {
     if (vscode.window.activeTextEditor) {
         refreshDiagnostics(vscode.window.activeTextEditor.document, diagnosticCollection);
     }
-    context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(editor => {
+    context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor((editor) => {
         if (editor) {
             refreshDiagnostics(editor.document, diagnosticCollection);
         }
     }));
-    context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(e => refreshDiagnostics(e.document, diagnosticCollection)));
-    context.subscriptions.push(vscode.workspace.onDidCloseTextDocument(doc => diagnosticCollection.delete(doc.uri)));
+    context.subscriptions.push(vscode.workspace.onDidChangeTextDocument((e) => refreshDiagnostics(e.document, diagnosticCollection)));
+    context.subscriptions.push(vscode.workspace.onDidCloseTextDocument((doc) => diagnosticCollection.delete(doc.uri)));
 }
 exports.subscribeToDocumentChanges = subscribeToDocumentChanges;
 async function getErrors(text) {
@@ -67,7 +67,11 @@ async function getErrors(text) {
     const scanErrors = scanner.scan();
     const parser = new parse_1.Parser(scanner.tokens, functions_1.standardLibraryFunctions);
     const parseErrors = await parser.parse();
-    return [...scanErrors, ...parseErrors, ...(0, typeCheck_1.default)(parser.program, functions_1.standardLibraryFunctions, parser.newFunctions)];
+    return [
+        ...scanErrors,
+        ...parseErrors,
+        ...(0, typeCheck_1.default)(parser.program, functions_1.standardLibraryFunctions, parser.newFunctions),
+    ];
 }
 
 
@@ -1045,15 +1049,15 @@ function includes(arr, searchElement) {
 
 var map = {
 	"./Date.js": [
-		14,
+		17,
 		1
 	],
 	"./Math.js": [
-		15,
+		18,
 		2
 	],
 	"./Str.js": [
-		16,
+		19,
 		3
 	]
 };
@@ -1640,45 +1644,60 @@ function activate(context) {
                 "true",
                 "false",
             ];
-            const keywordCompletions = keywords.map(e => new vscode.CompletionItem(e, vscode.CompletionItemKind.Keyword));
+            const keywordCompletions = keywords.map((e) => new vscode.CompletionItem(e, vscode.CompletionItemKind.Keyword));
             const scanner = new scan_1.Scanner(document.getText(), console.log);
             scanner.scan();
             const parser = new parse_1.Parser(scanner.tokens, functions_1.standardLibraryFunctions);
             await parser.parse();
             const functions = parser.functions;
             const functionNames = [];
-            Object.keys(functions).forEach(e => Object.keys(functions[e]).forEach(funcName => {
+            Object.keys(functions).forEach((e) => Object.keys(functions[e]).forEach((funcName) => {
                 functionNames.push(funcName);
             }));
             const uniqueFunctionNames = [...new Set(functionNames)];
-            const functionCompletions = uniqueFunctionNames.map(e => new vscode.CompletionItem(e, vscode.CompletionItemKind.Function));
+            const functionCompletions = uniqueFunctionNames.map((e) => new vscode.CompletionItem(e, vscode.CompletionItemKind.Function));
             /*
-            // a completion item that inserts its text as snippet,
-            // the `insertText`-property is a `SnippetString` which will be
-            // honored by the editor.
-            const snippetCompletion = new vscode.CompletionItem('Good part of the day');
-            snippetCompletion.insertText = new vscode.SnippetString('Good ${1|morning,afternoon,evening|}. It is ${1}, right?');
-            const docs: any = new vscode.MarkdownString("Inserts a snippet that lets you select [link](x.ts).");
-            snippetCompletion.documentation = docs;
-            docs.baseUri = vscode.Uri.parse('http://example.com/a/b/c/');
-
-            // a completion item that retriggers IntelliSense when being accepted,
-            // the `command`-property is set which the editor will execute after
-            // completion has been inserted. Also, the `insertText` is set so that
-            // a space is inserted after `new`
-            const commandCompletion = new vscode.CompletionItem('new');
-            commandCompletion.kind = vscode.CompletionItemKind.Keyword;
-            commandCompletion.insertText = 'new ';
-            commandCompletion.command = { command: 'editor.action.triggerSuggest', title: 'Re-trigger completions...' };
-            */
+                // a completion item that inserts its text as snippet,
+                // the `insertText`-property is a `SnippetString` which will be
+                // honored by the editor.
+                const snippetCompletion = new vscode.CompletionItem('Good part of the day');
+                snippetCompletion.insertText = new vscode.SnippetString('Good ${1|morning,afternoon,evening|}. It is ${1}, right?');
+                const docs: any = new vscode.MarkdownString("Inserts a snippet that lets you select [link](x.ts).");
+                snippetCompletion.documentation = docs;
+                docs.baseUri = vscode.Uri.parse('http://example.com/a/b/c/');
+    
+                // a completion item that retriggers IntelliSense when being accepted,
+                // the `command`-property is set which the editor will execute after
+                // completion has been inserted. Also, the `insertText` is set so that
+                // a space is inserted after `new`
+                const commandCompletion = new vscode.CompletionItem('new');
+                commandCompletion.kind = vscode.CompletionItemKind.Keyword;
+                commandCompletion.insertText = 'new ';
+                commandCompletion.command = { command: 'editor.action.triggerSuggest', title: 'Re-trigger completions...' };
+                */
             // return all completion items as array
-            return [
-                ...keywordCompletions,
-                ...functionCompletions,
-            ];
-        }
+            return [...keywordCompletions, ...functionCompletions];
+        },
     });
     context.subscriptions.push(provider1);
+}
+exports["default"] = activate;
+
+
+/***/ }),
+/* 14 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const vscode = __webpack_require__(1);
+function activate(context) {
+    const command = "typestack.run";
+    const commandHandler = (name = "world") => {
+        (vscode.window.activeTerminal || vscode.window.createTerminal()).sendText("typestack " + vscode.window.activeTextEditor?.document?.fileName);
+    };
+    context.subscriptions.push(vscode.commands.registerCommand(command, commandHandler));
 }
 exports["default"] = activate;
 
@@ -1818,11 +1837,13 @@ exports.activate = void 0;
 const vscode = __webpack_require__(1);
 const diagnostics_1 = __webpack_require__(2);
 const codeCompletion_1 = __webpack_require__(13);
+const codeRunning_1 = __webpack_require__(14);
 function activate(context) {
     const parseAndTypeErrors = vscode.languages.createDiagnosticCollection("parseAndTypeErrors");
     context.subscriptions.push(parseAndTypeErrors);
     (0, diagnostics_1.subscribeToDocumentChanges)(context, parseAndTypeErrors);
     (0, codeCompletion_1.default)(context);
+    (0, codeRunning_1.default)(context);
 }
 exports.activate = activate;
 
