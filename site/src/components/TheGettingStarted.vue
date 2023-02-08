@@ -11,7 +11,17 @@ export default {
     <h4>Installation</h4>
     <pre><code>npm install typestack-lang -g</code></pre>
     <h4>Run a File</h4>
-    <pre><code>typestack filename.txt</code></pre>
+    <pre><code># tsk is the file extension for typestack
+typestack filename.tsk</code></pre>
+    <h3>VSCode</h3>
+    <p>
+      Download the
+      <a
+        href="https://marketplace.visualstudio.com/items?itemName=BrettOrmsby.typestack"
+        >extension</a
+      >
+      to provide language support to <code>.tsk</code> files.
+    </p>
     <h3>JavaScript/TypeScript</h3>
     <h4>Installation</h4>
     <pre><code>npm install typestack-lang</code></pre>

@@ -2,7 +2,7 @@
   "name": "typestack",
   "displayName": "typestack",
   "description": "Syntax highlighting, error showing and code completion for the TypeStack language",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "license": "MIT",
   "publisher": "BrettOrmsby",
   "repository": {

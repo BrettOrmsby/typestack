@@ -16,8 +16,13 @@ npm install typestack-lang -g
 ## Running Files via CLI
 
 ```bash
-typestack filename.txt
+# tsk is the file extension for typestack
+typestack filename.tsk
 ```
+
+## VSCode 
+
+Download the [extension](https://marketplace.visualstudio.com/items?itemName=BrettOrmsby.typestack) to provide language support to `.tsk` files.
 
 ## Instillation for JavaScript
 
