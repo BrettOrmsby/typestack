@@ -1,14 +1,28 @@
 {
   "name": "typestack",
   "displayName": "typestack",
-  "description": "descript..",
-  "version": "0.0.1",
+  "description": "Syntax highlighting, error showing and code completion for the TypeStack language",
+  "version": "0.0.2",
+  "license": "MIT",
+  "publisher": "BrettOrmsby",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BrettOrmsby/typestack"
+  },
+  "icon": "images/typestack.png",
+  "galleryBanner": {
+    "theme": "dark"
+  },
   "engines": {
     "vscode": "^1.74.0"
   },
+  "protocol": "https",
   "main": "./dist/extension.js",
   "categories": [
     "Programming Languages"
+  ],
+  "activationEvents": [
+    "onLanguage:typestack"
   ],
   "contributes": {
     "commands": [
@@ -17,7 +31,6 @@
         "when": "editorLangId == typestack",
         "title": "Run TypeStack",
         "icon": "$(play)"
-
       }
     ],
     "menus": {
