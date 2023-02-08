@@ -14,19 +14,19 @@ Syntax highlighting, error showing and code completion for the TypeStack languag
 
 * Reports scanning, parsing and type-checking errors in `.tsk` files
 
-![Errors](vscode/images/highlight.png)
+![Errors](vscode/images/error.png)
 
 ### Code Completion
 
 * Recommends function and keywords to use
 
-![Code Completion](vscode/images/highlight.png)
+![Code Completion](vscode/images/codeCompletion.png)
 
 ### Code Running
 
 * Saves and runs the current file in the integrated terminal
 
-![Code Running](vscode/images/highlight.png)
+![Code Running](vscode/images/runCode.png)
 
 ## Requirements
 
