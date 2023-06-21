@@ -17,7 +17,7 @@
     "@picocss/pico": "^1.5.6",
     "ansi_up": "^5.1.0",
     "firacode": "^6.2.0",
-    "typestack-lang": "^1.5.1",
+    "typestack-lang": "^1.6.0",
     "vue": "^3.2.45",
     "vue-prism-editor": "^2.0.0-alpha.2"
   },

@@ -4,6 +4,7 @@ import type { StackFunctions } from "typestack-lang/dist/functions";
 import math from "typestack-lang/dist/modules/Math";
 import date from "typestack-lang/dist/modules/Date";
 import str from "typestack-lang/dist/modules/Str";
+import store from "typestack-lang/dist/modules/Store";
 
 import {
   consoleEffect,
@@ -36,6 +37,7 @@ const functions: StackFunctions = {
 addModule(math, "Math");
 addModule(date, "Date");
 addModule(str, "Str");
+addModule(store, "Store");
 
 export default async function run(
   code: string,

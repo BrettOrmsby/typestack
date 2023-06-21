@@ -35,7 +35,7 @@
       "@bool": {
         "&(right: bool left: bool)": "adds <code>true</code> to the <code>bool</code> stack if both <code>right</code> and <code>left</code> are <code>true</code> or else, adds <code>false</code> to the <code>bool</code> stack",
         "|(right: bool left: bool)": "adds <code>true</code> to the <code>bool</code> stack if one of <code>right</code> or <code>left</code> are <code>true</code> or else, adds <code>false</code> to the <code>bool</code> stack",
-        "!(boolean: bool)": "adds <code>true</code> to the <code>bool</code> if <code>boolean</code> if <code>false</code> or else, add <code>false</code> to the <code>bool</code> stack"
+        "!(boolean: bool)": "adds <code>true</code> to the <code>bool</code> stack if <code>boolean</code> is <code>false</code> or else, add <code>false</code> to the <code>bool</code> stack"
       },
       "@any": {
         "dup(first: any)": "duplicates the top of the stack",
@@ -143,6 +143,16 @@
           "codePointAt(string: str index: int)": "adds the code point of the character at index (starting at 0) <code>index</code> of <code>string</code> to the <code>int</code> stack. If there is no character at the index, an error occurs",
           "slice(string: str endIndex: int startIndex: int)": "adds the the str made by extracting the characters from <code>startIndex</code> (starting at 0) up to but not including <code>endIndex</code> of <code>string</code> to the <code>str</code> stack.",
           "split(separator: str string: str)": "splits <code>string</code> by <code>separator</code> and adds each item to the <code>str</code> stack such that the last item is on the top of the stack"
+        }
+      },
+      "Store": {
+        "@str": {
+          "get(key: str)": "adds the value stored at the key <code>key</code> to the stack of the value",
+          "has(key: str)": "adds <code>true</code> to the <code>bool</code> stack if the key <code>key</code> is in the store or else, add <code>false</code> to the <code>bool</code> stack",
+          "remove(key: str)": "removes the value and key for the <code>key</code> from the store"
+        },
+        "@any": {
+          "set(value: any, key: str)": "sets the key <code>key</code> in the store to <code>value</code>"
         }
       }
     }
